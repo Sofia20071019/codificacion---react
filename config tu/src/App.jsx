@@ -1,10 +1,17 @@
 import { useState } from 'react'
-import 'index.html'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import gestiempleados from './pages/gestiempleados'
 
 function App() {
-  const [count, setCount] = useState(0)
+  return (
+    
+    <BrowserRouter>
+      <Routes>
+        <Route path='gestiempleados' element={<gestiempleados/>}/>
+      </Routes>
+    </BrowserRouter>
 
-  return 
+  )
    
 }
 

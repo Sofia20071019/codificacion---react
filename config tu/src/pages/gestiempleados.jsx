@@ -80,3 +80,5 @@ function gestionempleados(){
         
     )
 }
+
+export default gestionempleados

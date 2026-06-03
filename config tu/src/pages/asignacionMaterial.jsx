@@ -1,14 +1,8 @@
-import React, { useState } from 'react';
-import Header from './components/Header';
-import Nav from './components/Nav';
-import Footer from './components/Footer';
+import Header from '../components/Header';
+import Nav from '../components/Nav';
+import Footer from '../components/Footer';
 
 function AsignacionMaterial() {
-  // Estado dinámico para controlar los campos del formulario
-  const [orden, setOrden] = useState('');
-  const [insumo, setInsumo] = useState('');
-  const [cantidad, setCantidad] = useState('');
-
   // Estado para controlar la lista de materiales en la tabla (Inicia con tu registro base)
   const [asignaciones, setAsignaciones] = useState([
     { id: 1, orden: '101', insumo: 'Cuero Sintético (#1)', cantidad: '5.00' }

@@ -1,0 +1,385 @@
+/* ==========================================================================
+   KIMUKA CORE STYLES - INFRAESTRUCTURA VISUAL (ESTÁNDAR OMG/W3C)
+   ========================================================================== */
+
+:root {
+    /* Paleta de Colores Premium Dark */
+    --bg-main: #0a0a0a;
+    --bg-card: #141414;
+    --bg-input: #1f1f1f;
+    --border-color: #2d2d2d;
+    
+    /* Textos */
+    --text-primary: #ffffff;
+    --text-secondary: #aaaaaa;
+    --text-muted: #666666;
+    
+    /* Estados Semánticos */
+    --color-success: #2ecc71;
+    --color-error: #e74c3c;
+    --color-warning: #f1c40f;
+}
+
+/* Base & Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body.dark-theme {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* Layout y Componentes Estructurales Compartidos */
+.top-nav {
+    background-color: #000000;
+    padding: 12px 10%;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12px;
+    letter-spacing: 4px;
+}
+
+.top-nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.top-nav a:hover {
+    color: var(--text-primary);
+}
+
+.main-header {
+    display: block;
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px 10%;
+    background-color: rgba(10, 10, 10, 0.95);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    display: table;
+    width: 100%;
+}
+
+.logo-principal-cell {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.header-actions-cell {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+}
+
+.logo-principal {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.logo-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #fff;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 15px;
+}
+
+.logo-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.main-header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.btn-login {
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-login a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.btn-login:hover {
+    background: var(--text-primary);
+    color: #000000;
+    border-color: var(--text-primary);
+}
+
+.content-wrapper {
+    padding: 40px 10%;
+    min-height: calc(100vh - 200px);
+}
+
+/* Vistas Semánticas, Paneles y Formularios */
+.panel-registro {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 40px;
+    margin-top: 20px;
+    display: table;
+    width: 100%;
+}
+
+.form-section-cell {
+    display: table-cell;
+    width: 60%;
+    vertical-align: top;
+    padding-right: 20px;
+}
+
+.image-section-cell {
+    display: table-cell;
+    width: 40%;
+    vertical-align: middle;
+    text-align: center;
+    border-left: 1px solid var(--border-color);
+    padding-left: 20px;
+}
+
+.form-title {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+.grid-form { display: block; }
+
+.input-row {
+    display: table;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.input-cell {
+    display: table-cell;
+    width: 50%;
+    padding-right: 10px;
+}
+
+.input-cell:last-child {
+    padding-right: 0;
+    padding-left: 10px;
+}
+
+label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 8px;
+}
+
+input, select {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    width: 100%;
+}
+
+input:focus, select:focus { border-color: var(--text-secondary); }
+
+.btn-submit {
+    background: var(--text-primary);
+    color: #000000;
+    border: none;
+    padding: 12px 30px;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    display: block;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    background-color: var(--text-secondary);
+}
+
+/* Gestión, Dashboards y Tablas */
+.panel-gestion {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.highlight-info {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.highlight-info h4 {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.highlight-info p {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.table-container { overflow-x: auto; margin-top: 20px; }
+
+.kimukaPedidos-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.kimukaPedidos-table th, .kimukaPedidos-table td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.kimukaPedidos-table th {
+    background-color: var(--bg-card);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-success { background: rgba(46, 204, 113, 0.2); color: var(--color-success); }
+
+/* Clases Utilitarias */
+.w-100 { width: 100%; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.margin-b-10 { margin-bottom: 10px; }
+.margin-b-15 { margin-bottom: 15px; }
+.margin-b-40 { margin-bottom: 40px; }
+.margin-t-10 { margin-top: 10px; }
+.margin-t-15 { margin-top: 15px; }
+.margin-block-15 { margin-top: 15px; margin-bottom: 15px; }
+.font-size-sm { font-size: 0.8rem; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+.module-card { text-align: center; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; }
+/* ==========================================================================
+   MAIN FOOTER
+   ========================================================================== */
+
+.main-footer {
+    text-align: center;
+    padding: 40px 10%;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background-color: #000000;
+}
+/* ==========================================================================
+   RF-008 ASIGNACIÓN DE ORDEN
+   ========================================================================== */
+
+.actions-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-warning {
+    background-color: var(--color-warning);
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-danger {
+    background-color: var(--color-error);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-warning:hover,
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* ==========================================================================
+   AGREGAR AL FINAL DEL CSS: EXTENSIONES PARA RF-009
+   ========================================================================== */
+
+select {
+    cursor: pointer;
+    appearance: none; /* Elimina el estilo por defecto del sistema */
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: calc(100% - 12px);
+    background-position-y: 50%;
+    padding-right: 35px;
+}
+
+.btn-danger-sm {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+    padding: 6px 16px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.btn-danger-sm:hover {
+    background-color: var(--color-error);
+    color: #ffffff;
+}

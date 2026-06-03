@@ -1,9 +1,11 @@
-import Header from './components/Header';
-import Nav from './components/Nav';
-import Footer from './components/Footer';
+import React, { useState } from 'react';
+import Header from '../components/Header';
+import Nav from '../components/Nav';
+import Footer from '../components/Footer';
+import '../styles/styles.css';
 
 function AsignacionOrden() {
-  // Estado básico para manejar el formulario de forma reactiva (Opcional, pero ideal en React)
+  // ... tu código de estado y funciones se queda igual ...
   const [formData, setFormData] = useState({
     idProduccion: '',
     idUsuario: '',
@@ -26,6 +28,7 @@ function AsignacionOrden() {
     <div className="dark-theme">
       {/* Reutilización de tus componentes estructurales core */}
       <Nav />
+      {/* ¡Nota! También deberías corregir la imagen del logo en Header.jsx, ver abajo */}
       <Header />
 
       {/* Contenido principal */}
@@ -107,8 +110,10 @@ function AsignacionOrden() {
 
           <div className="image-section-cell">
             <div className="portrait-wrapper">
-              {/* En React las imágenes de la carpeta public o assets se gestionan de forma relativa */}
-              <img src="../img/image.png" alt="Producción" />
+              
+              {/* ¡SOLUCIÓN AQUÍ! Usamos una ruta directa desde /img/ en public */}
+              <img src="/img/portadakk.jpg" alt="Producción" />
+
             </div>
             <p className="text-center">
               Gestión de asignación de órdenes a operarios.
@@ -116,7 +121,7 @@ function AsignacionOrden() {
           </div>
         </section>
 
-        {/* Tabla de asignaciones */}
+        {/* ... resto de tu tabla de asignaciones ... */}
         <section className="panel-gestion">
           <h3 className="margin-b-20">Asignaciones Registradas</h3>
           <div className="table-container">

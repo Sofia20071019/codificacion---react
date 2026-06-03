@@ -1,21 +1,21 @@
-function Header(){
-    return(
-        <header class="main-header">
-            <div class="header-container">
-                <div class="logo-principal-cell">
-                    <div class="logo-principal">
-                        <div class="logo-circle">
-                            <img src="../img/logo kimuka.png" alt="Logo Kimuka"></img>
-                        </div>
-                        <h1>Kimuka</h1>
-                    </div>
-                </div>
-                <div class="header-actions-cell">
-                    <button class="btn-login"><a href="inicioSesion.html">Iniciar Sesion</a></button>
-                </div>
+import React from 'react';
+
+function Header() {
+  return (
+    <header className="main-header">
+      <div className="header-container">
+        <div className="logo-principal-cell">
+          <div className="logo-principal">
+            <div className="logo-circle">
+                <img src="../img/logokimuka.png" alt="Logo" />
             </div>
-        </header>
-    )
+            <h1>KIMUKA</h1>
+          </div>
+        </div>
+        {/* ... resto del header ... */}
+      </div>
+    </header>
+  );
 }
 
-export default Header 
+export default Header;

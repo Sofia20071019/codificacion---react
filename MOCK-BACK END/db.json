@@ -1,0 +1,74 @@
+{
+  "inventario": [
+    {
+      "id": "t3hKg9AqtZg",
+      "nombre": "Tela Algodon",
+      "cantidad": 15.5,
+      "unidad": "metros",
+      "categoria": "telas",
+      "referenciaColor": "Blanco",
+      "imagen": "../img/productoTelaAlgodon kk .png"
+    },
+    {
+      "id": "CfUes7LEWGw",
+      "nombre": "Poliester",
+      "cantidad": 5.5,
+      "unidad": "metros",
+      "categoria": "telas",
+      "referenciaColor": "Amarillo",
+      "imagen": "../img/productoTelaPoliester kk .png"
+    },
+    {
+      "id": "INS-1780505922168",
+      "nombre": "Terciopleo",
+      "cantidad": 30.5,
+      "unidad": "metros",
+      "categoria": "telas",
+      "referenciaColor": "Rosado",
+      "imagen": "../img/productoTelaTerciopelo kk .png"
+    }
+  ],
+  "jornadas": [
+    {
+      "idRegistro": "JOR-1717426850000",
+      "operario": "BRAYAN VALDERRAMA",
+      "fecha": "2026-06-03",
+      "horaEntrada": "08:00",
+      "id": "DGj5-YLTcu8"
+    }
+  ],
+  "personal": [
+    {
+      "id": "OP-1717426900000",
+      "nombre": "Laura Jimena",
+      "apellido": "Valderrama Vaquero",
+      "edad": "19",
+      "email": "hola@sitioincreible.co",
+      "celular": "32634789",
+      "fechaRegistro": "2026-06-01",
+      "rol": "empleado",
+      "password": "password123",
+      "foto": "../img/registroDePersonal kk .png"
+    }
+  ],
+  "pedidos": [
+    {
+      "idPedido": "PED-001",
+      "mes": "03",
+      "material": "Algodón",
+      "cantidad": 50,
+      "comprador": "Taller Central Bogotá",
+      "estado": "✔",
+      "id": "muEGZL5a7s0"
+    },
+    {
+      "idPedido": "PED-002",
+      "mes": "03",
+      "material": "Seda",
+      "cantidad": 20,
+      "comprador": "Diseños Brando",
+      "estado": "..",
+      "id": "Ptt3E2TSioc"
+    }
+  ]
+}

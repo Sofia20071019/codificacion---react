@@ -1,13 +1,14 @@
-import { useState } from 'react'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
-import gestiempleados from './pages/gestiempleados'
+import Gestiempleados from './pages/Gestiempleados'
+import Aprobarpago from './pages/Aprobarpago'
 
 function App() {
   return (
     
     <BrowserRouter>
       <Routes>
-        <Route path='gestiempleados' element={<gestiempleados/>}/>
+        <Route path='/gestionempleados' element={<Gestiempleados/>}/>
+        <Route path='/aprobarpago' element={<Aprobarpago/>}/>
       </Routes>
     </BrowserRouter>
 

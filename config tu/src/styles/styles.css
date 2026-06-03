@@ -1,0 +1,290 @@
+:root{
+    --bg:#000;
+    --bg-soft:#1a1a1a;
+    --panel:#2a2a2a;
+    --panel-alt:#333;
+    --border:#444;
+    --text:#fff;
+    --muted:#aaa;
+    --radius:20px;
+    --radius-lg:30px;
+    --container:10%;
+    --transition:.3s ease;
+}
+
+*,
+*::before,
+*::after{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body,
+body.dark-theme{
+    background:var(--bg);
+    color:var(--text);
+    font-family:Georgia, "Times New Roman", serif;
+    min-height:100vh;
+}
+
+/* ---------- Layout ---------- */
+
+.content,
+.gestion-container,
+.registro-container,
+.cierreSesion-container,
+.Reportes-container{
+    padding-inline:var(--container);
+}
+
+.content,
+.Reportes-container,
+.cierreSesion-container{
+    padding-block:5%;
+}
+
+.gestion-container{
+    padding-block:1%;
+}
+
+.registro-container{
+    padding-block:3%;
+}
+
+/* ---------- Navegación ---------- */
+
+.top-nav{
+    background:var(--bg);
+    border-bottom:1px solid var(--panel-alt);
+    padding:1% 10px;
+    font-size:14px;
+    letter-spacing:6px;
+}
+
+.top-nav a,
+.btn-login a{
+    color:var(--muted);
+    text-decoration:none;
+}
+
+.main-header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:1% var(--container);
+    background:var(--bg);
+    border-bottom:2px solid var(--text);
+}
+
+.logo-principal{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.logo-circle{
+    width:60px;
+    height:60px;
+    overflow:hidden;
+    border-radius:50%;
+}
+
+.logo-circle img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+.btn-login,
+.btn-primary,
+.btn-action{
+    background:#222;
+    color:var(--muted);
+    border:none;
+    border-radius:20px;
+    padding:10px 25px;
+    cursor:pointer;
+    transition:var(--transition);
+}
+
+.btn-login:hover,
+.btn-primary:hover,
+.btn-action:hover{
+    background:#444;
+    color:#fff;
+}
+
+/* ---------- Hero ---------- */
+
+.hero-container{
+    position:relative;
+    height:700px;
+}
+
+.hero-img,
+.img-principal img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50px;
+}
+
+.hero-img{
+    opacity:.7;
+}
+
+.hero-overlay{
+    position:absolute;
+    inset:50% auto auto 50%;
+    transform:translate(-50%,-50%);
+    width:100%;
+    text-align:center;
+}
+
+/* ---------- Paneles ---------- */
+
+.panel-gestion,
+.panel-registro,
+.panel-card{
+    background:var(--panel-alt);
+    border-radius:var(--radius-lg);
+    padding:2%;
+}
+
+.panel-gestion{
+    display:flex;
+    justify-content:space-between;
+}
+
+.panel-card{
+    border:1px solid var(--border);
+}
+
+/* ---------- Formularios ---------- */
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:var(--bg-soft);
+    color:var(--text);
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    outline:none;
+    border-color:#777;
+}
+
+.filter-select{
+    background:transparent;
+    color:var(--text);
+    border:1px solid #555;
+    padding:10px 20px;
+    border-radius:5px;
+}
+
+/* ---------- Toolbars ---------- */
+
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:30px;
+    flex-wrap:wrap;
+}
+
+/* ---------- Tablas ---------- */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:12px;
+    border:1px solid var(--border);
+    text-align:left;
+}
+
+th{
+    background:var(--panel);
+}
+
+/* ---------- Tarjetas ---------- */
+
+.card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+}
+
+/* ---------- Tipografía ---------- */
+
+h1,h2,h3,h4,h5,h6{
+    margin-bottom:1rem;
+}
+
+h2{
+    text-align:center;
+}
+
+p{
+    line-height:1.6;
+}
+
+/* ---------- Footer ---------- */
+
+footer{
+    border-top:1px solid var(--border);
+    padding:20px;
+    text-align:center;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width:992px){
+
+    .main-header,
+    .panel-gestion,
+    .panel-registro,
+    .toolbar{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .hero-container{
+        height:450px;
+    }
+}
+
+@media (max-width:768px){
+
+    :root{
+        --container:5%;
+    }
+
+    .hero-container{
+        height:320px;
+    }
+
+    .logo-principal{
+        flex-direction:column;
+        gap:10px;
+    }
+}

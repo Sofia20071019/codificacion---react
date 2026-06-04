@@ -1,4 +1,5 @@
 import React from 'react';
+import Logo from '../assets/logokimuka.png';
 
 function Header() {
   return (
@@ -7,12 +8,11 @@ function Header() {
         <div className="logo-principal-cell">
           <div className="logo-principal">
             <div className="logo-circle">
-                <img src="../img/logokimuka.png" alt="Logo" />
+                <img src={Logo} alt="Logo" />
             </div>
             <h1>KIMUKA</h1>
           </div>
         </div>
-        {/* ... resto del header ... */}
       </div>
     </header>
   );

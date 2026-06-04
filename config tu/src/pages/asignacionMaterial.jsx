@@ -1,9 +1,16 @@
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
+import '../styles/styles.css';
 
 function AsignacionMaterial() {
-  // Estado para controlar la lista de materiales en la tabla (Inicia con tu registro base)
+  // 1. ESTADOS AGREGADOS: Ahora el formulario sí tiene donde guardar los datos
+  const [orden, setOrden] = useState('');
+  const [insumo, setInsumo] = useState('');
+  const [cantidad, setCantidad] = useState('');
+
+  // Estado para controlar la lista de materiales en la tabla
   const [asignaciones, setAsignaciones] = useState([
     { id: 1, orden: '101', insumo: 'Cuero Sintético (#1)', cantidad: '5.00' }
   ]);
@@ -115,7 +122,6 @@ function AsignacionMaterial() {
           <div className="image-section-cell">
             <div className="highlight-info">
               <h4>Asignaciones Activas</h4>
-              {/* El contador ahora se actualiza automáticamente según el largo del arreglo */}
               <p id="total-asignado">{asignaciones.length}</p>
               <span className="status status-success display-inline-block margin-t-10">Trazabilidad Activa</span>
             </div>
@@ -156,9 +162,7 @@ function AsignacionMaterial() {
             </table>
           </div>
         </div>
-
       </main>
-
       <Footer />
     </div>
   );

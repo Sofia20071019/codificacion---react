@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
+import Produccion from '../assets/registroPedidokk.png';
 import '../styles/styles.css';
 
 function AsignacionOrden() {
@@ -110,10 +111,7 @@ function AsignacionOrden() {
 
           <div className="image-section-cell">
             <div className="portrait-wrapper">
-              
-              {/* ¡SOLUCIÓN AQUÍ! Usamos una ruta directa desde /img/ en public */}
-              <img src="/img/portadakk.jpg" alt="Producción" />
-
+              <img src={Produccion} alt="Producción" />
             </div>
             <p className="text-center">
               Gestión de asignación de órdenes a operarios.

@@ -304,6 +304,7 @@ function Aprobarpago(){
 
                 </div>
             </main>
+            
             <Footer/>
         </>
     )

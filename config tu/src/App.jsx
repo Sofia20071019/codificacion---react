@@ -1,13 +1,19 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
-import Gestiempleados from './pages/Gestiempleados'
+import Editarempleados from './pages/Editarempleados'
 import Aprobarpago from './pages/Aprobarpago'
+import Dashboardadmin from './pages/Dashboardadmin'
+import GestionEmpleados from './pages/Gestiempleados'
+import PanelReportes from './pages/Panelreportes'
 
 function App() {
   return (
     
     <BrowserRouter>
       <Routes>
-        <Route path='/gestionempleados' element={<Gestiempleados/>}/>
+        <Route path='/dashboardadmin' element={<Dashboardadmin/>}/>
+        <Route path='/gestionempleados' element={<GestionEmpleados/>}/>
+        <Route path='/panereportes' element={<PanelReportes/>}/>
+        <Route path='/editarempleados' element={<Editarempleados/>}/>
         <Route path='/aprobarpago' element={<Aprobarpago/>}/>
       </Routes>
     </BrowserRouter>

@@ -1,74 +1,375 @@
+import { useState } from "react";
 import Footer from "../components/Footer";
 
-function Gestionempleados(){
-    return (
+function GestionEmpleados() {
 
+    const [empleados, setEmpleados] = useState([
+        {
+            id: "770123890",
+            nombres: "Jimena",
+            apellidos: "Martínez",
+            correo: "jimena@gmail.com",
+            cargo: "Empleado",
+            telefono: "3001234567",
+            horas: 7
+        }
+    ]);
+
+    const [formulario, setFormulario] = useState({
+        id: "",
+        nombres: "",
+        apellidos: "",
+        correo: "",
+        cargo: "",
+        telefono: "",
+        horas: ""
+    });
+
+    const [editando, setEditando] = useState(false);
+
+    const [busqueda, setBusqueda] = useState("");
+
+    const handleChange = (e) => {
+
+        setFormulario({
+            ...formulario,
+            [e.target.name]: e.target.value
+        });
+
+    };
+
+    const agregarEmpleado = () => {
+
+        if (
+            !formulario.id ||
+            !formulario.nombres ||
+            !formulario.apellidos
+        ) {
+            alert("Complete los campos obligatorios");
+            return;
+        }
+
+        setEmpleados([
+            ...empleados,
+            formulario
+        ]);
+
+        limpiarFormulario();
+
+    };
+
+    const editarEmpleado = (empleado) => {
+
+        setFormulario(empleado);
+        setEditando(true);
+
+    };
+
+    const actualizarEmpleado = () => {
+
+        const nuevosEmpleados = empleados.map((emp) =>
+            emp.id === formulario.id
+                ? formulario
+                : emp
+        );
+
+        setEmpleados(nuevosEmpleados);
+
+        limpiarFormulario();
+
+        setEditando(false);
+
+    };
+
+    const eliminarEmpleado = (id) => {
+
+        if (
+            window.confirm(
+                "¿Desea eliminar este empleado?"
+            )
+        ) {
+
+            setEmpleados(
+                empleados.filter(
+                    (emp) => emp.id !== id
+                )
+            );
+
+        }
+
+    };
+
+    const limpiarFormulario = () => {
+
+        setFormulario({
+            id: "",
+            nombres: "",
+            apellidos: "",
+            correo: "",
+            cargo: "",
+            telefono: "",
+            horas: ""
+        });
+
+    };
+
+    const empleadosFiltrados = empleados.filter((emp) =>
+        `${emp.nombres} ${emp.apellidos}`
+            .toLowerCase()
+            .includes(busqueda.toLowerCase())
+    );
+
+    return (
         <>
-            <nav className="top-nav"><a href="index.html">VOLVER </a></nav>
+
+            <nav className="top-nav">
+                <h3>GESTIÓN DE EMPLEADOS</h3>
+            </nav>
 
             <header className="main-header">
+
                 <div className="logo-principal">
+
                     <div className="logo-circle">
-                        <img src="../img/logo kimuka.png" alt="logo Kimuka"/>
+                        <img
+                            src="/img/logo-kimuka.png"
+                            alt=""
+                        />
                     </div>
-                    <h1>Editar Personal </h1>
+
+                    <h1>Kimuka</h1>
+
                 </div>
-                <button className="btn-login"><a href="RegistroDePersonal.html">Ver Personal Actual</a></button>
+
             </header>
 
-            <main className="registro-container">
-                <div className="panel-registro">
-                <section className="form-section">
-                    <h2 className="form-title">Editar</h2>
-                    
-                    <form className="grid-form">
-                        <div className="input-group">
-                            <label>Nombres De La Persona</label>
-                            <input type="text" placeholder="Lura Jimena"/>
-                        </div>
-                        <div className="input-group">
-                            <label>Apellidos De La Persona</label>
-                            <input type="text" placeholder="Valderrama Vaquero"/>
-                        </div>
+            <main className="gestion-container">
 
-                        <div className="input-group">
-                            <label>Correo Electrónico</label>
-                            <input type="email" placeholder="hola@sitioincreible.co"/>
-                        </div>
+                <div className="panel-card">
 
-                        <div className="input-group">
-                            <label>Número De Celular</label>
-                            <input type="text" placeholder="32634789"/>
-                        </div>
+                    <h2>
+                        {editando
+                            ? "Editar empleado"
+                            : "Registrar empleado"}
+                    </h2>
 
-                        <div className="input-group full-width">
-                            <label>Contraseña asignada</label>
-                            <input type="password" placeholder="11391912900"/>
-                        </div>
+                    <br />
 
-                        <button type="submit" class="btn-registrar">Guardar cambios</button>
-                    </form>
+                    <div
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                                "repeat(auto-fit,minmax(250px,1fr))",
+                            gap: "15px"
+                        }}
+                    >
 
-                </section>
+                        <input
+                            type="text"
+                            name="id"
+                            placeholder="ID"
+                            value={formulario.id}
+                            onChange={handleChange}
+                            disabled={editando}
+                        />
 
-                    <section className="image-section">
-                        <h2 className="img-label">Foto-Trabajador</h2>
-                        <div className="portrait-wrapper">
-                            <img src="../img/registroDePersonal kk .png" id="vista-previa" alt="Vista previa"/>
-                        </div>
+                        <input
+                            type="text"
+                            name="nombres"
+                            placeholder="Nombres"
+                            value={formulario.nombres}
+                            onChange={handleChange}
+                        />
 
-                        <div className="upload-btn-wrapper">
-                            <input type="file" id="foto-input" accept="image/*"/>
-                        </div>
-                    </section>
+                        <input
+                            type="text"
+                            name="apellidos"
+                            placeholder="Apellidos"
+                            value={formulario.apellidos}
+                            onChange={handleChange}
+                        />
+
+                        <input
+                            type="email"
+                            name="correo"
+                            placeholder="Correo"
+                            value={formulario.correo}
+                            onChange={handleChange}
+                        />
+
+                        <input
+                            type="text"
+                            name="cargo"
+                            placeholder="Cargo"
+                            value={formulario.cargo}
+                            onChange={handleChange}
+                        />
+
+                        <input
+                            type="text"
+                            name="telefono"
+                            placeholder="Teléfono"
+                            value={formulario.telefono}
+                            onChange={handleChange}
+                        />
+
+                        <input
+                            type="number"
+                            name="horas"
+                            placeholder="Horas trabajadas"
+                            value={formulario.horas}
+                            onChange={handleChange}
+                        />
+
+                    </div>
+
+                    <br />
+
+                    {editando ? (
+
+                        <button
+                            className="btn-primary"
+                            onClick={actualizarEmpleado}
+                        >
+                            Actualizar
+                        </button>
+
+                    ) : (
+
+                        <button
+                            className="btn-primary"
+                            onClick={agregarEmpleado}
+                        >
+                            Registrar
+                        </button>
+
+                    )}
+
                 </div>
+
+                <br />
+
+                <div className="toolbar">
+
+                    <input
+                        type="text"
+                        placeholder="Buscar empleado..."
+                        value={busqueda}
+                        onChange={(e) =>
+                            setBusqueda(e.target.value)
+                        }
+                        style={{
+                            maxWidth: "300px"
+                        }}
+                    />
+
+                </div>
+
+                <div className="panel-card">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>Correo</th>
+                                <th>Cargo</th>
+                                <th>Teléfono</th>
+                                <th>Horas</th>
+                                <th>Acciones</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {empleadosFiltrados.map(
+                                (empleado) => (
+
+                                    <tr
+                                        key={empleado.id}
+                                    >
+
+                                        <td>
+                                            {empleado.id}
+                                        </td>
+
+                                        <td>
+                                            {empleado.nombres}
+                                        </td>
+
+                                        <td>
+                                            {empleado.apellidos}
+                                        </td>
+
+                                        <td>
+                                            {empleado.correo}
+                                        </td>
+
+                                        <td>
+                                            {empleado.cargo}
+                                        </td>
+
+                                        <td>
+                                            {empleado.telefono}
+                                        </td>
+
+                                        <td>
+                                            {empleado.horas}
+                                        </td>
+
+                                        <td
+                                            style={{
+                                                display: "flex",
+                                                gap: "10px"
+                                            }}
+                                        >
+
+                                            <button
+                                                className="btn-action"
+                                                onClick={() =>
+                                                    editarEmpleado(
+                                                        empleado
+                                                    )
+                                                }
+                                            >
+                                                Editar
+                                            </button>
+
+                                            <button
+                                                className="btn-action"
+                                                onClick={() =>
+                                                    eliminarEmpleado(
+                                                        empleado.id
+                                                    )
+                                                }
+                                            >
+                                                Eliminar
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+
+                                )
+                            )}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
             </main>
 
-            <Footer/>
-
+            <Footer/>                
         </>
-        
-    )
+    );
 }
 
-export default Gestionempleados
+export default GestionEmpleados;

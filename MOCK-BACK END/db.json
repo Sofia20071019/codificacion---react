@@ -35,6 +35,13 @@
       "fecha": "2026-06-03",
       "horaEntrada": "08:00",
       "id": "DGj5-YLTcu8"
+    },
+    {
+      "idRegistro": "JOR-1780587685900",
+      "operario": "BRANDON CANGREJO",
+      "fecha": "2026-06-04",
+      "horaEntrada": "10:41",
+      "id": "5awT4od"
     }
   ],
   "personal": [
@@ -49,26 +56,51 @@
       "rol": "empleado",
       "password": "password123",
       "foto": "../img/registroDePersonal kk .png"
+    },
+    {
+      "id": "OP-1780586757540",
+      "nombre": "Brandon",
+      "apellido": "cangrejo",
+      "edad": "20",
+      "email": "brandon33@gmail.com",
+      "celular": "32146745678",
+      "fechaRegistro": "2026-05-19",
+      "rol": "empleado",
+      "password": "1234",
+      "foto": "../img/registroDePersonal kk .png"
+    },
+    {
+      "id": "OP-1780675293774",
+      "nombre": "luna",
+      "apellido": "rubiano",
+      "edad": "18",
+      "email": "luna@gnail.com",
+      "celular": "32146745678",
+      "fechaRegistro": "2026-05-19",
+      "rol": "administrador",
+      "password": "1234",
+      "foto": "../img/registroPedido kk .png"
+    },
+    {
+      "id": "OP-1780680200019",
+      "nombre": "brayan",
+      "apellido": "rubiano",
+      "edad": "18",
+      "email": "brayan@gmail.com",
+      "celular": "32146745678",
+      "fechaRegistro": "2026-05-19",
+      "rol": "empleado",
+      "password": "1234",
+      "foto": "../img/Agendamiento de pedidos kk .png"
     }
   ],
   "pedidos": [
     {
-      "idPedido": "PED-001",
-      "mes": "03",
-      "material": "Algodón",
-      "cantidad": 50,
-      "comprador": "Taller Central Bogotá",
-      "estado": "✔",
-      "id": "muEGZL5a7s0"
-    },
-    {
-      "idPedido": "PED-002",
-      "mes": "03",
-      "material": "Seda",
-      "cantidad": 20,
-      "comprador": "Diseños Brando",
-      "estado": "..",
-      "id": "Ptt3E2TSioc"
+      "id": "1",
+      "cliente": "Brayan Valderrama",
+      "correo": "rubianostivenbrayan13@gmail.com",
+      "fecha": "2026-05-04",
+      "estado": ".."
     }
   ]
 }

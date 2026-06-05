@@ -15,7 +15,7 @@ function ReporteDePedidos() {
                 </div>
             </div>
             <div className="header-actions-cell">
-                <button className="btn-login"><Link to="/">Administrador</Link></button>
+                <button className="btn-login"><Link to="/dashboardadmin">Administrador</Link></button>
                 <button className="btn-login"><Link to="/cierre-admin">Cerrar Sesión</Link></button>
             </div>
         </div>

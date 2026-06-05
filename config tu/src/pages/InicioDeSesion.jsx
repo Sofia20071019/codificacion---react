@@ -60,7 +60,7 @@ function InicioDeSesion() {
 
         // 4. Redirección controlada según el rol verificado por el servidor
         if (rol === 'administrador') {
-          navigate('/cierre-admin');
+          navigate('/dashboardadmin');
         } else if (rol === 'empleado') {
           navigate('/registro-horas');
         } else {

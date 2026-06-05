@@ -129,7 +129,7 @@ function GestionDePedidos() {
   return (
     <>
       <nav className="top-nav">
-        <Link to="/">VOLVER MENÚ</Link>
+        <Link to="/">VOLVER </Link>
       </nav>
 
       <header className="main-header">

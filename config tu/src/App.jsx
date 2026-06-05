@@ -17,6 +17,15 @@ import ReporteDePedidos from './pages/ReporteDePedidos';
 import CierreDeSesionAdministrador from './pages/cierreDeSesionAdministrador';
 import CierreDeSesionEmpleado from './pages/cierreDeSesionEmpleado';
 
+
+/* IMPORTACIONES JHON HERNANDEZ */
+
+import Editarempleados from './pages/Editarempleados'
+import Aprobarpago from './pages/Aprobarpago'
+import Dashboardadmin from './pages/Dashboardadmin'
+import GestionEmpleados from './pages/Gestiempleados'
+import PanelReportes from './pages/Panelreportes'
+
 function App() {
   return (
     <BrowserRouter>
@@ -41,7 +50,17 @@ function App() {
         {/* Cierres de Sesión */}
         <Route path="/cierre-admin" element={<CierreDeSesionAdministrador />} />
         <Route path="/cierre-empleado" element={<CierreDeSesionEmpleado />} />
+
+
+            {/* IMPORTACIONES JHON HERNANDEZ */}
+        <Route path='/dashboardadmin' element={<Dashboardadmin/>}/>
+        <Route path='/empleados' element={<GestionEmpleados/>}/>
+        <Route path='/reportes' element={<PanelReportes/>}/>
+        <Route path='/editarempleados' element={<Editarempleados/>}/>
+        <Route path='/aprobarpago' element={<Aprobarpago/>}/>
       </Routes>
+
+      
 
       <Footer />
     </BrowserRouter>

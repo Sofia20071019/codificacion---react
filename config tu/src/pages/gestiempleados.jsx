@@ -1,63 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom'; 
 
 function GestionEmpleados() {
-    const [empleados, setEmpleados] = useState([
-        { id: "770123890", nombres: "Jimena", apellidos: "Martínez", correo: "jimena@gmail.com", cargo: "Empleado", telefono: "3001234567", horas: 7 }
-    ]);
-
-    const [formulario, setFormulario] = useState({
-        id: "", nombres: "", apellidos: "", correo: "", cargo: "", telefono: "", horas: ""
-    });
-
-    const [editando, setEditando] = useState(false);
+    const [empleados, setEmpleados] = useState([]);
     const [busqueda, setBusqueda] = useState("");
+    const API_URL = "http://localhost:5000/personal";
 
-    const handleChange = (e) => {
-        setFormulario({ ...formulario, [e.target.name]: e.target.value });
-    };
-
-    const limpiarFormulario = () => {
-        setFormulario({ id: "", nombres: "", apellidos: "", correo: "", cargo: "", telefono: "", horas: "" });
-        setEditando(false);
-    };
-
-    const agregarEmpleado = () => {
-        if (!formulario.id || !formulario.nombres || !formulario.apellidos) {
-            alert("Complete los campos obligatorios");
-            return;
-        }
-        setEmpleados([...empleados, formulario]);
-        limpiarFormulario();
-    };
-
-    const actualizarEmpleado = () => {
-        const nuevosEmpleados = empleados.map((emp) =>
-            emp.id === formulario.id ? formulario : emp
-        );
-        setEmpleados(nuevosEmpleados);
-        limpiarFormulario();
-    };
+    // Cargar los empleados desde el simulador backend
+    useEffect(() => {
+        fetch(API_URL)
+            .then((res) => res.json())
+            .then((data) => setEmpleados(data))
+            .catch((err) => console.error("Error cargando personal:", err));
+    }, []);
 
     const eliminarEmpleado = (id) => {
-        if (window.confirm("¿Desea eliminar este empleado?")) {
-            setEmpleados(empleados.filter((emp) => emp.id !== id));
+        if (window.confirm("¿Desea eliminar este empleado del sistema?")) {
+            fetch(`${API_URL}/${id}`, {
+                method: "DELETE",
+            })
+            .then((res) => {
+                if (res.ok) {
+                    setEmpleados(empleados.filter((emp) => emp.id !== id));
+                }
+            })
+            .catch((err) => console.error("Error al eliminar:", err));
         }
-    };
-
-    const editarEmpleado = (empleado) => {
-        setFormulario(empleado);
-        setEditando(true);
     };
 
     const empleadosFiltrados = empleados.filter((emp) =>
-        `${emp.nombres} ${emp.apellidos}`.toLowerCase().includes(busqueda.toLowerCase())
+        `${emp.nombre} ${emp.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
     );
 
     return (
         <div className="dark-theme">
             <nav className="top-nav">
-                <Link to="/dashboardadmin">VOLVER</Link>
+                <Link to="/dashboardadmin" className="no-text-decor">VOLVER</Link>
             </nav>
 
             <header className="main-header">
@@ -71,13 +49,15 @@ function GestionEmpleados() {
                         </div>
                     </div>
                     <div className="header-actions-cell">
-                        <button className="btn-login">Registrar Nuevo Empleado</button>
+                        <button className="btn-login">Administrador</button>
+                        <button className="btn-login">
+                            <Link to="/registro-personal" className="no-text-decor">Registrar Nuevo Empleado</Link>
+                        </button>
                     </div>
                 </div>
             </header>
 
             <main className="content-wrapper">
-
                 <div className="toolbar margin-b-20">
                     <div className="max-w-500">
                         <label className="margin-b-10 text-center display-block">Buscador de Personal</label>
@@ -97,8 +77,8 @@ function GestionEmpleados() {
                                 <th>ID</th>
                                 <th>Nombre Completo</th>
                                 <th>Correo</th>
-                                <th>Cargo</th>
-                                <th>Horas</th>
+                                <th>Cargo / Rol</th>
+                                <th>Celular</th>
                                 <th className="text-right">Acciones</th>
                             </tr>
                         </thead>
@@ -111,13 +91,15 @@ function GestionEmpleados() {
                                 empleadosFiltrados.map((emp) => (
                                     <tr key={emp.id}>
                                         <td>{emp.id}</td>
-                                        <td>{emp.nombres} {emp.apellidos}</td>
-                                        <td>{emp.correo}</td>
-                                        <td><span className="status status-pending">{emp.cargo}</span></td>
-                                        <td>{emp.horas}</td>
+                                        <td>{emp.nombre} {emp.apellido}</td>
+                                        <td>{emp.email}</td>
+                                        <td><span className="status status-pending">{emp.rol}</span></td>
+                                        <td>{emp.celular}</td>
                                         <td className="text-right">
                                             <div className="flex-row-gap-10">
-                                                <button className="btn-action" onClick={() => editarEmpleado(emp)}>Editar</button>
+                                                <button className="btn-action">
+                                                    <Link to={`/editarempleados/${emp.id}`} className="no-text-decor">Editar</Link>
+                                                </button>
                                                 <button className="btn-action btn-alert-color" onClick={() => eliminarEmpleado(emp.id)}>Eliminar</button>
                                             </div>
                                         </td>

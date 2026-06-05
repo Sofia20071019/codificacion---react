@@ -1,8 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom'; 
 
 function Aprobarpago(){
-    const [pago, setPago] = useState({ /* ... estado inicial ... */ });
+    const [pago, setPago] = useState({
+        nombre: "",
+        cedula: "",
+        monto: "",
+        metodo: "",
+        concepto: "",
+        estado: "Pendiente",
+        responsable: "BRAYAN VALDERRAMA"
+    });
+
+    // Simulación: Trae información base del primer pedido del backend para procesar el pago
+    useEffect(() => {
+        fetch("http://localhost:3000/pedidos/1")
+            .then((res) => res.json())
+            .then((data) => {
+                setPago(prev => ({
+                    ...prev,
+                    nombre: data.cliente,
+                    concepto: `Liquidación o Pago de Pedido N° ${data.id}`,
+                    monto: "250000" // Valor ejemplo asignado al proceso
+                }));
+            })
+            .catch((err) => console.error("Error al conectar con simulación de pedidos:", err));
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -11,13 +34,16 @@ function Aprobarpago(){
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        alert("Pago aprobado correctamente");
+        
+        // Simulamos la actualización del estado de pago enviando un PUT o POST alternativo
+        setPago({ ...pago, estado: "Aprobado" });
+        alert(`Pago por valor de $${Number(pago.monto).toLocaleString()} aprobado correctamente para ${pago.nombre}`);
     };
 
     return (
         <div className="dark-theme">
             <nav className="top-nav">
-                <Link to="/dashboardadmin">VOLVER</Link>
+                <Link to="/dashboardadmin" className="no-text-decor">VOLVER</Link>
             </nav>
 
             <header className="main-header">
@@ -31,7 +57,9 @@ function Aprobarpago(){
                         </div>
                     </div>
                     <div className="header-actions-cell">
-                        <button className="btn-login"><Link to="/registro-personal">  Registrar Nuevo Personal </Link> </button>
+                        <button className="btn-login">
+                            <Link to="/registro-personal" className="no-text-decor">Registrar Nuevo Personal</Link> 
+                        </button>
                     </div>
                 </div>
             </header>
@@ -43,34 +71,34 @@ function Aprobarpago(){
                         <form className="grid-form" onSubmit={handleSubmit}>
                             <div className="input-row">
                                 <div className="input-cell">
-                                    <label>Nombre del Empleado</label>
-                                    <input type="text" name="nombre" value={pago.nombre} onChange={handleChange} placeholder="Juan Carlos Pérez" />
+                                    <label>Nombre del Empleado / Cliente</label>
+                                    <input type="text" name="nombre" value={pago.nombre} onChange={handleChange} placeholder="Juan Carlos Pérez" required />
                                 </div>
                                 <div className="input-cell">
-                                    <label>Cédula</label>
-                                    <input type="text" name="cedula" value={pago.cedula} onChange={handleChange} />
+                                    <label>Cédula / Documento</label>
+                                    <input type="text" name="cedula" value={pago.cedula} onChange={handleChange} required />
                                 </div>
                             </div>
 
                             <div className="input-row">
                                 <div className="input-cell">
                                     <label>Monto a Pagar</label>
-                                    <input type="number" name="monto" value={pago.monto} onChange={handleChange} />
+                                    <input type="number" name="monto" value={pago.monto} onChange={handleChange} required />
                                 </div>
                                 <div className="input-cell">
                                     <label>Método de Pago</label>
-                                    <select name="metodo" value={pago.metodo} onChange={handleChange}>
+                                    <select name="metodo" value={pago.metodo} onChange={handleChange} required>
                                         <option value="">Seleccione</option>
-                                        <option>Transferencia Bancaria</option>
-                                        <option>Nequi</option>
-                                        <option>Daviplata</option>
+                                        <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                                        <option value="Nequi">Nequi</option>
+                                        <option value="Daviplata">Daviplata</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div className="input-group">
                                 <label>Concepto del Pago</label>
-                                <input type="text" name="concepto" value={pago.concepto} onChange={handleChange} />
+                                <input type="text" name="concepto" value={pago.concepto} onChange={handleChange} required />
                             </div>
 
                             <button type="submit" className="btn-submit w-100">Confirmar Aprobación</button>
@@ -88,14 +116,14 @@ function Aprobarpago(){
                                 </span>
                             </div>
                         </div>
-                        <div className="margin-t-15 font-size-sm text-secondary">
-                            <p><strong>Responsable:</strong> {pago.responsable || "Administrador"}</p>
+                        <div className="margin-t-15 font-size-sm text-secondary text-center">
+                            <p><strong>Responsable:</strong> {pago.responsable}</p>
                         </div>
                     </section>
                 </div>
             </main>
         </div>
-    )
+    );
 }
 
 export default Aprobarpago;

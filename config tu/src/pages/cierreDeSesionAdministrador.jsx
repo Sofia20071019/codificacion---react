@@ -12,7 +12,7 @@ function CierreDeSesionAdministrador() {
             <p className="text-muted margin-b-35">Se guardarán todos los cambios pendientes en el servidor del inventario textil y las bitácoras operativas.</p>
             
             <div className="flex-row-gap-10">
-                <button className="btn-login" id="btn-permanecer"><Link to="/">Permanecer</Link></button>
+                <button className="btn-login" id="btn-permanecer"><Link to="/dashboardadmin">Permanecer</Link></button>
                 <button className="btn-submit btn-alert-color" id="btn-confirmar-salida"><Link to="/">Confirmar Salida</Link> </button>
             </div>
         </div>

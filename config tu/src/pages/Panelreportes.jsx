@@ -20,6 +20,7 @@ function PanelReportes() {
                     </div>
                     <div className="header-actions-cell">
                         <button className="btn-login">Administrador</button>
+                        <button className="btn-login"><Link to="/cierre-admin">Cerrar Sesión</Link></button>
                     </div>
                 </div>
             </header>
@@ -32,7 +33,7 @@ function PanelReportes() {
                         <div className="img-principal">
                             <img src="../img/inventarioDeMaterial kk .png" alt="Inventario" />
                         </div>
-                        <h2 className="margin-t-15">Reporte de Inventario</h2>
+                        <h2 className="margin-t-15"><Link to="/reporte-pedidos" className="no-text-decor display-block">Reporte de Inventario</Link></h2>
                     </div>
 
                     <div className="panel-gestion module-card">

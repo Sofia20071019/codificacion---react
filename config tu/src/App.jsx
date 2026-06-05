@@ -56,7 +56,7 @@ function App() {
         <Route path='/dashboardadmin' element={<Dashboardadmin/>}/>
         <Route path='/empleados' element={<GestionEmpleados/>}/>
         <Route path='/reportes' element={<PanelReportes/>}/>
-        <Route path='/editarempleados' element={<Editarempleados/>}/>
+        <Route path='/editarempleados/:id' element={<Editarempleados/>}/>
         <Route path='/aprobarpago' element={<Aprobarpago/>}/>
       </Routes>
 

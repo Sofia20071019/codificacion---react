@@ -147,6 +147,7 @@ function MateriaPrima() {
             </div>
           </div>
           <div className="header-actions-cell">
+            <button className="btn-login">Administrador</button>
             <button 
               className="btn-login" 
               onClick={() => setMostrarFormulario(true)}

@@ -128,8 +128,9 @@ function RegistroDeHoras() {
                 />
               </div>
 
-              <button type="submit" className="btn-submit w-100 margin-t-15">
-                Ingresar Al Sistema
+              <button type="submit" className="btn-submit w-100 margin-t-15"> 
+                <Link to="/">
+                Ingresar Al Sistema</Link>
               </button>
             </form>
           </div>

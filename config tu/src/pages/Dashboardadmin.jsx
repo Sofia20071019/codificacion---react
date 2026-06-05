@@ -43,25 +43,36 @@ function Dashboardadmin() {
 
                         <div className="panel-gestion module-card">
                             <div className="img-principal">
-                                <img src="../img/horasDeEmpleado kk .png" alt="Empleados" />
+                                <img src="../img/horasDeEmpleado kk .png" alt="Inventario de Materias Primas" />
                             </div>
-                            <h2 className="margin-t-15">Gestión de empleados</h2>
-                        </div>
-
-                        <div className="panel-gestion module-card">
-                            <div className="img-principal">
-                                <img src="../img/inventarioDeMaterial kk .png" />
-                            </div>
-                            <h2 className="margin-t-15">Inventario De Materias Primas</h2>
+                            <h2 className="margin-t-15">
+                                <Link to="/empleados" className="no-text-decor display-block">
+                                    Gestión de empleados
+                                </Link>
+                            </h2>
                         </div>
                         
                         <div className="panel-gestion module-card">
                             <div className="img-principal">
-                                <img src="../img/panelAdministracion kk .png" />
+                                <img src="../img/inventarioDeMaterial kk .png" alt="Inventario de Materias Primas" />
                             </div>
-                            <h2 className="margin-t-15">Panel de reportes</h2>
+                            <h2 className="margin-t-15">
+                                <Link to="/materia-prima" className="no-text-decor display-block">
+                                    Inventario De Materias Primas
+                                </Link>
+                            </h2>
                         </div>
 
+                        <div className="panel-gestion module-card">
+                            <div className="img-principal">
+                                <img src="../img/panelAdministracion kk .png" alt="Inventario de Materias Primas" />
+                            </div>
+                            <h2 className="margin-t-15">
+                                <Link to="/reportes" className="no-text-decor display-block">
+                                    Panel De Reportes
+                                </Link>
+                            </h2>
+                        </div>
 
                 </div>
             </main>

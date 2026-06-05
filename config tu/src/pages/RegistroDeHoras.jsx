@@ -5,7 +5,6 @@ function RegistroDeHoras() {
   const navigate = useNavigate();
 
   // --- ESTADOS DE CONTROL DE REACT ---
-  //  Modificación 1: Convertimos a mayúsculas el valor inicial del localStorage
   const [nombreOperario, setNombreOperario] = useState(() => {
     const sesionGuardada = localStorage.getItem('kimuka_sesion_activa');
     return sesionGuardada ? sesionGuardada.toUpperCase() : 'OPERARIO NO IDENTIFICADO';
@@ -17,7 +16,6 @@ function RegistroDeHoras() {
   useEffect(() => {
     const sesionActiva = localStorage.getItem('kimuka_sesion_activa');
     if (sesionActiva) {
-      //  Modificación 2: Forzamos el texto en mayúsculas al actualizar el estado
       setNombreOperario(sesionActiva.toUpperCase());
     }
 
@@ -33,24 +31,41 @@ function RegistroDeHoras() {
     setHoraInicio(`${horas}:${minutos}`);
   }, []);
 
-  // 2. CONTROLADOR DEL ENVÍO DEL FORMULARIO
+  // 2. CONTROLADOR DEL ENVÍO DEL FORMULARIO CONECTADO AL SIMULADOR
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Estructura exacta requerida por la colección "jornadas" en tu db.json
     const registroAsistencia = {
       idRegistro: 'JOR-' + Date.now(),
-      operario: nombreOperario, // Se guardará en mayúsculas en el historial de jornadas
+      operario: nombreOperario, // Mantiene la consistencia de datos en mayúsculas
       fecha: fechaInicio,
       horaEntrada: horaInicio
     };
 
-    let historialJornadas = JSON.parse(localStorage.getItem('kimuka_jornadas')) || [];
-    historialJornadas.push(registroAsistencia);
-    localStorage.setItem('kimuka_jornadas', JSON.stringify(historialJornadas));
-
-    alert(`¡Ingreso Autorizado!\nOperario: ${registroAsistencia.operario}\nHora: ${registroAsistencia.horaEntrada}`);
-
-    navigate('/');
+    // Reemplazamos la persistencia local por una petición HTTP POST al simulador backend
+    fetch('http://localhost:5000/jornadas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(registroAsistencia)
+    })
+      .then(respuesta => {
+        if (!respuesta.ok) {
+          throw new Error('Error al guardar la jornada en el servidor');
+        }
+        return respuesta.json();
+      })
+      .then(data => {
+        // Notificación de éxito con datos confirmados por el servidor
+        alert(`¡Ingreso Autorizado!\nOperario: ${data.operario}\nHora: ${data.horaEntrada}`);
+        navigate('/'); // Redirecciona al menú principal
+      })
+      .catch(error => {
+        console.error("Error crítico de persistencia en jornadas:", error);
+        alert("Hubo un fallo de comunicación. Asegúrate de que el servidor en el puerto 5000 esté activo.");
+      });
   };
 
   return (
@@ -71,7 +86,6 @@ function RegistroDeHoras() {
           </div>
           <div className="header-actions-cell">
             <button className="btn-login" type="button">
-              {/* Aquí se mostrará automáticamente en mayúsculas */}
               <span id="nav-nombre">{nombreOperario}</span>
             </button>
           </div>
@@ -87,7 +101,6 @@ function RegistroDeHoras() {
           </div>
 
           <div className="form-section-cell">
-            {/* Aquí también se reflejará el cambio en mayúsculas sobre el formulario */}
             <h2 className="user-name text-center margin-b-25 font-size-xl" id="titulo-nombre">
               {nombreOperario}
             </h2>

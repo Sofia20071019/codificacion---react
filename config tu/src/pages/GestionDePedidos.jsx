@@ -20,57 +20,85 @@ function GestionDePedidos() {
   const [filtroEstado, setFiltroEstado] = useState('todos');
 
   // --- 4. ESTADO PARA LA LISTA DE PEDIDOS ---
-  const [listaPedidos, setListaPedidos] = useState(() => {
-    return JSON.parse(localStorage.getItem('kimuka_pedidos')) || [];
-  });
+  const [listaPedidos, setListaPedidos] = useState([]);
 
-  // --- 5. GUARDAR EN LOCALSTORAGE AUTOMÁTICAMENTE ---
+  // --- 5. CARGA INICIAL: TRAER LOS PEDIDOS DEL SIMULADOR BACKEND (GET) ---
   useEffect(() => {
-    localStorage.setItem('kimuka_pedidos', JSON.stringify(listaPedidos));
-  }, [listaPedidos]);
+    cargarPedidosBackend();
+  }, []);
 
-  // --- 6. CONTROLADOR DE GUARDAR / ACTUALIZAR PEDIDO (Basado en tu JS) ---
+  const cargarPedidosBackend = () => {
+    fetch('http://localhost:5000/pedidos')
+      .then(respuesta => {
+        if (!respuesta.ok) {
+          throw new Error('Error al obtener la lista de pedidos de la base de datos');
+        }
+        return respuesta.json();
+      })
+      .then(data => {
+        setListaPedidos(data);
+      })
+      .catch(error => {
+        console.error("Error crítico de lectura en pedidos:", error);
+        alert("No se pudo sincronizar el libro de pedidos con el servidor backend.");
+      });
+  };
+
+  // --- 6. CONTROLADOR DE GUARDAR / ACTUALIZAR PEDIDO (POST / PUT) ---
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const nuevoPedido = {
+    const pedidoIdEstandar = idPedido.trim().toUpperCase();
+
+    // Objeto base para enviar al backend estructurado según tu db.json
+    // Nota: Si tus registros existentes usan propiedades adicionales como 'mes', 'material', 'cantidad' o 'comprador',
+    // puedes agregarlas o mapearlas aquí para no perder la consistencia del esquema.
+    const datosPedido = {
+      id: pedidoIdEstandar,
       cliente: cliente.trim(),
       correo: correo.trim(),
-      id: idPedido.trim().toUpperCase(), // Mantenemos consistencia con mayúsculas en IDs
       fecha: fecha,
       estado: estado
     };
 
-    // Copiamos la lista actual para poder manipularla sin mutar el estado directamente
-    let pedidosActuales = [...listaPedidos];
+    // Determinamos la URL y el método HTTP según el flujo operativo
+    const url = esEdicion 
+      ? `http://localhost:5000/pedidos/${pedidoIdEstandar}` 
+      : 'http://localhost:5000/pedidos';
+      
+    const metodo = esEdicion ? 'PUT' : 'POST';
 
-    // Buscamos si el ID ya existe en nuestro almacenamiento (Lógica exacta de tu archivo JS)
-    const index = pedidosActuales.findIndex(p => p.id === nuevoPedido.id);
-
-    if (index !== -1) {
-      //  Si existe: Reemplaza / Edita el registro existente
-      pedidosActuales[index] = nuevoPedido;
-      alert('Pedido actualizado con éxito.');
-    } else {
-      //  Si no existe: Crea uno nuevo en la lista
-      pedidosActuales.push(nuevoPedido);
-      alert('Pedido registrado en el libro operativo.');
-    }
-
-    // Actualizamos el estado global de React
-    setListaPedidos(pedidosActuales);
-
-    // Limpieza y cierre del formulario
-    limpiarFormulario();
+    fetch(url, {
+      method: metodo,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(datosPedido)
+    })
+      .then(respuesta => {
+        if (!respuesta.ok) {
+          throw new Error(`Error al procesar la solicitud del pedido con método ${metodo}`);
+        }
+        return respuesta.json();
+      })
+      .then(() => {
+        alert(esEdicion ? 'Pedido actualizado con éxito en el servidor.' : 'Pedido registrado en el libro operativo.');
+        limpiarFormulario();
+        cargarPedidosBackend(); // Refrescamos la tabla consultando el estado vivo del servidor
+      })
+      .catch(error => {
+        console.error(`Error de persistencia (${metodo}) en pedidos:`, error);
+        alert("Hubo un error al sincronizar la orden. Verifique la conexión con el puerto 5000.");
+      });
   };
 
-  // ---  7. ACCIÓN PARA CARGAR UN PEDIDO EN EL FORMULARIO PARA ACTUALIZAR ---
+  // --- 7. ACCIÓN PARA CARGAR UN PEDIDO EN EL FORMULARIO PARA ACTUALIZAR ---
   const handleCargarEdicion = (pedido) => {
-    setCliente(pedido.cliente);
-    setCorreo(pedido.correo);
+    setCliente(pedido.cliente || '');
+    setCorreo(pedido.correo || '');
     setIdPedido(pedido.id);
-    setFecha(pedido.fecha);
-    setEstado(pedido.estado);
+    setFecha(pedido.fecha || '');
+    setEstado(pedido.estado || '..');
     setEsEdicion(true); // Marcamos que estamos editando
     setMostrarFormulario(true); // Abrimos el formulario automáticamente
   };
@@ -87,7 +115,8 @@ function GestionDePedidos() {
 
   // --- 8. LÓGICA DE FILTRADO Y BÚSQUEDA ---
   const pedidosFiltrados = listaPedidos.filter((pedido) => {
-    const coincideId = pedido.id.toLowerCase().includes(busqueda.toLowerCase());
+    const idSeguro = pedido.id ? pedido.id.toLowerCase() : '';
+    const coincideId = idSeguro.includes(busqueda.toLowerCase());
     
     let coincideEstado = true;
     if (filtroEstado === 'entregado') coincideEstado = pedido.estado === '✔';
@@ -266,17 +295,16 @@ function GestionDePedidos() {
               ) : (
                 pedidosFiltrados.map((pedido) => (
                   <tr key={pedido.id}>
-                    <td>{pedido.cliente}</td>
-                    <td>{pedido.correo}</td>
+                    <td>{pedido.cliente || 'N/A'}</td>
+                    <td>{pedido.correo || 'N/A'}</td>
                     <td style={{ fontWeight: 'bold' }}>{pedido.id}</td>
-                    <td>{pedido.fecha}</td>
+                    <td>{pedido.fecha || 'N/A'}</td>
                     <td>
                       <span className={`status-badge state-${pedido.estado === '✔' ? 'entregado' : pedido.estado === '..' ? 'proceso' : 'cancelado'}`}>
                         {pedido.estado === '✔' ? 'Entregado (✔)' : pedido.estado === '..' ? 'En proceso (..)' : 'Cancelado (✖)'}
                       </span>
                     </td>
                     <td>
-                      {/* ACCIÓN: BOTÓN ACTUALIZAR */}
                       <button 
                         type="button"
                         className="btn-submit" 

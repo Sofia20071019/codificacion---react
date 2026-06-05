@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; //  Importamos useNavigate
+import { Link, useNavigate } from 'react-router-dom'; // Importamos useNavigate
 
 function RegistroDePersonal() {
   const navigate = useNavigate(); // Inicializamos el hook de navegación
@@ -14,25 +14,32 @@ function RegistroDePersonal() {
   const [cargo, setCargo] = useState('');
   const [password, setPassword] = useState('');
   
-  // Estado para almacenar la URL temporal de la foto de vista previa
+  // Estado para almacenar la URL temporal de la foto de vista previa en la interfaz
   const [fotoPreview, setFotoPreview] = useState('../img/registroDePersonal kk .png');
+  // Estado para almacenar únicamente el nombre del archivo de imagen para el simulador
+  const [fotoNombre, setFotoNombre] = useState('');
 
   // --- MANEJADOR DEL CAMBIO DE IMAGEN ---
   const handleFotoChange = (e) => {
     const archivo = e.target.files[0];
     if (archivo) {
+      setFotoNombre(archivo.name); // Guardamos el nombre del archivo (ej: "operario.png")
+      
       const urlTemporal = URL.createObjectURL(archivo);
-      setFotoPreview(urlTemporal);
+      setFotoPreview(urlTemporal); // Genera la vista previa visual en el componente
     }
   };
 
-  // --- CONTROLADOR DEL ENVÍO DEL FORMULARIO ---
+  // --- CONTROLADOR DEL ENVÍO DEL FORMULARIO AL SIMULADOR MOCK-BACKEND ---
   const handleSubmit = (e) => {
     e.preventDefault(); 
 
-    // 1. Creamos el objeto del operario
+    // Si el usuario subió una foto, estructuramos la ruta relativa, si no, dejamos la por defecto
+    const fotoFinal = fotoNombre ? `../img/${fotoNombre}` : "../img/registroDePersonal kk .png";
+
+    // 1. Creamos el objeto del operario con la estructura exacta compatible con db.json
     const nuevoOperario = {
-      id: 'OP-' + Date.now(),
+      id: 'OP-' + Date.now(), // ID único para cumplir con la trazabilidad estándar (ISO 9001)
       nombre: nombre.trim(),
       apellido: apellido.trim(),
       edad: edad,
@@ -40,24 +47,33 @@ function RegistroDePersonal() {
       celular: celular,
       fechaRegistro: fecha,
       rol: cargo,
-      password: password,
-      foto: fotoPreview
+      password: password, // Nota: En entornos de producción real bajo la ley 1581 (Habeas Data), esto debe ir encriptado
+      foto: fotoFinal
     };
 
-    // 2. Traemos la lista previa o array vacío
-    const registrosExistentes = JSON.parse(localStorage.getItem('kimuka_personal')) || [];
-
-    // 3. Agregamos el nuevo registro
-    registrosExistentes.push(nuevoOperario);
-
-    // 4. Guardamos en LocalStorage
-    localStorage.setItem('kimuka_personal', JSON.stringify(registrosExistentes));
-
-    // 5. Notificamos e inmediatamente redirigimos al inicio de sesión
-    alert(`¡Operario registrado con éxito!\nNombre: ${nuevoOperario.nombre} ${nuevoOperario.apellido}`);
-    
-    // Ajusta la ruta si en tu App.jsx el inicio de sesión se llama diferente (ej: '/login')
-    navigate('/login'); 
+    // 2. Enviamos el registro por método POST a la colección "personal" de json-server
+    fetch('http://localhost:5000/personal', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(nuevoOperario)
+    })
+      .then(respuesta => {
+        if (!respuesta.ok) {
+          throw new Error('Error en la respuesta del servidor simulado');
+        }
+        return respuesta.json();
+      })
+      .then(data => {
+        // 3. Notificamos éxito con los datos devuelvos por el backend y redirigimos
+        alert(`¡Operario registrado con éxito en el sistema!\nNombre: ${data.nombre} ${data.apellido}`);
+        navigate('/login'); 
+      })
+      .catch(error => {
+        console.error("Error crítico de conexión con el simulador de personal:", error);
+        alert("Hubo un error al registrar el operario. Por favor, verifica que el simulador esté encendido en el puerto 5000.");
+      });
   };
 
   return (

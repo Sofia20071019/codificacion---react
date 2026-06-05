@@ -18,13 +18,29 @@ function MateriaPrima() {
   const [formNombre, setFormNombre] = useState('');
   const [formCantidad, setFormCantidad] = useState('');
   const [formColor, setFormColor] = useState('');
-  const [formImagen, setFormImagen] = useState(null);
+  const [formImagenNombre, setFormImagenNombre] = useState('');
 
-  // --- 1. CARGAR INVENTARIO INICIAL ---
+  // --- 1. CARGAR INVENTARIO INICIAL DESDE EL SIMULADOR BACKEND (GET) ---
   useEffect(() => {
-    const datosLocales = JSON.parse(localStorage.getItem('inventarioKimuka')) || [];
-    setInventario(datosLocales);
+    cargarInventarioBackend();
   }, []);
+
+  const cargarInventarioBackend = () => {
+    fetch('http://localhost:5000/inventario')
+      .then(respuesta => {
+        if (!respuesta.ok) {
+          throw new Error('Error al obtener el stock de materia prima');
+        }
+        return respuesta.json();
+      })
+      .then(data => {
+        setInventario(data);
+      })
+      .catch(error => {
+        console.error("Error crítico de lectura en inventario:", error);
+        alert("No se pudo sincronizar el stock operativo con el servidor backend.");
+      });
+  };
 
   // --- 2. CONTROL DINÁMICO DE TEXTOS EN EL FORMULARIO ---
   const esUnidadForm = porUnidades.includes(formCategoria);
@@ -32,28 +48,27 @@ function MateriaPrima() {
   const placeholderCantidad = esUnidadForm ? "Ej: 50" : "Ej: 15.5";
   const tipoUnidadForm = esUnidadForm ? "unidades" : "metros";
 
-  // --- 3. PROCESAR IMAGEN A BASE64 ---
+  // --- 3. MANEJADOR DE LA IMAGEN DE MANERA OPTIMIZADA ---
   const handleImagenChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFormImagen(event.target.result);
-      };
-      reader.readAsDataURL(file);
+      // Capturamos el nombre limpio del archivo para construir una ruta relativa estable en db.json
+      setFormImagenNombre(file.name);
     }
   };
 
-  // --- 4. ENVIAR FORMULARIO (REGISTRAR) ---
+  // --- 4. ENVIAR FORMULARIO AL BACKEND (POST) ---
   const registrarMaterial = (e) => {
     e.preventDefault();
 
     const unidad = porUnidades.includes(formCategoria) ? "unidades" : "metros";
     const referenciaColor = formColor.trim() || 'Ej: Negro Mate';
-    const imgSrc = formImagen || "../img/default.png";
+    
+    // Si el usuario adjuntó imagen construimos su ruta en la carpeta local, si no, se usa la por defecto
+    const imgSrc = formImagenNombre ? `../img/${formImagenNombre}` : "../img/default.png";
 
     const nuevoItem = {
-      id: 'INS-' + Date.now(),
+      id: 'INS-' + Date.now(), // ID único para trazabilidad textil
       nombre: formNombre.trim(),
       cantidad: parseFloat(formCantidad),
       unidad,
@@ -62,15 +77,29 @@ function MateriaPrima() {
       imagen: imgSrc
     };
 
-    // Actualizar estado y LocalStorage
-    const nuevoInventario = [...inventario, nuevoItem];
-    setInventario(nuevoInventario);
-    localStorage.setItem('inventarioKimuka', JSON.stringify(nuevoInventario));
-
-    alert(`¡Material ${formNombre} registrado con éxito en el stock!`);
-    
-    // Resetear formulario y cerrar
-    resetearFormulario();
+    // Petición POST síncrona al endpoint del simulador backend
+    fetch('http://localhost:5000/inventario', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(nuevoItem)
+    })
+      .then(respuesta => {
+        if (!respuesta.ok) {
+          throw new Error('Error al guardar el nuevo insumo en el servidor');
+        }
+        return respuesta.json();
+      })
+      .then(data => {
+        alert(`¡Material ${data.nombre} registrado con éxito en el stock de Kimuka!`);
+        resetearFormulario();
+        cargarInventarioBackend(); // Refrescamos la interfaz con la base de datos actualizada
+      })
+      .catch(error => {
+        console.error("Error de persistencia (POST) en materia prima:", error);
+        alert("Hubo un fallo al registrar el insumo. Verifica que el servidor esté activo en el puerto 5000.");
+      });
   };
 
   const resetearFormulario = () => {
@@ -78,13 +107,14 @@ function MateriaPrima() {
     setFormNombre('');
     setFormCantidad('');
     setFormColor('');
-    setFormImagen(null);
+    setFormImagenNombre('');
     setMostrarFormulario(false);
   };
 
   // --- 5. LÓGICA DE FILTRADO MULTIDIMENSIONAL ---
   const itemsFiltrados = inventario.filter(item => {
-    const coincideNombre = buscarNombre === "" || item.nombre.toLowerCase().includes(buscarNombre.toLowerCase().trim());
+    const nombreSeguro = item.nombre ? item.nombre.toLowerCase() : '';
+    const coincideNombre = buscarNombre === "" || nombreSeguro.includes(buscarNombre.toLowerCase().trim());
     const coincideCat = filtroCategoria === "todos" || item.categoria === filtroCategoria;
     
     let coincideCant = true;
@@ -100,12 +130,10 @@ function MateriaPrima() {
     ? "unidades" 
     : (filtroCategoria === "todos" ? "unidades/metros" : "metros");
 
-
   return (
     <>
-      {/* class cambia a className en React */}
       <nav className="top-nav">
-        <Link to="/index.html">VOLVER PRINCIPAL</Link>
+        <Link to="/">VOLVER PRINCIPAL</Link>
       </nav>
 
       <header className="main-header">
@@ -177,7 +205,7 @@ function MateriaPrima() {
           </div>
         </section>
 
-        {/* SECCIÓN FORMULARIO (Renderizado condicional en vez de usar style.display) */}
+        {/* SECCIÓN FORMULARIO (Renderizado condicional) */}
         {mostrarFormulario && (
           <section className="panel-gestion" id="seccion-anadir-materiaPrima">
             <h3 className="margin-b-20">REGISTRAR INGRESO DE MATERIAL</h3>
@@ -204,7 +232,6 @@ function MateriaPrima() {
                     </optgroup>
                   </select>
                   
-                  {/* Selector interno dinámico del formulario */}
                   {formCategoria && (
                     <select className="filter-select margin-t-10" id="filtro-cantidad" defaultValue="todos">
                       <option value="todos">Todos</option>
@@ -285,7 +312,7 @@ function MateriaPrima() {
           ) : (
             itemsFiltrados.map((item) => (
               <div key={item.id} className="card-materia-prima" data-categoria={item.categoria}>
-                <h2>{item.nombre}</h2>
+                <h2>{item.nombre || 'Sin nombre'}</h2>
                 <span className="badge-cantidad">{item.cantidad} {item.unidad}</span>
                 <p style={{ fontSize: "0.85em", color: "#aaa", margin: "4px 0" }}>Ref: {item.referenciaColor}</p>
                 <div className="image-wrapper-stock" style={{ marginTop: "10px" }}>

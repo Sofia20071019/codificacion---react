@@ -13,56 +13,64 @@ function InicioDeSesion() {
   const handleLogin = (e) => {
     e.preventDefault(); // Evita que la página se recargue
 
-    // 1. Jalamos la lista de personal registrado en el sistema
-    const registrosPersonal = JSON.parse(localStorage.getItem('kimuka_personal')) || [];
-
-    // Limpiamos los textos para evitar fallos por espacios o mayúsculas
     const emailDigitado = email.toLowerCase().trim();
     const passwordDigitada = password.trim();
 
-    // 2. Buscamos al operario que coincida exactamente con el correo ingresado
-    const usuarioEncontrado = registrosPersonal.find((persona) => {
-      const correoRegistro = (persona.email || persona.correo || "").toLowerCase().trim();
-      return correoRegistro === emailDigitado;
-    });
+    // 1. Consultamos la colección "personal" directamente desde el simulador backend
+    fetch('http://localhost:5000/personal')
+      .then(respuesta => {
+        if (!respuesta.ok) {
+          throw new Error('Error al conectar con el servidor de autenticación');
+        }
+        return respuesta.json();
+      })
+      .then(registrosPersonal => {
+        // 2. Buscamos al operario que coincida exactamente con el correo ingresado
+        const usuarioEncontrado = registrosPersonal.find((persona) => {
+          const correoRegistro = (persona.email || persona.correo || "").toLowerCase().trim();
+          return correoRegistro === emailDigitado;
+        });
 
-    // ====================================================================
-    // VALIDADOR DE REGISTRO REAL Y CONTRASEÑA
-    // ====================================================================
-    if (!usuarioEncontrado) {
-      alert(" Error: Este correo electrónico no se encuentra registrado en el sistema Kimuka.");
-      return; // Detiene la ejecución aquí para que no redirija
-    }
+        // ====================================================================
+        // VALIDADOR DE REGISTRO REAL Y CONTRASEÑA
+        // ====================================================================
+        if (!usuarioEncontrado) {
+          alert("Error: Este correo electrónico no se encuentra registrado en el sistema Kimuka.");
+          return; 
+        }
 
-    if (usuarioEncontrado.password !== passwordDigitada) {
-      alert(" Error: La contraseña ingresada es incorrecta. Inténtelo de nuevo.");
-      return; // Detiene la ejecución si la clave no coincide
-    }
+        if (usuarioEncontrado.password !== passwordDigitada) {
+          alert("Error: La contraseña ingresada es incorrecta. Inténtelo de nuevo.");
+          return; 
+        }
 
-    if (usuarioEncontrado.rol !== rol) {
-      alert(` Advertencia: El perfil seleccionado no coincide con su rol asignado (${usuarioEncontrado.rol}).`);
-      return; // Detiene la ejecución si el rol seleccionado en el formulario está mal
-    }
-    // ====================================================================
+        if (usuarioEncontrado.rol !== rol) {
+          alert(`Advertencia: El perfil seleccionado no coincide con su rol asignado (${usuarioEncontrado.rol}).`);
+          return; 
+        }
+        // ====================================================================
 
-    // 3. SI PASÓ LAS VALIDACIONES: Unimos el NOMBRE y el APELLIDO del registro real
-    const primerNombre = usuarioEncontrado.nombre || usuarioEncontrado.nombres || '';
-    const primerApellido = usuarioEncontrado.apellido || usuarioEncontrado.apellidos || '';
-    const nombreParaSesion = `${primerNombre} ${primerApellido}`.trim();
+        // 3. SI PASÓ LAS VALIDACIONES: Unimos el NOMBRE y el APELLIDO del registro real
+        const primerNombre = usuarioEncontrado.nombre || usuarioEncontrado.nombres || '';
+        const primerApellido = usuarioEncontrado.apellido || usuarioEncontrado.apellidos || '';
+        const nombreParaSesion = `${primerNombre} ${primerApellido}`.trim();
 
-    // Guardamos el nombre real definitivo en la sesión activa
-    localStorage.setItem('kimuka_sesion_activa', nombreParaSesion);
+        // Guardamos el nombre en el localStorage solo para manejar la sesión activa en el Front-End
+        localStorage.setItem('kimuka_sesion_activa', nombreParaSesion);
 
-    // 4. Retraso controlado para garantizar la escritura antes de navegar a la ruta correspondiente
-    setTimeout(() => {
-      if (rol === 'administrador') {
-        navigate('/cierre-admin');
-      } else if (rol === 'empleado') {
-        navigate('/registro-horas');
-      } else {
-        alert('Por favor, seleccione un perfil válido.');
-      }
-    }, 100);
+        // 4. Redirección controlada según el rol verificado por el servidor
+        if (rol === 'administrador') {
+          navigate('/cierre-admin');
+        } else if (rol === 'empleado') {
+          navigate('/registro-horas');
+        } else {
+          alert('Por favor, seleccione un perfil válido.');
+        }
+      })
+      .catch(error => {
+        console.error("Error crítico durante el inicio de sesión:", error);
+        alert("Hubo un problema de conexión con el backend de Kimuka. Asegúrate de que el servidor esté corriendo en el puerto 5000.");
+      });
   };
 
   return (

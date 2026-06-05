@@ -1,4 +1,5 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import { Link } from 'react-router-dom'; 
 import Editarempleados from './pages/Editarempleados'
 import Aprobarpago from './pages/Aprobarpago'
 import Dashboardadmin from './pages/Dashboardadmin'
@@ -11,8 +12,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/dashboardadmin' element={<Dashboardadmin/>}/>
-        <Route path='/gestionempleados' element={<GestionEmpleados/>}/>
-        <Route path='/panereportes' element={<PanelReportes/>}/>
+        <Route path='/empleados' element={<GestionEmpleados/>}/>
+        <Route path='/reportes' element={<PanelReportes/>}/>
         <Route path='/editarempleados' element={<Editarempleados/>}/>
         <Route path='/aprobarpago' element={<Aprobarpago/>}/>
       </Routes>

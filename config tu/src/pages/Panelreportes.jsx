@@ -1,120 +1,57 @@
 import Footer from "../components/Footer";
+import { Link } from 'react-router-dom'; 
 
 function PanelReportes() {
-
     return (
-
-        <>
-
+        <div className="dark-theme">
             <nav className="top-nav">
-                <h3>PANEL DE REPORTES</h3>
+                <Link to="/dashboardadmin">VOLVER</Link>
             </nav>
 
             <header className="main-header">
-
-                <div className="logo-principal">
-
-                    <div className="logo-circle">
-                        <img
-                            src="/img/logo-kimuka.png"
-                            alt=""
-                        />
+                <div className="header-container">
+                    <div className="logo-principal-cell">
+                        <div className="logo-principal">
+                            <div className="logo-circle">
+                                <img src="../img/logo kimuka.png" alt="Logo Kimuka" />
+                            </div>
+                            <h1>Panel De Reportes</h1>
+                        </div>
                     </div>
-
-                    <h1>Kimuka</h1>
-
+                    <div className="header-actions-cell">
+                        <button className="btn-login">Administrador</button>
+                    </div>
                 </div>
-
-                <button className="btn-login">
-                    Administrador
-                </button>
-
             </header>
 
-            <main className="Reportes-container">
+            <main className="content-wrapper">
+                <h2 className="table-title margin-b-35">Reportes Disponibles</h2>
 
-                <h2>Reportes disponibles</h2>
-
-                <br />
-
-                <div
-                    style={{
-                        display:"grid",
-                        gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",
-                        gap:"30px"
-                    }}
-                >
-
-                    <div className="card">
-
-                        <img
-                            src="/img/inventario.jpg"
-                            alt=""
-                            style={{
-                                width:"100%",
-                                height:"220px",
-                                objectFit:"cover",
-                                borderRadius:"20px"
-                            }}
-                        />
-
-                        <br />
-
-                        <h2>
-                            Reporte de Inventario
-                        </h2>
-
+                <div className="card-grid">
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            <img src="../img/inventarioDeMaterial kk .png" alt="Inventario" />
+                        </div>
+                        <h2 className="margin-t-15">Reporte de Inventario</h2>
                     </div>
 
-                    <div className="card">
-
-                        <img
-                            src="/img/pedidos.jpg"
-                            alt=""
-                            style={{
-                                width:"100%",
-                                height:"220px",
-                                objectFit:"cover",
-                                borderRadius:"20px"
-                            }}
-                        />
-
-                        <br />
-
-                        <h2>
-                            Reporte de Pedidos
-                        </h2>
-
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            <img src="../img/reporteDePedidos kk .png" alt="Pedidos" />
+                        </div>
+                        <h2 className="margin-t-15">Reporte de Pedidos</h2>
                     </div>
 
-                    <div className="card">
-
-                        <img
-                            src="/img/empleados.jpg"
-                            alt=""
-                            style={{
-                                width:"100%",
-                                height:"220px",
-                                objectFit:"cover",
-                                borderRadius:"20px"
-                            }}
-                        />
-
-                        <br />
-
-                        <h2>
-                            Reporte de Empleados
-                        </h2>
-
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            <img src="../img/horasDeEmpleado kk .png" alt="Empleados" />
+                        </div>
+                        <h2 className="margin-t-15">Reporte de Empleados</h2>
                     </div>
-
                 </div>
-
             </main>
-            
             <Footer/>
-        </>
-
+        </div>
     );
 }
 

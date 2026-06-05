@@ -1,374 +1,137 @@
 import { useState } from "react";
 import Footer from "../components/Footer";
+import { Link } from 'react-router-dom'; 
 
 function GestionEmpleados() {
-
     const [empleados, setEmpleados] = useState([
-        {
-            id: "770123890",
-            nombres: "Jimena",
-            apellidos: "Martínez",
-            correo: "jimena@gmail.com",
-            cargo: "Empleado",
-            telefono: "3001234567",
-            horas: 7
-        }
+        { id: "770123890", nombres: "Jimena", apellidos: "Martínez", correo: "jimena@gmail.com", cargo: "Empleado", telefono: "3001234567", horas: 7 }
     ]);
 
     const [formulario, setFormulario] = useState({
-        id: "",
-        nombres: "",
-        apellidos: "",
-        correo: "",
-        cargo: "",
-        telefono: "",
-        horas: ""
+        id: "", nombres: "", apellidos: "", correo: "", cargo: "", telefono: "", horas: ""
     });
 
     const [editando, setEditando] = useState(false);
-
     const [busqueda, setBusqueda] = useState("");
 
     const handleChange = (e) => {
-
-        setFormulario({
-            ...formulario,
-            [e.target.name]: e.target.value
-        });
-
-    };
-
-    const agregarEmpleado = () => {
-
-        if (
-            !formulario.id ||
-            !formulario.nombres ||
-            !formulario.apellidos
-        ) {
-            alert("Complete los campos obligatorios");
-            return;
-        }
-
-        setEmpleados([
-            ...empleados,
-            formulario
-        ]);
-
-        limpiarFormulario();
-
-    };
-
-    const editarEmpleado = (empleado) => {
-
-        setFormulario(empleado);
-        setEditando(true);
-
-    };
-
-    const actualizarEmpleado = () => {
-
-        const nuevosEmpleados = empleados.map((emp) =>
-            emp.id === formulario.id
-                ? formulario
-                : emp
-        );
-
-        setEmpleados(nuevosEmpleados);
-
-        limpiarFormulario();
-
-        setEditando(false);
-
-    };
-
-    const eliminarEmpleado = (id) => {
-
-        if (
-            window.confirm(
-                "¿Desea eliminar este empleado?"
-            )
-        ) {
-
-            setEmpleados(
-                empleados.filter(
-                    (emp) => emp.id !== id
-                )
-            );
-
-        }
-
+        setFormulario({ ...formulario, [e.target.name]: e.target.value });
     };
 
     const limpiarFormulario = () => {
+        setFormulario({ id: "", nombres: "", apellidos: "", correo: "", cargo: "", telefono: "", horas: "" });
+        setEditando(false);
+    };
 
-        setFormulario({
-            id: "",
-            nombres: "",
-            apellidos: "",
-            correo: "",
-            cargo: "",
-            telefono: "",
-            horas: ""
-        });
+    const agregarEmpleado = () => {
+        if (!formulario.id || !formulario.nombres || !formulario.apellidos) {
+            alert("Complete los campos obligatorios");
+            return;
+        }
+        setEmpleados([...empleados, formulario]);
+        limpiarFormulario();
+    };
 
+    const actualizarEmpleado = () => {
+        const nuevosEmpleados = empleados.map((emp) =>
+            emp.id === formulario.id ? formulario : emp
+        );
+        setEmpleados(nuevosEmpleados);
+        limpiarFormulario();
+    };
+
+    const eliminarEmpleado = (id) => {
+        if (window.confirm("¿Desea eliminar este empleado?")) {
+            setEmpleados(empleados.filter((emp) => emp.id !== id));
+        }
+    };
+
+    const editarEmpleado = (empleado) => {
+        setFormulario(empleado);
+        setEditando(true);
     };
 
     const empleadosFiltrados = empleados.filter((emp) =>
-        `${emp.nombres} ${emp.apellidos}`
-            .toLowerCase()
-            .includes(busqueda.toLowerCase())
+        `${emp.nombres} ${emp.apellidos}`.toLowerCase().includes(busqueda.toLowerCase())
     );
 
     return (
-        <>
-
+        <div className="dark-theme">
             <nav className="top-nav">
-                <h3>GESTIÓN DE EMPLEADOS</h3>
+                <Link to="/dashboardadmin">VOLVER</Link>
             </nav>
 
             <header className="main-header">
-
-                <div className="logo-principal">
-
-                    <div className="logo-circle">
-                        <img
-                            src="/img/logo-kimuka.png"
-                            alt=""
-                        />
+                <div className="header-container">
+                    <div className="logo-principal-cell">
+                        <div className="logo-principal">
+                            <div className="logo-circle">
+                                <img src="../img/logo kimuka.png" alt="Logo Kimuka" />
+                            </div>
+                            <h1>Gestión De Empleado</h1>
+                        </div>
                     </div>
-
-                    <h1>Kimuka</h1>
-
+                    <div className="header-actions-cell">
+                        <button className="btn-login">Registrar Nuevo Empleado</button>
+                    </div>
                 </div>
-
             </header>
 
-            <main className="gestion-container">
+            <main className="content-wrapper">
 
-                <div className="panel-card">
-
-                    <h2>
-                        {editando
-                            ? "Editar empleado"
-                            : "Registrar empleado"}
-                    </h2>
-
-                    <br />
-
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns:
-                                "repeat(auto-fit,minmax(250px,1fr))",
-                            gap: "15px"
-                        }}
-                    >
-
-                        <input
-                            type="text"
-                            name="id"
-                            placeholder="ID"
-                            value={formulario.id}
-                            onChange={handleChange}
-                            disabled={editando}
+                <div className="toolbar margin-b-20">
+                    <div className="max-w-500">
+                        <label className="margin-b-10 text-center display-block">Buscador de Personal</label>
+                        <input 
+                            type="text" 
+                            placeholder="Buscar por nombre o apellido..." 
+                            value={busqueda} 
+                            onChange={(e) => setBusqueda(e.target.value)} 
                         />
-
-                        <input
-                            type="text"
-                            name="nombres"
-                            placeholder="Nombres"
-                            value={formulario.nombres}
-                            onChange={handleChange}
-                        />
-
-                        <input
-                            type="text"
-                            name="apellidos"
-                            placeholder="Apellidos"
-                            value={formulario.apellidos}
-                            onChange={handleChange}
-                        />
-
-                        <input
-                            type="email"
-                            name="correo"
-                            placeholder="Correo"
-                            value={formulario.correo}
-                            onChange={handleChange}
-                        />
-
-                        <input
-                            type="text"
-                            name="cargo"
-                            placeholder="Cargo"
-                            value={formulario.cargo}
-                            onChange={handleChange}
-                        />
-
-                        <input
-                            type="text"
-                            name="telefono"
-                            placeholder="Teléfono"
-                            value={formulario.telefono}
-                            onChange={handleChange}
-                        />
-
-                        <input
-                            type="number"
-                            name="horas"
-                            placeholder="Horas trabajadas"
-                            value={formulario.horas}
-                            onChange={handleChange}
-                        />
-
                     </div>
-
-                    <br />
-
-                    {editando ? (
-
-                        <button
-                            className="btn-primary"
-                            onClick={actualizarEmpleado}
-                        >
-                            Actualizar
-                        </button>
-
-                    ) : (
-
-                        <button
-                            className="btn-primary"
-                            onClick={agregarEmpleado}
-                        >
-                            Registrar
-                        </button>
-
-                    )}
-
                 </div>
 
-                <br />
-
-                <div className="toolbar">
-
-                    <input
-                        type="text"
-                        placeholder="Buscar empleado..."
-                        value={busqueda}
-                        onChange={(e) =>
-                            setBusqueda(e.target.value)
-                        }
-                        style={{
-                            maxWidth: "300px"
-                        }}
-                    />
-
-                </div>
-
-                <div className="panel-card">
-
-                    <table>
-
+                <div className="table-container panel-gestion">
+                    <table className="kimukaPedidos-table">
                         <thead>
-
                             <tr>
-
                                 <th>ID</th>
-                                <th>Nombres</th>
-                                <th>Apellidos</th>
+                                <th>Nombre Completo</th>
                                 <th>Correo</th>
                                 <th>Cargo</th>
-                                <th>Teléfono</th>
                                 <th>Horas</th>
-                                <th>Acciones</th>
-
+                                <th className="text-right">Acciones</th>
                             </tr>
-
                         </thead>
-
                         <tbody>
-
-                            {empleadosFiltrados.map(
-                                (empleado) => (
-
-                                    <tr
-                                        key={empleado.id}
-                                    >
-
-                                        <td>
-                                            {empleado.id}
+                            {empleadosFiltrados.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="text-center">No hay registros disponibles.</td>
+                                </tr>
+                            ) : (
+                                empleadosFiltrados.map((emp) => (
+                                    <tr key={emp.id}>
+                                        <td>{emp.id}</td>
+                                        <td>{emp.nombres} {emp.apellidos}</td>
+                                        <td>{emp.correo}</td>
+                                        <td><span className="status status-pending">{emp.cargo}</span></td>
+                                        <td>{emp.horas}</td>
+                                        <td className="text-right">
+                                            <div className="flex-row-gap-10">
+                                                <button className="btn-action" onClick={() => editarEmpleado(emp)}>Editar</button>
+                                                <button className="btn-action btn-alert-color" onClick={() => eliminarEmpleado(emp.id)}>Eliminar</button>
+                                            </div>
                                         </td>
-
-                                        <td>
-                                            {empleado.nombres}
-                                        </td>
-
-                                        <td>
-                                            {empleado.apellidos}
-                                        </td>
-
-                                        <td>
-                                            {empleado.correo}
-                                        </td>
-
-                                        <td>
-                                            {empleado.cargo}
-                                        </td>
-
-                                        <td>
-                                            {empleado.telefono}
-                                        </td>
-
-                                        <td>
-                                            {empleado.horas}
-                                        </td>
-
-                                        <td
-                                            style={{
-                                                display: "flex",
-                                                gap: "10px"
-                                            }}
-                                        >
-
-                                            <button
-                                                className="btn-action"
-                                                onClick={() =>
-                                                    editarEmpleado(
-                                                        empleado
-                                                    )
-                                                }
-                                            >
-                                                Editar
-                                            </button>
-
-                                            <button
-                                                className="btn-action"
-                                                onClick={() =>
-                                                    eliminarEmpleado(
-                                                        empleado.id
-                                                    )
-                                                }
-                                            >
-                                                Eliminar
-                                            </button>
-
-                                        </td>
-
                                     </tr>
-
-                                )
+                                ))
                             )}
-
                         </tbody>
-
                     </table>
-
                 </div>
-
             </main>
 
-            <Footer/>                
-        </>
+            <Footer />
+        </div>
     );
 }
 

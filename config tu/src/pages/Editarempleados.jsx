@@ -1,74 +1,73 @@
 import Footer from "../components/Footer";
+import { Link } from 'react-router-dom'; 
 
 function Editarempleados(){
     return (
-
-        <>
-            <nav className="top-nav"><a href="index.html">VOLVER </a></nav>
+        <div className="dark-theme">
+            <nav className="top-nav">
+                <Link to="/dashboardadmin">VOLVER</Link>
+            </nav>
 
             <header className="main-header">
-                <div className="logo-principal">
-                    <div className="logo-circle">
-                        <img src="../img/logo kimuka.png" alt="logo Kimuka"/>
+                <div className="header-container">
+                    <div className="logo-principal-cell">
+                        <div className="logo-principal">
+                            <div className="logo-circle">
+                                <img src="../img/logo kimuka.png" alt="logo Kimuka"/>
+                            </div>
+                            <h1>Editar Personal</h1>
+                        </div>
                     </div>
-                    <h1>Editar Personal </h1>
+                    <div className="header-actions-cell">
+                        <button className="btn-login">Ver Personal Actual</button>
+                    </div>
                 </div>
-                <button className="btn-login"><a href="RegistroDePersonal.html">Ver Personal Actual</a></button>
             </header>
 
-            <main className="registro-container">
+            <main className="content-wrapper">
                 <div className="panel-registro">
-                <section className="form-section">
-                    <h2 className="form-title">Editar</h2>
-                    
-                    <form className="grid-form">
-                        <div className="input-group">
-                            <label>Nombres De La Persona</label>
-                            <input type="text" placeholder="Lura Jimena"/>
-                        </div>
-                        <div className="input-group">
-                            <label>Apellidos De La Persona</label>
-                            <input type="text" placeholder="Valderrama Vaquero"/>
-                        </div>
+                    <section className="form-section-cell">
+                        <h2 className="form-title">Editar</h2>
+                        <form className="grid-form">
+                            <div className="input-group">
+                                <label>Nombres De La Persona</label>
+                                <input type="text" placeholder="Laura Jimena"/>
+                            </div>
+                            <div className="input-group">
+                                <label>Apellidos De La Persona</label>
+                                <input type="text" placeholder="Valderrama Vaquero"/>
+                            </div>
+                            <div className="input-group">
+                                <label>Correo Electrónico</label>
+                                <input type="email" placeholder="hola@sitioincreible.co"/>
+                            </div>
+                            <div className="input-group">
+                                <label>Número De Celular</label>
+                                <input type="text" placeholder="32634789"/>
+                            </div>
+                            <div className="input-group">
+                                <label>Contraseña asignada</label>
+                                <input type="password" placeholder="11391912900"/>
+                            </div>
+                            <button type="submit" className="btn-submit">Guardar cambios</button>
+                        </form>
+                    </section>
 
-                        <div className="input-group">
-                            <label>Correo Electrónico</label>
-                            <input type="email" placeholder="hola@sitioincreible.co"/>
-                        </div>
-
-                        <div className="input-group">
-                            <label>Número De Celular</label>
-                            <input type="text" placeholder="32634789"/>
-                        </div>
-
-                        <div className="input-group full-width">
-                            <label>Contraseña asignada</label>
-                            <input type="password" placeholder="11391912900"/>
-                        </div>
-
-                        <button type="submit" class="btn-registrar">Guardar cambios</button>
-                    </form>
-
-                </section>
-
-                    <section className="image-section">
-                        <h2 className="img-label">Foto-Trabajador</h2>
+                    <section className="image-section-cell">
+                        <h2 className="avatar-preview-text">Foto-Trabajador</h2>
                         <div className="portrait-wrapper">
-                            <img src="../img/registroDePersonal kk .png" id="vista-previa" alt="Vista previa"/>
+                            <img src="../img/registroDePersonal kk .png" alt="Vista previa"/>
                         </div>
-
-                        <div className="upload-btn-wrapper">
-                            <input type="file" id="foto-input" accept="image/*"/>
+                        <div className="margin-t-15">
+                            <input type="file" className="font-size-sm" accept="image/*"/>
                         </div>
                     </section>
                 </div>
             </main>
 
             <Footer/>
-
-        </>
-        
+        </div>
     )
 }
 
-export default Editarempleados
+export default Editarempleados;

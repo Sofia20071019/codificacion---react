@@ -1,131 +1,73 @@
-import Footer from "../components/Footer"; 
+import { Link } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 function Dashboardadmin() {
     return (
-        <>
-
+        <div className="dark-theme">
             <nav className="top-nav">
-                <h3>INICIO</h3>
+                <Link to="/" className="no-text-decor">INICIO</Link>
             </nav>
 
             <header className="main-header">
-
-                <div className="logo-principal">
-                    <div className="logo-circle">
-                        <img src="/img/logo-kimuka.png" alt="Logo" />
+                <div className="header-container">
+                    <div className="logo-principal-cell">
+                        <div className="logo-principal">
+                            <div className="logo-circle">
+                                <img src="../img/logo kimuka.png" alt="Logo Kimuka" />
+                            </div>
+                            <h1>Kimuka</h1>
+                        </div>
                     </div>
-
-                    <h1>Kimuka</h1>
+                    <div className="header-actions-cell">
+                        <div className="flex-row-gap-10">
+                            <button className="btn-login">Administrador</button>
+                            <button className="btn-login">Cerrar sesión</button>
+                        </div>
+                    </div>
                 </div>
-
-                <div style={{display:"flex", gap:"10px"}}>
-                    <button className="btn-login">
-                        Administrador
-                    </button>
-
-                    <button className="btn-login">
-                        Cerrar sesión
-                    </button>
-                </div>
-
             </header>
 
-            <main className="content">
-
-                <div className="hero-container">
-
-                    <img
-                        src="/img/dashboard-admin.jpg"
-                        alt=""
-                        className="hero-img"
-                    />
-
-                    <div className="hero-overlay">
-
-                        <h1>
-                            Sistema de Gestión Interna
-                        </h1>
-
-                        <h1>
-                            Titan Sports
-                        </h1>
-
-                    </div>
-
+            <main className="content-wrapper">
+                <div className="img-principal">
+                    <img src="../img/portada kk .jpg" alt="Dashboard Hero" />
                 </div>
 
-                <br />
-
-                <h2>Módulos del sistema</h2>
-
-                <br />
-
-                <div
-                    style={{
-                        display:"grid",
-                        gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",
-                        gap:"30px"
-                    }}
-                >
-
-                    <Link
-                        to="/empleados"
-                        style={{textDecoration:"none"}}
-                    >
-
-                        <div className="card">
-
-                            <img
-                                src="/img/empleados.jpg"
-                                alt=""
-                                style={{
-                                    width:"100%",
-                                    height:"220px",
-                                    objectFit:"cover",
-                                    borderRadius:"20px"
-                                }}
-                            />
-
-                            <br />
-
-                            <h2>Gestión de empleados</h2>
-
-                        </div>
-
-                    </Link>
-
-                    <Link
-                        to="/reportes"
-                        style={{textDecoration:"none"}}
-                    >
-
-                        <div className="card">
-
-                            <img
-                                src="/img/reportes.jpg"
-                                alt=""
-                                style={{
-                                    width:"100%",
-                                    height:"220px",
-                                    objectFit:"cover",
-                                    borderRadius:"20px"
-                                }}
-                            />
-
-                            <br />
-
-                            <h2>Panel de reportes</h2>
-
-                        </div>
-
-                    </Link>
-
+                <div className="text-center margin-b-40">
+                    <h1 className="font-size-xl">Sistema de Gestión Interna</h1>
+                    <h2 className="text-secondary">Titan Sports</h2>
                 </div>
 
+                <h2 className="table-title margin-b-25">Módulos del sistema</h2>
+
+                <div className="card-grid">
+
+                        <div className="panel-gestion module-card">
+                            <div className="img-principal">
+                                <img src="../img/horasDeEmpleado kk .png" alt="Empleados" />
+                            </div>
+                            <h2 className="margin-t-15">Gestión de empleados</h2>
+                        </div>
+
+                        <div className="panel-gestion module-card">
+                            <div className="img-principal">
+                                <img src="../img/inventarioDeMaterial kk .png" />
+                            </div>
+                            <h2 className="margin-t-15">Inventario De Materias Primas</h2>
+                        </div>
+                        
+                        <div className="panel-gestion module-card">
+                            <div className="img-principal">
+                                <img src="../img/panelAdministracion kk .png" />
+                            </div>
+                            <h2 className="margin-t-15">Panel de reportes</h2>
+                        </div>
+
+
+                </div>
             </main>
             
             <Footer/>
-        </>
+        </div>
     );
 }
 

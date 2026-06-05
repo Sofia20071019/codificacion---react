@@ -101,48 +101,50 @@ function GestionPedidos() {
                   <option value="todos">Filtrar</option>
                 </select>
                 <div className="search-container">
-                  <input type="text" placeholder="Buscar empleado 🔍" />
+                  <input type="text" placeholder="Buscar empleado" />
                 </div>
               </div>
-
-              <div className="table-container">
-                <table className="kimuka-custom-table">
-                  <thead>
-                    <tr>
-                      <th>Cliente</th>
-                      <th>Correo electrónico</th>
-                      <th>ID</th>
-                      <th>Fecha del pedido</th>
-                      <th>Fecha de entrega</th>
-                      <th>Entregado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr 
-                      className="clickable-row" 
-                      onClick={() => seleccionarPedido('Jimena martinez', 'jimenamartinez@gmail.com', '770123890', '30/02/2025', '30/02/2025')}
-                    >
-                      <td>Jimena martinez</td>
-                      <td>jimenamartinez@gmail.com</td>
-                      <td>770123890</td>
-                      <td>30/02/2025</td>
-                      <td>30/02/2025</td>
-                      <td><span className="icon-status success">✔️</span></td>
-                    </tr>
-                    <tr 
-                      className="clickable-row"
-                      onClick={() => seleccionarPedido('Juan garcía', 'juangarcia156@gmail.com', '487912526', '12/04/2025', '20/04/2025')}
-                    >
-                      <td>Juan garcía</td>
-                      <td>juangarcia156@gmail.com</td>
-                      <td>487912526</td>
-                      <td>12/04/2025</td>
-                      <td>20/04/2025</td>
-                      <td><span className="icon-status danger">❌</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <section className='panel-gestion'>
+                <h3 className="margin-b-20">Gestion Pedidos </h3>
+                <div className="table-container">
+                  <table className="kimukaPedidos-table">
+                    <thead>
+                      <tr>
+                        <th>Cliente</th>
+                        <th>Correo electrónico</th>
+                        <th>ID</th>
+                        <th>Fecha del pedido</th>
+                        <th>Fecha de entrega</th>
+                        <th>Entregado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr 
+                        className="clickable-row" 
+                        onClick={() => seleccionarPedido('Jimena martinez', 'jimenamartinez@gmail.com', '770123890', '30/02/2025', '30/02/2025')}
+                      >
+                        <td>Jimena martinez</td>
+                        <td>jimenamartinez@gmail.com</td>
+                        <td>770123890</td>
+                        <td>30/02/2025</td>
+                        <td>30/02/2025</td>
+                        <td><span className="icon-status success"></span></td>
+                      </tr>
+                      <tr 
+                        className="clickable-row"
+                        onClick={() => seleccionarPedido('Juan garcía', 'juangarcia156@gmail.com', '487912526', '12/04/2025', '20/04/2025')}
+                      >
+                        <td>Juan garcía</td>
+                        <td>juangarcia156@gmail.com</td>
+                        <td>487912526</td>
+                        <td>12/04/2025</td>
+                        <td>20/04/2025</td>
+                        <td><span className="icon-status danger"></span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
             </section>
           </div>
         )}

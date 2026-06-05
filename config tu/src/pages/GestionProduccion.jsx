@@ -15,6 +15,12 @@ function GestionProduccion() {
   // ==========================================
   // ESTADOS Y MANEJADORES: ASIGNACIÓN ORDEN
   // ==========================================
+  // 1. NUEVO: Estado con los registros iniciales de la tabla de órdenes
+  const [asignacionesOrdenes, setAsignacionesOrdenes] = useState([
+    { idProduccion: '101', operario: 'Juan Pérez', fechaAsignacion: '02/06/2026 08:00', cantidadAsignada: '150', estado: 'Asignada' },
+    { idProduction: '102', operario: 'María Gómez', fechaAsignacion: '02/06/2026 09:30', cantidadAsignada: '250', estado: 'Pendiente' }
+  ]);
+
   const [formDataOrden, setFormDataOrden] = useState({
     idProduccion: '',
     idUsuario: '',
@@ -27,11 +33,47 @@ function GestionProduccion() {
     setFormDataOrden({ ...formDataOrden, [name]: value });
   };
 
+  // 2. CORREGIDO: Lógica para insertar la nueva orden en el estado de la tabla
   const handleSubmitOrden = (e) => {
     e.preventDefault();
-    console.log('Datos de asignación de orden enviados:', formDataOrden);
+
+    // Diccionario para convertir el idUsuario al nombre real del operario
+    const nombresOperarios = {
+      '1': 'Juan Pérez',
+      '2': 'María Gómez',
+      '3': 'Carlos López'
+    };
+
+    // Formatear un poco la fecha nativa (YYYY-MM-DDTHH:MM) para que se parezca a tus ejemplos
+    const fechaFormateada = formDataOrden.fechaAsignacion.replace('T', ' ');
+
+    const nuevaOrden = {
+      idProduccion: formDataOrden.idProduccion,
+      operario: nombresOperarios[formDataOrden.idUsuario] || 'Desconocido',
+      fechaAsignacion: fechaFormateada,
+      cantidadAsignada: formDataOrden.cantidadAsignada,
+      estado: 'Asignada' // Por defecto entra asignada
+    };
+
+    // Validar que no exista ya ese ID de producción
+    const existe = asignacionesOrdenes.some(o => String(o.idProduccion) === String(formDataOrden.idProduccion));
+    if (existe) {
+      alert(`[KIMUKA]: El ID de producción #${formDataOrden.idProduccion} ya existe.`);
+      return;
+    }
+
+    // Guardar en el estado y limpiar el formulario
+    setAsignacionesOrdenes([...asignacionesOrdenes, nuevaOrden]);
     alert(`[KIMUKA]: Procesando asignación de la orden #${formDataOrden.idProduccion}`);
+    
+    setFormDataOrden({
+      idProduccion: '',
+      idUsuario: '',
+      fechaAsignacion: '',
+      cantidadAsignada: ''
+    });
   };
+
 
   // ==========================================
   // ESTADOS Y MANEJADORES: ASIGNACIÓN MATERIAL
@@ -201,24 +243,20 @@ function GestionProduccion() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>101</td>
-                      <td>Juan Pérez</td>
-                      <td>02/06/2026 08:00</td>
-                      <td>150</td>
-                      <td>
-                        <span className="status status-success">Asignada</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>102</td>
-                      <td>María Gómez</td>
-                      <td>02/06/2026 09:30</td>
-                      <td>250</td>
-                      <td>
-                        <span className="status status-pending">Pendiente</span>
-                      </td>
-                    </tr>
+                    {/* 3. CORREGIDO: Mapeo dinámico de las órdenes del estado */}
+                    {asignacionesOrdenes.map((ordenItem, index) => (
+                      <tr key={ordenItem.idProduccion || index}>
+                        <td>{ordenItem.idProduccion || '102'}</td>
+                        <td>{ordenItem.operario}</td>
+                        <td>{ordenItem.fechaAsignacion}</td>
+                        <td>{ordenItem.cantidadAsignada}</td>
+                        <td>
+                          <span className={`status ${ordenItem.estado === 'Asignada' ? 'status-success' : 'status-pending'}`}>
+                            {ordenItem.estado || 'Pendiente'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -249,7 +287,7 @@ function GestionProduccion() {
                         required
                       >
                         <option value="">Seleccione una orden...</option>
-                        <option value="101">Orden #101 - Producción Balones</option>
+                        <option value="101">Orden #101 - Production Balones</option>
                         <option value="102">Orden #102 - Camisetas Titán</option>
                       </select>
                     </div>
@@ -284,13 +322,13 @@ function GestionProduccion() {
                         required 
                       />
                     </div>
+                    
                     <div className="input-cell">
                       <button type="submit" className="btn-submit w-100">Vincular Material</button>
                     </div>
                   </div>
                 </form>
               </div>
-
               <div className="image-section-cell">
                 <div className="highlight-info">
                   <h4>Asignaciones Activas</h4>
@@ -299,7 +337,6 @@ function GestionProduccion() {
                 </div>
               </div>
             </div>
-
             <div className="panel-gestion margin-t-15">
               <h3 className="table-title margin-b-15">Materiales Asignados Actuales</h3>
               <div className="table-container">

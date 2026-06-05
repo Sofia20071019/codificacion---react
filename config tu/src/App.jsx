@@ -1,17 +1,18 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import AsignacionOrden from './pages/AsignacionOrden'
-import AsignacionMaterial from './pages/AsignacionMaterial'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import VistaEmpleado from './pages/vistaEmpleado';
+import GestionPedidos from './pages/GestionPedidos';
+import GestionProduccion from './pages/GestionProduccion';
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route path="/" element={<AsignacionOrden />} />
-        <Route path="/AsignacionOrden" element={<AsignacionOrden />} />
-        <Route path="/AsignacionMaterial" element={<AsignacionMaterial />} />
+        <Route path="/" element={<VistaEmpleado />} />
+        <Route path="/gestionPedidos" element={<GestionPedidos />} />
+        <Route path="/gestionProduccion" element={<GestionProduccion />} />
       </Routes>
-    </BrowserRouter>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;

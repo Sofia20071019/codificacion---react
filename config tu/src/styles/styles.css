@@ -314,6 +314,111 @@ input:focus, select:focus { border-color: var(--text-secondary); }
     color: var(--text-muted);
     background-color: #000000;
 }
+
+/* ==========================================================================
+   KIMUKA DASHBOARD STYLES - EXTENSIONES PARA INICIO
+   ========================================================================== */
+
+.main-banner {
+    position: relative;
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 35px;
+    border: 1px solid var(--border-color);
+}
+
+.banner-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    opacity: 0.4;
+    display: block;
+}
+
+.banner-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    text-align: center;
+}
+
+.banner-text h2 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+}
+
+.banner-text h3 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+.section-title {
+    font-weight: 400;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.module-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.module-card-link:hover .module-card {
+    transform: scale(1.02);
+    border-color: var(--text-secondary);
+    background-color: #1a1a1a;
+}
+
+.module-card {
+    padding: 25px;
+    transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.card-image-wrapper {
+    width: 100%;
+    height: 140px;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.card-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.grid-list-materials {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.vertical-list-orders {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
 /* ==========================================================================
    RF-008 ASIGNACIÓN DE ORDEN
    ========================================================================== */
@@ -342,6 +447,34 @@ input:focus, select:focus { border-color: var(--text-secondary); }
     border-radius: 25px;
     cursor: pointer;
     font-weight: bold;
+}
+
+.portrait-wrapper {
+    width: 150px; /* Tamaño controlado para que no rompa el diseño */
+    height: 150px;
+    margin: 0 auto 15px auto; /* Centra y da espacio con el texto inferior */
+    border-radius: 50%; /* Si buscas un formato circular idéntico al logo */
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    background-color: var(--bg-input);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.portrait-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Mantiene la proporción de la imagen sin deformarla */
+    display: block;
+}
+
+.image-section-cell p.text-center {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    max-width: 80%;
+    margin: 0 auto;
+    line-height: 1.4;
 }
 
 .btn-warning:hover,
@@ -382,4 +515,260 @@ select {
 .btn-danger-sm:hover {
     background-color: var(--color-error);
     color: #ffffff;
+}
+
+/* ==========================================================================
+   ESTILOS ESPECÍFICOS: GESTIÓN DE PEDIDOS Y CLIENTES (KIMUKA)
+   ========================================================================== */
+
+/* --- SISTEMA DE PESTAÑAS (TABS) --- */
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.tab-btn {
+    background-color: #1f2937;
+    color: #9ca3af;
+    border: 1px solid #374151;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    background-color: #374151;
+    color: #ffffff;
+}
+
+.tab-btn.active {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+}
+
+/* --- CONTROL DE CONTENIDOS Y VISTAS --- */
+.pedido-view-content {
+    display: none;
+}
+
+.pedido-view-content.active {
+    display: block;
+}
+
+/* --- DISEÑO DIVIDIDO (SPLIT LAYOUT) --- */
+.split-layout-pedido {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-top: 30px;
+}
+
+/* --- ESTRUCTURA DEL FORMULARIO DE EDICIÓN --- */
+.pedido-form-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-grid-row {
+    display: grid;
+    grid-template-columns: 1.2fr 2fr;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.form-grid-row label {
+    text-align: right;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+.form-grid-row input {
+    background-color: #000000;
+    border: 1px solid #374151;
+    border-radius: 4px;
+    padding: 10px;
+    color: #ffffff;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-grid-row input:focus {
+    outline: none;
+    border-color: #ffffff;
+}
+
+/* --- BOTONERA DE ACCIONES --- */
+.actions-group-pedidos {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 35px;
+}
+
+.actions-group-pedidos button {
+    border-radius: 20px;
+    border: none;
+    padding: 12px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #ffffff;
+    transition: opacity 0.2s;
+}
+
+.actions-group-pedidos button:hover {
+    opacity: 0.9;
+}
+
+.btn-pedidos-nav { 
+    background-color: #374151; 
+}
+
+.btn-pedidos-action { 
+    background-color: #1f2937; 
+    border: 1px solid #374151 !important; 
+}
+
+.btn-pedidos-cancel { 
+    background-color: #1f2937; 
+    border: 1px solid #374151 !important; 
+}
+
+/* --- SECCIÓN VISUAL (AVATAR DEL PRODUCTO) --- */
+.pedido-visual-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.visual-title {
+    font-size: 1.4rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-weight: 300;
+    text-transform: lowercase;
+}
+
+.product-avatar-frame {
+    width: 240px;
+    height: 240px;
+    background-color: #111827;
+    border-radius: 80px;
+    border: 1px solid #374151;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.avatar-circle-placeholder {
+    width: 90%;
+    height: 90%;
+    background-image: url('https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=300');
+    background-size: cover;
+    background-position: center;
+    border-radius: 70px;
+}
+
+/* --- TABLA E ICONOS DE ESTADO --- */
+.clickable-row {
+    transition: background-color 0.2s;
+}
+
+.clickable-row:hover {
+    background-color: #111827;
+}
+
+.icon-status { 
+    font-size: 1.1rem; 
+}
+
+.icon-status.success { color: #10b981; }
+.icon-status.danger { color: #ef4444; }
+
+/* --- PANTALLA DE CONFIRMACIÓN DE CANCELACIÓN --- */
+.flex-center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.question-title {
+    font-size: 1.8rem;
+    color: #ffffff;
+    margin-bottom: 10px;
+    font-weight: 400;
+}
+
+.product-desc-text {
+    color: #9ca3af;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.confirm-buttons-row {
+    display: flex;
+    gap: 20px;
+}
+
+.confirm-buttons-row button {
+    background-color: #374151;
+    color: #ffffff;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1rem;
+    min-width: 110px;
+    transition: background-color 0.2s;
+}
+
+.confirm-buttons-row .btn-confirm-yes:hover {
+    background-color: #ef4444;
+}
+
+.confirm-buttons-row .btn-confirm-no:hover {
+    background-color: #4b5563;
+}
+
+/* --- NOTIFICACIONES DE ÉXITO DE OPERACIÓN --- */
+.success-overlay-message {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.success-title {
+    font-size: 2.2rem;
+    color: #ffffff;
+    margin-bottom: 30px;
+    font-weight: normal;
+}
+
+.btn-return-home {
+    background-color: #ffffff;
+    color: #000000;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-return-home:hover {
+    background-color: #e5e7eb;
 }

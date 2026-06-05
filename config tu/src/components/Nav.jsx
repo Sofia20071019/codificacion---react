@@ -1,10 +1,12 @@
+import {Link} from 'react-router-dom';
+
 function Nav() {
     return(
         <nav class="top-nav">
-            <a href="#">TITAN SPORTS &copy; 2026</a> &nbsp;|&nbsp;
-            <a href="index.html">INICIO</a> &nbsp;|&nbsp;
-            <a href="GestionProduccion.jsx">MÓDULO INVENTARIO</a> &nbsp;|&nbsp;
-            <a href="GestionProductos.jsx">MÓDULO PEDIDOS</a>
+            <Link to="/">TITAN SPORTS &copy; 2026</Link> &nbsp;|&nbsp;
+            <Link to="/">INICIO</Link> &nbsp;|&nbsp;
+            <Link to="/gestionProduccion">MÓDULO INVENTARIO</Link> &nbsp;|&nbsp;
+            <Link to="/gestionPedidos">MÓDULO PEDIDOS</Link>
         </nav>
     )
 }

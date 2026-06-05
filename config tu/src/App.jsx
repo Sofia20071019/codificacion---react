@@ -8,8 +8,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<VistaEmpleado />} />
-        <Route path="/gestionPedidos" element={<GestionPedidos />} />
-        <Route path="/gestionProduccion" element={<GestionProduccion />} />
+        <Route path="/GestionPedidos" element={<GestionPedidos />} />
+        <Route path="/GestionProduccion" element={<GestionProduccion />} />
       </Routes>
     </Router>
   );

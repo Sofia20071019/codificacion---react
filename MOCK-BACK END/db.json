@@ -92,6 +92,30 @@
       "rol": "empleado",
       "password": "1234",
       "foto": "../img/Agendamiento de pedidos kk .png"
+    },
+    {
+      "id": "OP-1780712212711",
+      "nombre": "maria",
+      "apellido": "rodriguez",
+      "edad": "18",
+      "email": "maria@gmail.com",
+      "celular": "3214674567",
+      "fechaRegistro": "2026-06-05",
+      "rol": "empleado",
+      "password": "1234",
+      "foto": "../img/registroPedido kk .png"
+    },
+    {
+      "id": "OP-1780712351975",
+      "nombre": "maria",
+      "apellido": "rodriguez",
+      "edad": "18",
+      "email": "maria2@gmail.com",
+      "celular": "3214674567",
+      "fechaRegistro": "2026-06-05",
+      "rol": "administrador",
+      "password": "1234",
+      "foto": "../img/registroDePersonal kk .png"
     }
   ],
   "pedidos": [

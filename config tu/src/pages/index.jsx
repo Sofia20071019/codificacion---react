@@ -33,25 +33,25 @@ function Inicio() {
           <div className="panel-gestion module-card">
             <h3>Módulo de Suministros</h3>
             <p className="color-secondary font-size-sm margin-block-15">Administración de inventarios, telas y materias primas en stock.</p>
-            <Link to="/materia-prima" className="btn-login w-100">Abrir Inventario</Link>
+            <Link to="/login" className="btn-login w-100">Abrir Inventario</Link>
           </div>
 
           <div className="panel-gestion module-card">
             <h3>Gestión de Pedidos</h3>
             <p className="color-secondary font-size-sm margin-block-15">Control de solicitudes de confección, clientes y estados de entrega.</p>
-            <Link to="/gestion-pedidos" className="btn-login w-100">Ver Pedidos</Link>
+            <Link to="/login" className="btn-login w-100">Ver Pedidos</Link>
           </div>
 
           <div className="panel-gestion module-card">
             <h3>Control de Operarios</h3>
             <p className="color-secondary font-size-sm margin-block-15">Gestión de talento humano, registros de ingresos y horas trabajadas.</p>
-            <Link to="/registro-personal" className="btn-login w-100">Administrar Personal</Link>
+            <Link to="/login" className="btn-login w-100">Administrar Personal</Link>
           </div>
 
           <div className="panel-gestion module-card">
             <h3>Módulo de Analítica</h3>
             <p className="color-secondary font-size-sm margin-block-15">Reportes de rendimiento, gráficos analíticos y balances mensuales.</p>
-            <Link to="/reporte-pedidos" className="btn-login w-100">Ver Dashboard</Link>
+            <Link to="/login" className="btn-login w-100">Ver Dashboard</Link>
           </div>
         </div>
       </main>

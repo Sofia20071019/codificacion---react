@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 function InicioDeSesion() {
-  // Estados para capturar lo que el usuario escribe o selecciona
-  const [rol, setRol] = useState('');
+  // Estados para capturar lo que el usuario escribe (Se eliminó el estado 'rol')
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
@@ -43,11 +42,7 @@ function InicioDeSesion() {
           alert("Error: La contraseña ingresada es incorrecta. Inténtelo de nuevo.");
           return; 
         }
-
-        if (usuarioEncontrado.rol !== rol) {
-          alert(`Advertencia: El perfil seleccionado no coincide con su rol asignado (${usuarioEncontrado.rol}).`);
-          return; 
-        }
+        // Se eliminó la validación manual del rol que chocaba con el selector
         // ====================================================================
 
         // 3. SI PASÓ LAS VALIDACIONES: Unimos el NOMBRE y el APELLIDO del registro real
@@ -58,13 +53,15 @@ function InicioDeSesion() {
         // Guardamos el nombre en el localStorage solo para manejar la sesión activa en el Front-End
         localStorage.setItem('kimuka_sesion_activa', nombreParaSesion);
 
-        // 4. Redirección controlada según el rol verificado por el servidor
-        if (rol === 'administrador') {
+        // 4. Redirección automatizada según el rol guardado en la base de datos
+        const rolUsuario = usuarioEncontrado.rol;
+
+        if (rolUsuario === 'administrador') {
           navigate('/dashboardadmin');
-        } else if (rol === 'empleado') {
+        } else if (rolUsuario === 'empleado') {
           navigate('/registro-horas');
         } else {
-          alert('Por favor, seleccione un perfil válido.');
+          alert('Tu usuario no tiene un rol válido asignado en el sistema.');
         }
       })
       .catch(error => {
@@ -88,19 +85,8 @@ function InicioDeSesion() {
             <h2 className="form-title text-center margin-t-10 font-size-xl">Acceso al Sistema</h2>
 
             <form className="grid-form" id="form-login" onSubmit={handleLogin}>
-              <div className="input-group">
-                <label htmlFor="rol-selector">Seleccione Perfil Organizacional</label>
-                <select 
-                  id="rol-selector" 
-                  value={rol}
-                  onChange={(e) => setRol(e.target.value)}
-                  required
-                >
-                  <option value="">-- Seleccionar Rol --</option>
-                  <option value="administrador">Administrador</option>
-                  <option value="empleado">Empleado</option>
-                </select>
-              </div>
+              
+              {/* Se eliminó el bloque HTML del select (Seleccione Perfil Organizacional) */}
 
               <div className="input-group">
                 <label htmlFor="user-email">Correo Electrónico Corporativo</label>

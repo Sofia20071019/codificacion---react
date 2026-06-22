@@ -13,12 +13,23 @@ function GestionProduccion() {
   const [tabActiva, setTabActiva] = useState('ordenes');
 
   // ==========================================
-  // ESTADOS Y MANEJADORES: ASIGNACIÓN ORDEN
+  // ESTADOS DEL INVENTARIO Y ASIGNACIONES
   // ==========================================
-  // 1. NUEVO: Estado con los registros iniciales de la tabla de órdenes
+  
+  // 1. CORREGIDO: El inventario ahora está declarado aquí arriba correctamente
+  const [inventarioInsumos, setInventarioInsumos] = useState([
+    { id: "1", nombre: "Cuero Sintético", stock: 50 },
+    { id: "2", nombre: "Hilo de Poliéster", stock: 100 },
+    { id: "3", nombre: "Tinta Textil", stock: 30 }
+  ]);
+
+  const [asignacionesMateriales, setAsignacionesMateriales] = useState([
+    { id: 1, orden: '101', insumo: 'Cuero Sintético (#1)', idInsumoOriginal: '1', cantidad: '5.00' }
+  ]);
+
   const [asignacionesOrdenes, setAsignacionesOrdenes] = useState([
     { idProduccion: '101', operario: 'Juan Pérez', fechaAsignacion: '02/06/2026 08:00', cantidadAsignada: '150', estado: 'Asignada' },
-    { idProduction: '102', operario: 'María Gómez', fechaAsignacion: '02/06/2026 09:30', cantidadAsignada: '250', estado: 'Pendiente' }
+    { idProduccion: '102', operario: 'María Gómez', fechaAsignacion: '02/06/2026 09:30', cantidadAsignada: '250', estado: 'Pendiente' }
   ]);
 
   const [formDataOrden, setFormDataOrden] = useState({
@@ -28,23 +39,27 @@ function GestionProduccion() {
     cantidadAsignada: ''
   });
 
+  const [orden, setOrden] = useState('');
+  const [insumo, setInsumo] = useState('');
+  const [cantidad, setCantidad] = useState('');
+
+  // ==========================================
+  // MANEJADORES: ASIGNACIÓN ORDEN
+  // ==========================================
   const handleChangeOrden = (e) => {
     const { name, value } = e.target;
     setFormDataOrden({ ...formDataOrden, [name]: value });
   };
 
-  // 2. CORREGIDO: Lógica para insertar la nueva orden en el estado de la tabla
   const handleSubmitOrden = (e) => {
     e.preventDefault();
 
-    // Diccionario para convertir el idUsuario al nombre real del operario
     const nombresOperarios = {
       '1': 'Juan Pérez',
       '2': 'María Gómez',
       '3': 'Carlos López'
     };
 
-    // Formatear un poco la fecha nativa (YYYY-MM-DDTHH:MM) para que se parezca a tus ejemplos
     const fechaFormateada = formDataOrden.fechaAsignacion.replace('T', ' ');
 
     const nuevaOrden = {
@@ -52,17 +67,15 @@ function GestionProduccion() {
       operario: nombresOperarios[formDataOrden.idUsuario] || 'Desconocido',
       fechaAsignacion: fechaFormateada,
       cantidadAsignada: formDataOrden.cantidadAsignada,
-      estado: 'Asignada' // Por defecto entra asignada
+      estado: 'Asignada'
     };
 
-    // Validar que no exista ya ese ID de producción
     const existe = asignacionesOrdenes.some(o => String(o.idProduccion) === String(formDataOrden.idProduccion));
     if (existe) {
       alert(`[KIMUKA]: El ID de producción #${formDataOrden.idProduccion} ya existe.`);
       return;
     }
 
-    // Guardar en el estado y limpiar el formulario
     setAsignacionesOrdenes([...asignacionesOrdenes, nuevaOrden]);
     alert(`[KIMUKA]: Procesando asignación de la orden #${formDataOrden.idProduccion}`);
     
@@ -74,32 +87,34 @@ function GestionProduccion() {
     });
   };
 
-
   // ==========================================
-  // ESTADOS Y MANEJADORES: ASIGNACIÓN MATERIAL
+  // MANEJADORES: ASIGNACIÓN MATERIAL (CORREGIDOS)
   // ==========================================
-  const [orden, setOrden] = useState('');
-  const [insumo, setInsumo] = useState('');
-  const [cantidad, setCantidad] = useState('');
-
-  const [asignacionesMateriales, setAsignacionesMateriales] = useState([
-    { id: 1, orden: '101', insumo: 'Cuero Sintético (#1)', cantidad: '5.00' }
-  ]);
-
   const handleSubmitMaterial = (e) => {
     e.preventDefault();
 
-    const nombresInsumos = {
-      '1': 'Cuero Sintético (Stock: 50)',
-      '2': 'Hilo de Poliéster (Stock: 100)',
-      '3': 'Tinta Textil (Stock: 30)'
-    };
+    const cantidadNumerica = parseFloat(cantidad);
+    const insumoSeleccionado = inventarioInsumos.find(i => i.id === insumo);
+
+    if (!insumoSeleccionado) return;
+
+    // Validar stock disponible antes de restar
+    if (insumoSeleccionado.stock < cantidadNumerica) {
+      alert(`[KIMUKA]: No hay suficiente stock disponible de ${insumoSeleccionado.nombre}. (Disponible: ${insumoSeleccionado.stock})`);
+      return;
+    }
+
+    // Restar del stock
+    setInventarioInsumos(prevInsumos =>
+      prevInsumos.map(i => i.id === insumo ? { ...i, stock: i.stock - cantidadNumerica } : i)
+    );
 
     const nuevaAsignacion = {
       id: Date.now(),
       orden: orden,
-      insumo: nombresInsumos[insumo] || `Insumo (#${insumo})`,
-      cantidad: parseFloat(cantidad).toFixed(2)
+      insumo: `${insumoSeleccionado.nombre} (#${insumoSeleccionado.id})`,
+      idInsumoOriginal: insumo, // Necesario para devolver el stock al remover
+      cantidad: cantidadNumerica.toFixed(2)
     };
 
     setAsignacionesMateriales([...asignacionesMateriales, nuevaAsignacion]);
@@ -112,6 +127,19 @@ function GestionProduccion() {
 
   const handleRemoverMaterial = (id) => {
     if (window.confirm("¿Está seguro de remover este material de la orden? El stock será reintegrado.")) {
+      const asignacionAEliminar = asignacionesMateriales.find(item => item.id === id);
+      
+      if (asignacionAEliminar) {
+        // Reintegrar al stock
+        setInventarioInsumos(prevInsumos =>
+          prevInsumos.map(i =>
+            i.id === asignacionAEliminar.idInsumoOriginal 
+              ? { ...i, stock: i.stock + parseFloat(asignacionAEliminar.cantidad) } 
+              : i
+          )
+        );
+      }
+
       setAsignacionesMateriales(asignacionesMateriales.filter(item => item.id !== id));
       alert("[Remover]: Vínculo deshecho de forma exitosa.");
     }
@@ -124,7 +152,6 @@ function GestionProduccion() {
 
       <main className="content-wrapper">
         
-        {/* MENÚ DE PESTAÑAS (TABS) */}
         <div className="toolbar">
           <h2 className="table-title">Módulo de Gestión de Producción</h2>
           
@@ -144,9 +171,7 @@ function GestionProduccion() {
           </div>
         </div>
 
-        {/* ==========================================
-            VISTA A: ASIGNACIÓN DE ÓRDENES
-           ========================================== */}
+        {/* VISTA A: ASIGNACIÓN DE ÓRDENES */}
         {tabActiva === 'ordenes' && (
           <>
             <section className="panel-registro">
@@ -192,6 +217,7 @@ function GestionProduccion() {
                         name="fechaAsignacion"
                         value={formDataOrden.fechaAsignacion}
                         onChange={handleChangeOrden}
+                        min={new Date().toISOString().slice(0,16)}
                         required
                       />
                     </div>
@@ -243,7 +269,6 @@ function GestionProduccion() {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* 3. CORREGIDO: Mapeo dinámico de las órdenes del estado */}
                     {asignacionesOrdenes.map((ordenItem, index) => (
                       <tr key={ordenItem.idProduccion || index}>
                         <td>{ordenItem.idProduccion || '102'}</td>
@@ -264,9 +289,7 @@ function GestionProduccion() {
           </>
         )}
 
-        {/* ==========================================
-            VISTA B: ASIGNACIÓN DE MATERIALES
-           ========================================== */}
+        {/* VISTA B: ASIGNACIÓN DE MATERIALES */}
         {tabActiva === 'materiales' && (
           <>
             <div className="panel-registro">
@@ -301,9 +324,15 @@ function GestionProduccion() {
                         required
                       >
                         <option value="">Seleccione un insumo...</option>
-                        <option value="1">Cuero Sintético (Stock: 50)</option>
-                        <option value="2">Hilo de Poliéster (Stock: 100)</option>
-                        <option value="3">Tinta Textil (Stock: 30)</option>
+                        {inventarioInsumos.map((insumoItem) => (
+                          <option 
+                            key={insumoItem.id} 
+                            value={insumoItem.id}
+                            disabled={insumoItem.stock <= 0}
+                          >
+                            {insumoItem.nombre} (Stock: {insumoItem.stock})
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -329,6 +358,7 @@ function GestionProduccion() {
                   </div>
                 </form>
               </div>
+
               <div className="image-section-cell">
                 <div className="highlight-info">
                   <h4>Asignaciones Activas</h4>
@@ -337,6 +367,7 @@ function GestionProduccion() {
                 </div>
               </div>
             </div>
+
             <div className="panel-gestion margin-t-15">
               <h3 className="table-title margin-b-15">Materiales Asignados Actuales</h3>
               <div className="table-container">

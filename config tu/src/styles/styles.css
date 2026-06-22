@@ -901,3 +901,71 @@ select {
     height: 20px;
     border-radius: 50%;
 }
+
+/* ==========================================================================
+   VISTA 23 - REPORTE DE INVENTARIO EXTENSIONES
+   ========================================================================== */
+
+/* Contenedor del gráfico y las leyendas */
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    width: 100%;
+}
+
+/* El círculo del gráfico pastel (Pie Chart con colores premium) */
+.pie-chart {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    /* conic-gradient genera la división exacta: Algodón 55%, Poliéster 35%, Lana 10% */
+    background: conic-gradient(
+        #2196F3 0% 55%,   /* Azul */
+        #FFC107 55% 90%,  /* Amarillo */
+        #4CAF50 90% 100%  /* Verde */
+    );
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    margin-bottom: 25px;
+}
+
+/* Contenedor de las leyendas inferiores */
+.chart-legends {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+/* Ítem individual de la leyenda (Bala + Texto) */
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+}
+
+/* Estilos para las viñetas cuadradas redondeadas de color */
+.bullet-algodon,
+.bullet-poliester,
+.bullet-lana {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.bullet-algodon {
+    background-color: #2196F3;
+}
+
+.bullet-poliester {
+    background-color: #FFC107;
+}
+
+.bullet-lana {
+    background-color: #4CAF50;
+}

@@ -9,7 +9,7 @@ function Aprobarpago(){
         metodo: "",
         concepto: "",
         estado: "Pendiente",
-        responsable: "BRAYAN VALDERRAMA"
+        responsable: "BRAYAN VALDERRAMA" // Mantiene tu nombre como el responsable del proceso
     });
 
     // Simulación: Trae información base del primer pedido del backend para procesar el pago

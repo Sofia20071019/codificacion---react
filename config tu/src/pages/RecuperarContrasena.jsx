@@ -11,7 +11,7 @@ function RecuperarContrasena() {
     <>
       <nav className="top-nav">
         {/* Corrección: Apuntar a la ruta del enrutador de React, no al archivo .html */}
-        <Link to="/login">REGRESAR AL LOGIN</Link>
+        <Link to="/login">VOLVER</Link>
       </nav>
 
       <main className="content-wrapper flex-center">

@@ -4,7 +4,7 @@ import { fetchData } from '../api';
 
 function RegistroDePersonal() {
   const navigate = useNavigate();
-  const [adminName, setAdminName] = useState('Administrador');
+  const [adminName, setAdminName] = useState('ADMINISTRADOR');
 
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
@@ -26,10 +26,19 @@ function RegistroDePersonal() {
     const dia = String(hoy.getDate()).padStart(2, '0');
     setFecha(`${año}-${mes}-${dia}`);
 
+    // Sincronización y conversión del nombre del administrador a MAYÚSCULAS
     const usuarioLogueado = localStorage.getItem('usuarioLogueado');
     if (usuarioLogueado) {
         const user = JSON.parse(usuarioLogueado);
-        if (user.nombre) setAdminName(user.nombre);
+        if (user.nombre) {
+            setAdminName(user.nombre.toUpperCase());
+        }
+    } else {
+        // Validación alternativa con la otra clave por si acaso
+        const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+        if (nombreSesion) {
+            setAdminName(nombreSesion.toUpperCase());
+        }
     }
   }, []);
 
@@ -48,12 +57,13 @@ function RegistroDePersonal() {
       return;
     }
 
-    const nombreCompleto = `${nombre.trim()} ${apellido.trim()}`;
-
+    // Estructuramos el JSON mapeando los datos de forma limpia para la API
     const nuevoOperario = {
-      nombre: nombreCompleto,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(), 
       email: correo.toLowerCase().trim(),
-      rol: cargo.toLowerCase()
+      rol: cargo.toLowerCase(),
+      celular: celular.trim()   
     };
 
     try {
@@ -74,7 +84,7 @@ function RegistroDePersonal() {
   return (
     <>
       <nav className="top-nav">
-        <Link to="/dashboardadmin">VOLVER AL MENÚ</Link>
+        <Link to="/empleados">VOLVER </Link>
       </nav>
 
       <header className="main-header">
@@ -88,6 +98,7 @@ function RegistroDePersonal() {
             </div>
           </div>
           <div className="header-actions-cell">
+            {/* Renderiza el nombre en mayúsculas de manera consistente */}
             <button className="btn-login">{adminName}</button>
             <button className="btn-login">
               <Link to="/cierre-admin">Cerrar Sesión</Link>
@@ -120,7 +131,16 @@ function RegistroDePersonal() {
                 </div>
                 <div className="input-cell">
                   <label htmlFor="emp-correo">Correo Electrónico</label>
-                  <input type="email" id="emp-correo" placeholder="ejemplo@gmail.com" value={correo} onChange={(e) => setCorreo(e.target.value)} pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Formato de correo no válido." required />
+                  <input 
+                    type="email" 
+                    id="emp-correo" 
+                    placeholder="ejemplo@gmail.com" 
+                    value={correo} 
+                    onChange={(e) => setCorreo(e.target.value)} 
+                    pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" 
+                    title="Formato de correo no válido." 
+                    required 
+                  />
                 </div>
               </div>
 

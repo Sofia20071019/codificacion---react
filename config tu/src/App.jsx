@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
 import Header from './components/Header';
 import Nav from './components/Nav';
@@ -13,18 +13,28 @@ import MateriaPrima from './pages/MateriaPrima';
 import RegistroDeHoras from './pages/RegistroDeHoras';
 import ReporteDePedidos from './pages/ReporteDePedidos';
 
-// Corregidos los nombres aquí arriba para que coincidan con el uso de abajo
+// Nombres de archivos corregidos para que coincidan con el sistema de carpetas
 import CierreDeSesionAdministrador from './pages/cierreDeSesionAdministrador';
 import CierreDeSesionEmpleado from './pages/cierreDeSesionEmpleado';
 
+/* IMPORTACIONES JHON HERNANDEZ CORREGIDAS */
+import Editarempleados from './pages/Editarempleados';
+import Aprobarpago from './pages/Aprobarpago';
+import Dashboardadmin from './pages/Dashboardadmin';
+import GestionEmpleados from './pages/GestionEmpleados';
+import PanelReportes from './pages/Panelreportes';
 
-/* IMPORTACIONES JHON HERNANDEZ */
-
-import Editarempleados from './pages/Editarempleados'
-import Aprobarpago from './pages/Aprobarpago'
-import Dashboardadmin from './pages/Dashboardadmin'
-import GestionEmpleados from './pages/Gestiempleados'
-import PanelReportes from './pages/Panelreportes'
+//  COMPONENTE DE PROTECCIÓN DE RUTAS
+// Si no hay sesión iniciada, redirige al login de inmediato
+const RutaProtegida = ({ children }) => {
+  const sesionActiva = localStorage.getItem('kimuka_sesion_activa') || localStorage.getItem('usuarioLogueado');
+  
+  if (!sesionActiva) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
 
 function App() {
   return (
@@ -33,34 +43,29 @@ function App() {
       <Nav />
       
       <Routes>
-        {/* Ruta principal */}
+        {/* Rutas Públicas */}
         <Route path="/" element={<VistaInicio />} />
-        
-        {/* Autenticación y Usuarios */}
         <Route path="/login" element={<InicioDeSesion />} />
         <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
-        <Route path="/registro-personal" element={<RegistroDePersonal />} />
         
-        {/* Módulos del Sistema */}
-        <Route path="/materia-prima" element={<MateriaPrima />} />
-        <Route path="/gestion-pedidos" element={<GestionDePedidos />} />
-        <Route path="/reporte-pedidos" element={<ReporteDePedidos />} />
-        <Route path="/registro-horas" element={<RegistroDeHoras />} />
+        {/* Rutas Protegidas (Requieren haber iniciado sesión) */}
+        <Route path="/registro-personal" element={<RutaProtegida><RegistroDePersonal /></RutaProtegida>} />
+        <Route path="/materia-prima" element={<RutaProtegida><MateriaPrima /></RutaProtegida>} />
+        <Route path="/gestion-pedidos" element={<RutaProtegida><GestionDePedidos /></RutaProtegida>} />
+        <Route path="/reporte-pedidos" element={<RutaProtegida><ReporteDePedidos /></RutaProtegida>} />
+        <Route path="/registro-horas" element={<RutaProtegida><RegistroDeHoras /></RutaProtegida>} />
         
+        {/* Módulos Administrativos Protegidos */}
+        <Route path='/dashboardadmin' element={<RutaProtegida><Dashboardadmin/></RutaProtegida>}/>
+        <Route path='/empleados' element={<RutaProtegida><GestionEmpleados/></RutaProtegida>}/>
+        <Route path='/reportes' element={<RutaProtegida><PanelReportes/></RutaProtegida>}/>
+        <Route path='/editarempleados/:id' element={<RutaProtegida><Editarempleados/></RutaProtegida>}/>
+        <Route path='/aprobarpago' element={<RutaProtegida><Aprobarpago/></RutaProtegida>}/>
+
         {/* Cierres de Sesión */}
         <Route path="/cierre-admin" element={<CierreDeSesionAdministrador />} />
         <Route path="/cierre-empleado" element={<CierreDeSesionEmpleado />} />
-
-
-            {/* IMPORTACIONES JHON HERNANDEZ */}
-        <Route path='/dashboardadmin' element={<Dashboardadmin/>}/>
-        <Route path='/empleados' element={<GestionEmpleados/>}/>
-        <Route path='/reportes' element={<PanelReportes/>}/>
-        <Route path='/editarempleados/:id' element={<Editarempleados/>}/>
-        <Route path='/aprobarpago' element={<Aprobarpago/>}/>
       </Routes>
-
-      
 
       <Footer />
     </BrowserRouter>

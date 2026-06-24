@@ -51,7 +51,7 @@ function InicioDeSesion() {
   return (
     <>
       <nav className="top-nav">
-        <Link to="/">VOLVER AL INICIO</Link>
+        <Link to="/">VOLVER </Link>
       </nav>
 
       <main className="content-wrapper flex-center">
@@ -87,15 +87,19 @@ function InicioDeSesion() {
                 />
               </div>
 
-              <div className="text-right">
-                <Link to="/recuperar-contrasena" className="font-size-sm no-text-decor text-muted">
-                  ¿Olvidó su contraseña?
-                </Link>
-              </div>
-
               <button type="submit" className="btn-submit w-100 margin-t-15">
                 Ingresar de Forma Segura
               </button>
+
+              {/* 🌟 SECCIÓN AÑADIDA AL FINAL DEL LOGIN */}
+              <div className="text-center margin-t-20" style={{ borderTop: '1px solid #333', paddingTop: '15px' }}>
+                <p className="text-muted font-size-sm" style={{ margin: 0 }}>
+                  ¿Tienes problemas para acceder?{' '}
+                  <Link to="/recuperar-contrasena" style={{ color: '#f39c12', fontWeight: 'bold', textDecoration: 'none' }}>
+                    Recuperar contraseña aquí
+                  </Link>
+                </p>
+              </div>
             </form>
           </div>
         </div>

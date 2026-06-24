@@ -5,11 +5,8 @@ function Dashboardadmin() {
     const [adminName, setAdminName] = useState('ADMINISTRADOR');
 
     useEffect(() => {
-        // CORRECCIÓN: Usamos la misma clave que guardó el Inicio de Sesión
         const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-        
         if (nombreSesion) {
-            // Convertimos el nombre de la sesión directamente a MAYÚSCULAS
             setAdminName(nombreSesion.toUpperCase());
         }
     }, []);
@@ -32,7 +29,6 @@ function Dashboardadmin() {
                     </div>
                     <div className="header-actions-cell">
                         <div className="flex-row-gap-10">
-                            {/* Aquí se renderizará el nombre real en mayúsculas */}
                             <button className="btn-login">{adminName}</button>
                             <button className="btn-login">
                                 <Link to="/cierre-admin">Cerrar Sesión</Link>
@@ -82,7 +78,7 @@ function Dashboardadmin() {
                             <img src="../img/panelAdministracion kk .png" alt="Reportes" />
                         </div>
                         <h2 className="margin-t-15">
-                            <Link to="/reportes" className="no-text-decor display-block">
+                            <Link to="/reporte-pedidos" className="no-text-decor display-block">
                                 Panel De Reportes
                             </Link>
                         </h2>

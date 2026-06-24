@@ -5,7 +5,6 @@ function PanelReportes() {
     const [adminName, setAdminName] = useState('ADMINISTRADOR');
 
     useEffect(() => {
-        // Corrección: Sincronización de clave local y transformación a mayúsculas
         const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
         if (nombreSesion) {
             setAdminName(nombreSesion.toUpperCase());
@@ -29,14 +28,22 @@ function PanelReportes() {
                         </div>
                     </div>
                     <div className="header-actions-cell">
-                        {/* Corrección: Muestra el nombre real del administrador logueado */}
                         <button className="btn-login">{adminName}</button>
-                        <button className="btn-login"><Link to="/cierre-admin">Cerrar Sesión</Link></button>
+                        <button className="btn-login">
+                            <Link to="/cierre-admin">Cerrar Sesión</Link>
+                        </button>
                     </div>
                 </div>
             </header>
-            {/* ... Resto de tu vista se mantiene igual ... */}
+            
+            <main className="content-wrapper">
+                <div className="text-center margin-b-40">
+                    <h2 className="font-size-xl">Módulo de Estadísticas y Reportes</h2>
+                    <p className="text-secondary">Consulta la información consolidada del sistema Kimuka.</p>
+                </div>
+            </main>
         </div>
+        
     );
 }
 

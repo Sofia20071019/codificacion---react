@@ -165,7 +165,7 @@ function MateriaPrima() {
   return (
     <>
       <nav className="top-nav">
-        <Link to="/dashboardadmin">VOLVER PRINCIPAL</Link>
+        <Link to="/dashboardadmin">VOLVER</Link>
       </nav>
 
       <header className="main-header">

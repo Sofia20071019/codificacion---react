@@ -8,12 +8,12 @@
     --bg-card: #141414;
     --bg-input: #1f1f1f;
     --border-color: #2d2d2d;
-
+    
     /* Textos */
     --text-primary: #ffffff;
     --text-secondary: #aaaaaa;
     --text-muted: #666666;
-
+    
     /* Estados Semánticos */
     --color-success: #2ecc71;
     --color-error: #e74c3c;
@@ -27,7 +27,7 @@
     padding: 0;
 }
 
-body {
+body.dark-theme {
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -54,7 +54,7 @@ body {
 }
 
 .main-header {
-    display: block;
+    display: block; /* WeasyPrint/Layout compatible */
     border-bottom: 1px solid var(--border-color);
     padding: 15px 10%;
     background-color: rgba(10, 10, 10, 0.95);
@@ -63,6 +63,7 @@ body {
     z-index: 1000;
 }
 
+/* Estructuración de cabeceras mediante tablas CSS para máxima compatibilidad */
 .header-container {
     display: table;
     width: 100%;
@@ -120,6 +121,7 @@ body {
     font-size: 0.9rem;
     transition: all 0.3s ease;
     display: inline-block;
+    text-decoration: none !important;
 }
 
 .btn-login a {
@@ -134,18 +136,20 @@ body {
 }
 
 .content-wrapper {
-    padding: 80px 5%;
+    padding: 40px 10%;
     min-height: calc(100vh - 200px);
 }
 
-/* Vistas Semánticas, Paneles y Formularios */
+/* ==========================================================================
+   VISTAS SEMÁNTICAS (Paneles y Formularios)
+   ========================================================================== */
+
 .panel-registro {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 40px;
     margin-top: 20px;
-    margin-bottom: 25px;
     display: table;
     width: 100%;
 }
@@ -193,6 +197,11 @@ body {
     padding-left: 10px;
 }
 
+.input-group {
+    display: block;
+    margin-bottom: 20px;
+}
+
 label {
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -202,8 +211,7 @@ label {
     margin-bottom: 8px;
 }
 
-input,
-select {
+input, select {
     background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
@@ -215,9 +223,27 @@ select {
     width: 100%;
 }
 
-input:focus,
-select:focus {
+input:focus, select:focus {
     border-color: var(--text-secondary);
+}
+
+input::placeholder {
+    color: #555555;
+}
+
+input[type="date"], input[type="time"] {
+    text-align: center;
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+input[type="file"] {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
 }
 
 .btn-submit {
@@ -231,6 +257,7 @@ select:focus {
     font-size: 0.95rem;
     transition: transform 0.2s ease, background-color 0.3s ease;
     display: block;
+
 }
 
 .btn-submit:hover {
@@ -238,13 +265,95 @@ select:focus {
     background-color: var(--text-secondary);
 }
 
-/* Gestión, Dashboards y Tablas */
+.portrait-wrapper {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--border-color);
+    background-color: var(--bg-input);
+    margin: 0 auto 15px auto;
+}
+
+.portrait-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ==========================================================================
+   GESTIÓN, DASHBOARDS Y TABLAS
+   ========================================================================== */
+
+.img-principal {
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.img-principal img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.toolbar {
+    margin-bottom: 25px;
+}
+
+.table-title {
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
 .panel-gestion {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
+}
+
+.filters-grid {
+    display: table;
+    width: 100%;
+}
+
+.filter-cell {
+    display: table-cell;
+    padding-right: 15px;
+    vertical-align: bottom;
+}
+
+.filter-cell:last-child {
+    padding-right: 0;
+}
+
+/* Arquitectura de Cuadro de Mando */
+.stats-container {
+    display: table;
+    width: 100%;
+}
+
+.stats-cell-left {
+    display: table-cell;
+    width: 50%;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.stats-cell-right {
+    display: table-cell;
+    width: 50%;
+    vertical-align: middle;
+    padding-left: 30px;
+}
+
+.chart-box {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
 }
 
 .highlight-info {
@@ -279,8 +388,7 @@ select:focus {
     text-align: left;
 }
 
-.kimukaPedidos-table th,
-.kimukaPedidos-table td {
+.kimukaPedidos-table th, .kimukaPedidos-table td {
     padding: 14px;
     border-bottom: 1px solid var(--border-color);
 }
@@ -298,66 +406,43 @@ select:focus {
     font-weight: bold;
 }
 
-.status-success {
-    background: rgba(46, 204, 113, 0.2);
-    color: var(--color-success);
-}
+.status-success { background: rgba(46, 204, 113, 0.2); color: var(--color-success); }
+.status-fail { background: rgba(231, 76, 60, 0.2); color: var(--color-error); }
+.status-pending { background: rgba(241, 196, 15, 0.2); color: var(--color-warning); }
 
-/* Clases Utilitarias */
-.w-100 {
-    width: 100%;
-}
+/* ==========================================================================
+   CLASES UTILITARIAS CLAVE (ELIMINAN EL ESTILO EN LÍNEA)
+   ========================================================================== */
 
-.text-center {
-    text-align: center;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.margin-b-10 {
-    margin-bottom: 10px;
-}
-
-.margin-b-15 {
-    margin-bottom: 15px;
-}
-
-.margin-b-40 {
-    margin-bottom: 40px;
-}
-
-.margin-t-10 {
-    margin-top: 10px;
-}
-
-.margin-t-15 {
-    margin-top: 15px;
-}
-
-.margin-block-15 {
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
-
-.font-size-sm {
-    font-size: 0.8rem;
-}
-
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-}
-
-.module-card {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 200px;
-}
+.w-100 { width: 100%; }
+.max-w-500 { max-width: 500px; margin: 0 auto; }
+.max-w-550 { max-width: 550px; margin: 0 auto; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.margin-b-10 { margin-bottom: 10px; }
+.margin-b-15 { margin-bottom: 15px; }
+.margin-b-20 { margin-bottom: 20px; }
+.margin-b-25 { margin-bottom: 25px; }
+.margin-b-35 { margin-bottom: 35px; }
+.margin-b-40 { margin-bottom: 40px; }
+.margin-t-10 { margin-top: 10px; }
+.margin-t-15 { margin-top: 15px; }
+.margin-block-15 { margin-top: 15px; margin-bottom: 15px; }
+.font-size-sm { font-size: 0.8rem; }
+.font-size-md { font-size: 0.9rem; }
+.font-size-lg { font-size: 1.6rem; }
+.font-size-xl { font-size: 1.8rem; }
+.no-text-decor { text-decoration: none; }
+.display-block { display: block; }
+.display-inline-block { display: inline-block; }
+.flex-row-gap-10 { display: flex; gap: 10px; justify-content: flex-end; }
+.btn-alert-color { background-color: var(--color-error); color: white; }
+.vertical-align-mid { vertical-align: middle; }
+.avatar-preview-text { font-size: 1.4rem; margin-bottom: 20px; text-align: center; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+.module-card { text-align: center; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; }
+.logo-img-auth { width: 70px; height: 70px; object-fit: contain; }
+.materia-prima-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 
 /* ==========================================================================
    MAIN FOOTER
@@ -372,8 +457,12 @@ select:focus {
     background-color: #000000;
 }
 
+.main-footer p {
+    margin-bottom: 8px;
+}
+
 /* ==========================================================================
-   KIMUKA DASHBOARD STYLES - EXTENSIONES PARA INICIO
+   KIMUKA DASHBOARD STYLES - EXTENSIONES PARA INICIO / My styles 
    ========================================================================== */
 
 .main-banner {
@@ -439,7 +528,15 @@ select:focus {
 }
 
 .module-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
     padding: 25px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
     transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
 }
 
@@ -477,7 +574,7 @@ select:focus {
 }
 
 /* ==========================================================================
-   RF-008 ASIGNACIÓN DE ORDEN
+   RF-008 & RF-009 GESTIÓN DE PEDIDOS, CLIENTES Y BOTONES
    ========================================================================== */
 
 .actions-row {
@@ -506,60 +603,9 @@ select:focus {
     font-weight: bold;
 }
 
-.portrait-wrapper {
-    width: 270px;
-    /* Tamaño controlado para que no rompa el diseño */
-    height: 270px;
-    margin: 0 auto 15px auto;
-    /* Centra y da espacio con el texto inferior */
-    border-radius: 50%;
-    /* Si buscas un formato circular idéntico al logo */
-    overflow: hidden;
-    border: 2px solid var(--border-color);
-    background-color: var(--bg-input);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.portrait-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* Mantiene la proporción de la imagen sin deformarla */
-    display: block;
-}
-
-.image-section-cell p.text-center {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    max-width: 80%;
-    margin: 0 auto;
-    line-height: 1.4;
-}
-
 .btn-warning:hover,
 .btn-danger:hover {
     opacity: 0.9;
-}
-
-.full-width {
-    width: 100%;
-}
-
-/* ==========================================================================
-   AGREGAR AL FINAL DEL CSS: EXTENSIONES PARA RF-009
-   ========================================================================== */
-
-select {
-    cursor: pointer;
-    appearance: none;
-    /* Elimina el estilo por defecto del sistema */
-    background-image: url("");
-    background-repeat: no-repeat;
-    background-position-x: calc(100% - 12px);
-    background-position-y: 50%;
-    padding-right: 35px;
 }
 
 .btn-danger-sm {
@@ -579,11 +625,7 @@ select {
     color: #ffffff;
 }
 
-/* ==========================================================================
-   ESTILOS ESPECÍFICOS: GESTIÓN DE PEDIDOS Y CLIENTES (KIMUKA)
-   ========================================================================== */
-
-/* --- SISTEMA DE PESTAÑAS (TABS) --- */
+/* Sistema de Pestañas (Tabs) */
 .tabs-container {
     display: flex;
     justify-content: center;
@@ -613,7 +655,6 @@ select {
     border-color: #ffffff;
 }
 
-/* --- CONTROL DE CONTENIDOS Y VISTAS --- */
 .pedido-view-content {
     display: none;
 }
@@ -622,7 +663,7 @@ select {
     display: block;
 }
 
-/* --- DISEÑO DIVIDIDO (SPLIT LAYOUT) --- */
+/* Split Layout de Pedidos */
 .split-layout-pedido {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -631,7 +672,6 @@ select {
     margin-top: 30px;
 }
 
-/* --- ESTRUCTURA DEL FORMULARIO DE EDICIÓN --- */
 .pedido-form-panel {
     display: flex;
     flex-direction: column;
@@ -669,7 +709,6 @@ select {
     border-color: #ffffff;
 }
 
-/* --- BOTONERA DE ACCIONES --- */
 .actions-group-pedidos {
     display: flex;
     justify-content: space-between;
@@ -692,21 +731,11 @@ select {
     opacity: 0.9;
 }
 
-.btn-pedidos-nav {
-    background-color: #374151;
-}
+.btn-pedidos-nav { background-color: #374151; }
+.btn-pedidos-action { background-color: #1f2937; border: 1px solid #374151 !important; }
+.btn-pedidos-cancel { background-color: #1f2937; border: 1px solid #374151 !important; }
 
-.btn-pedidos-action {
-    background-color: #1f2937;
-    border: 1px solid #374151 !important;
-}
-
-.btn-pedidos-cancel {
-    background-color: #1f2937;
-    border: 1px solid #374151 !important;
-}
-
-/* --- SECCIÓN VISUAL (AVATAR DEL PRODUCTO) --- */
+/* Sección Visual (Avatar del Producto) */
 .pedido-visual-panel {
     display: flex;
     flex-direction: column;
@@ -737,13 +766,13 @@ select {
 .avatar-circle-placeholder {
     width: 90%;
     height: 90%;
-    background-image: url('../img/Agendamiento\ de\ pedidos\ kk\ .png');
+    background-image: url('../img/Agendamiento de pedidos kk .png');
     background-size: cover;
     background-position: center;
     border-radius: 70px;
 }
 
-/* --- TABLA E ICONOS DE ESTADO --- */
+/* Control e Iconos de Estado en Tablas */
 .clickable-row {
     transition: background-color 0.2s;
 }
@@ -752,30 +781,21 @@ select {
     background-color: #111827;
 }
 
-/* Propiedades base para ambos íconos */
 .icon-status {
-    display: inline-block;       /* Cambiado a inline-block para que acepte ancho y alto */
-    width: 24px;                 /* Tamaño fijo adecuado para una tabla */
-    height: 24px;                /* Tamaño fijo adecuado para una tabla */
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     background-position: center;
     background-repeat: no-repeat;
-    background-size: contain;    /* Fuerza a la imagen a encajar perfectamente dentro de los 24px */
-    vertical-align: middle;      /* Alinea el ícono verticalmente con el texto */
+    background-size: contain;
+    vertical-align: middle;
 }
 
-/* Ícono de Entregado (Success) */
-.icon-status.success {
-    /* Ojo con los espacios al final del archivo si el nombre real los tiene */
-    background-image: url('../img/indicadorEntregaEntregado kk .png'); 
-}
+.icon-status.success { background-image: url('../img/indicadorEntregaEntregado kk .png'); }
+.icon-status.danger { background-image: url('../img/indicadorEntregaFallida .png'); }
 
-/* Ícono de No Entregado (Danger) */
-.icon-status.danger {
-    /* Pon aquí la ruta exacta de tu imagen de la equis roja */
-    background-image: url('../img/indicadorEntregaFallida\ .png'); 
-}
-
-/* --- PANTALLA DE CONFIRMACIÓN DE CANCELACIÓN --- */
+/* Confirmación de Cancelación e Interfaz de Éxito */
 .flex-center-content {
     display: flex;
     flex-direction: column;
@@ -815,15 +835,9 @@ select {
     transition: background-color 0.2s;
 }
 
-.confirm-buttons-row .btn-confirm-yes:hover {
-    background-color: #ef4444;
-}
+.confirm-buttons-row .btn-confirm-yes:hover { background-color: #ef4444; }
+.confirm-buttons-row .btn-confirm-no:hover { background-color: #4b5563; }
 
-.confirm-buttons-row .btn-confirm-no:hover {
-    background-color: #4b5563;
-}
-
-/* --- NOTIFICACIONES DE ÉXITO DE OPERACIÓN --- */
 .success-overlay-message {
     padding: 60px 20px;
     text-align: center;
@@ -851,8 +865,8 @@ select {
     background-color: #e5e7eb;
 }
 
-/* --- Mejoras de la tabla y filtros de gestion --- */
-.filter-bar{
+/* Filtros y Buscador */
+.filter-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -860,9 +874,8 @@ select {
     gap: 15px;
 }
 
-/* ---Estilo del buscador --- */
-.search-container input{
-    background-color: #111857;
+.search-container input {
+    background-color: var(--bg-input); /* Integrado a tu tema dark */
     border: 1px solid #374151;
     border-radius: 20px;
     padding: 10px 20px;
@@ -870,43 +883,10 @@ select {
     width: 250px;
 }
 
-/* -- Estilos de las seldas --- */
-.kimukaPedidos-table{
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.kimukaPedidos-table th,
-.kimukaPedidos-table td {
-    padding: 14px 18px; /* Separación interna (aire) para cada celda */
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
-    word-wrap: break-word; /* Si el correo es muy largo, baja al siguiente renglón sin romper la celda */
-}
-
-/* Control exacto del ancho de las columnas en Pedidos (Suma 100%) */
-.kimukaPedidos-table th:nth-child(1), .kimukaPedidos-table td:nth-child(1) { width: 20%; } /* Cliente */
-.kimukaPedidos-table th:nth-child(2), .kimukaPedidos-table td:nth-child(2) { width: 30%; } /* Correo electrónico */
-.kimukaPedidos-table th:nth-child(3), .kimukaPedidos-table td:nth-child(3) { width: 15%; } /* ID */
-.kimukaPedidos-table th:nth-child(4), .kimukaPedidos-table td:nth-child(4) { width: 15%; } /* Fecha Pedido */
-.kimukaPedidos-table th:nth-child(5), .kimukaPedidos-table td:nth-child(5) { width: 12%; } /* Fecha Entrega */
-.kimukaPedidos-table th:nth-child(6), .kimukaPedidos-table td:nth-child(6) { width: 8%; text-align: center; } /* Entregado */
-
-/* Ajuste del tamaño para los iconos/imágenes de estado en la tabla */
-.icon-status {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-}
-
 /* ==========================================================================
-   VISTA 23 - REPORTE DE INVENTARIO EXTENSIONES
+   VISTA 23 - REPORTE DE INVENTARIO EXTENSIONES (Gráfico Conic-Gradient)
    ========================================================================== */
 
-/* Contenedor del gráfico y las leyendas */
 .chart-container {
     display: flex;
     flex-direction: column;
@@ -915,12 +895,10 @@ select {
     width: 100%;
 }
 
-/* El círculo del gráfico pastel (Pie Chart con colores premium) */
 .pie-chart {
     width: 250px;
     height: 250px;
     border-radius: 50%;
-    /* conic-gradient genera la división exacta: Algodón 55%, Poliéster 35%, Lana 10% */
     background: conic-gradient(
         #2196F3 0% 55%,   /* Azul */
         #FFC107 55% 90%,  /* Amarillo */
@@ -930,7 +908,6 @@ select {
     margin-bottom: 25px;
 }
 
-/* Contenedor de las leyendas inferiores */
 .chart-legends {
     display: flex;
     gap: 25px;
@@ -940,7 +917,6 @@ select {
     margin-top: 15px;
 }
 
-/* Ítem individual de la leyenda (Bala + Texto) */
 .legend-item {
     display: flex;
     align-items: center;
@@ -948,24 +924,13 @@ select {
     font-size: 0.95rem;
 }
 
-/* Estilos para las viñetas cuadradas redondeadas de color */
-.bullet-algodon,
-.bullet-poliester,
-.bullet-lana {
+.bullet-algodon, .bullet-poliester, .bullet-lana {
     width: 14px;
     height: 14px;
     border-radius: 4px;
     display: inline-block;
 }
 
-.bullet-algodon {
-    background-color: #2196F3;
-}
-
-.bullet-poliester {
-    background-color: #FFC107;
-}
-
-.bullet-lana {
-    background-color: #4CAF50;
-}
+.bullet-algodon { background-color: #2196F3; }
+.bullet-poliester { background-color: #FFC107; }
+.bullet-lana { background-color: #4CAF50; }

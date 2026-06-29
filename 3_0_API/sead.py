@@ -1,36 +1,61 @@
 from app import create_app
-from app.database.database import db, bcrypt 
-from app.models.usuario import Usuario 
-from app.models.rol import Rol
+from app.database.database import db, bcrypt
+from app.models import Rol, EstadoUsuario, Usuario, Categoria, UnidadMedida, MetodoPago
 
 app = create_app()
 
 with app.app_context():
-    # 1. Crear roles de manera segura si no existen
-    if Rol.query.filter_by(nombre="ADMIN").first() is None:
-        db.session.add(Rol(nombre="ADMIN")) 
+    db.create_all()
 
-    if Rol.query.filter_by(nombre="USER").first() is None:
-        db.session.add(Rol(nombre="USER"))
+    if Rol.query.filter_by(idRol="ROL-001").first() is None:
+        db.session.add(Rol(idRol="ROL-001", nombreRol="ADMIN"))
+        db.session.add(Rol(idRol="ROL-002", nombreRol="EMPLEADO"))
+        db.session.commit()
+        print("Roles creados.")
 
-    db.session.commit() 
+    if EstadoUsuario.query.filter_by(idEstado="EST-001").first() is None:
+        db.session.add(EstadoUsuario(idEstado="EST-001", nombreEstado="ACTIVO"))
+        db.session.add(EstadoUsuario(idEstado="EST-002", nombreEstado="INACTIVO"))
+        db.session.commit()
+        print("Estados de usuario creados.")
 
-    # 2. Buscar el rol de administrador para asignarlo
-    rol_admin = Rol.query.filter_by(nombre="ADMIN").first()
-
-    # 3. Crear el administrador por defecto si no existe
-    if Usuario.query.filter_by(email="admin@titan.com").first() is None:
+    if Usuario.query.filter_by(correo="admin@titan.com").first() is None:
         admin = Usuario(
-            nombre="Administrador",
-            apellido="General",
-            edad=30,
-            celular="3000000000",
-            email="admin@titan.com",
-            password=bcrypt.generate_password_hash("admin123").decode("utf-8"),
-            avatar="default.png",
-            rol_id=rol_admin.id
+            idUsuario="USR-001",
+            pNombre="Administrador",
+            sNombre=None,
+            pApellido="General",
+            sApellido=None,
+            correo="admin@titan.com",
+            passwordHash=bcrypt.generate_password_hash("admin123").decode("utf-8"),
+            idRol="ROL-001",
+            idEstado="EST-001"
         )
         db.session.add(admin)
-        db.session.commit()  
+        db.session.commit()
+        print("Administrador creado: admin@titan.com / admin123")
 
-        print("¡Administrador creado correctamente!")
+    if Categoria.query.filter_by(idCategoria="CAT-001").first() is None:
+        db.session.add(Categoria(idCategoria="CAT-001", nombreCategoria="Telas"))
+        db.session.add(Categoria(idCategoria="CAT-002", nombreCategoria="Cauchos"))
+        db.session.add(Categoria(idCategoria="CAT-003", nombreCategoria="Cremalleras"))
+        db.session.add(Categoria(idCategoria="CAT-004", nombreCategoria="Moldes"))
+        db.session.add(Categoria(idCategoria="CAT-005", nombreCategoria="Marquillas"))
+        db.session.commit()
+        print("Categorías creadas.")
+
+    if UnidadMedida.query.filter_by(idUnidad="MED-001").first() is None:
+        db.session.add(UnidadMedida(idUnidad="MED-001", nombreUnidad="Metros"))
+        db.session.add(UnidadMedida(idUnidad="MED-002", nombreUnidad="Unidades"))
+        db.session.commit()
+        print("Unidades de medida creadas.")
+
+    if MetodoPago.query.filter_by(idMetodo="MET-001").first() is None:
+        db.session.add(MetodoPago(idMetodo="MET-001", nombreMetodo="Transferencia Bancaria"))
+        db.session.add(MetodoPago(idMetodo="MET-002", nombreMetodo="Nequi"))
+        db.session.add(MetodoPago(idMetodo="MET-003", nombreMetodo="Daviplata"))
+        db.session.add(MetodoPago(idMetodo="MET-004", nombreMetodo="Efectivo"))
+        db.session.commit()
+        print("Métodos de pago creados.")
+
+    print("Seed completado.")

@@ -10,24 +10,22 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import { api } from '../api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function ReporteDePedidos() {
   const [adminName, setAdminName] = useState('ADMINISTRADOR');
-  const [materiales, setMateriales] = useState([]);
-  const [clientes, setClientes] = useState([]);
-
+  const [insumos, setInsumos] = useState([]);
   const [filtroMes, setFiltroMes] = useState('');
   const [filtroAnio, setFiltroAnio] = useState(new Date().getFullYear().toString());
-  const [filtroMaterial, setFiltroMaterial] = useState('');
-  const [filtroCliente, setFiltroCliente] = useState('');
+  const [filtroInsumo, setFiltroInsumo] = useState('');
 
   const [datosGrafica, setDatosGrafica] = useState({
     labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
     datasets: [
       {
-        label: 'Consumo/Pedidos de Materiales',
+        label: 'Consumo de Insumos',
         data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         backgroundColor: '#f39c12',
       }
@@ -59,16 +57,9 @@ function ReporteDePedidos() {
       setAdminName(nombreSesion.toUpperCase());
     }
 
-    fetch('http://localhost:5000/api/inventario')
-      .then((res) => res.json())
-      .then((data) => setMateriales(data))
-      .catch((err) => console.error("Error cargando materiales para filtros:", err));
-
-    setClientes([
-      { id: 1, nombre: "Titan Sports" },
-      { id: 2, nombre: "Distribuidora Bogotá" },
-      { id: 3, nombre: "Confecciones Cundinamarca" }
-    ]);
+    api.insumos.listar()
+      .then((res) => setInsumos(res.data || []))
+      .catch(() => {});
   }, []);
 
   const handleFiltrarReporte = (e) => {
@@ -86,7 +77,7 @@ function ReporteDePedidos() {
       labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
       datasets: [
         {
-          label: `Métricas de Pedidos - Año ${filtroAnio}`,
+          label: `Métricas - Año ${filtroAnio}`,
           data: valoresAleatoriosConsumo,
           backgroundColor: '#f39c12',
           borderColor: '#e67e22',
@@ -94,8 +85,6 @@ function ReporteDePedidos() {
         }
       ]
     });
-
-    alert("¡Gráfica actualizada con los criterios seleccionados!");
   };
 
   return (
@@ -127,77 +116,57 @@ function ReporteDePedidos() {
         <div className="img-principal">
           <img src="../img/panelDeReportes kk    .png" alt="Análisis Operativo" />
         </div>
-        
+
         <div className="toolbar">
           <h2 className="table-title">Reporte de pedidos / Materiales</h2>
         </div>
 
-        {/* 🌟 CONTENEDOR DE FILTROS: Limpio de estilos CSS en línea */}
         <div className="panel-gestion margin-b-20 panel-filtro-padding">
           <form className="grid-form form-reporte-grid" onSubmit={handleFiltrarReporte}>
-            
             <div className="input-cell">
-              <label htmlFor="filtro-anio">Seleccionar Año</label>
-              <select id="filtro-anio" value={filtroAnio} onChange={(e) => setFiltroAnio(e.target.value)}>
+              <label>Seleccionar Año</label>
+              <select value={filtroAnio} onChange={(e) => setFiltroAnio(e.target.value)}>
                 {aniosDisponibles.map(anio => (
                   <option key={anio} value={anio}>{anio}</option>
                 ))}
               </select>
             </div>
-
             <div className="input-cell">
-              <label htmlFor="filtro-mes">Seleccionar Mes</label>
-              <select id="filtro-mes" value={filtroMes} onChange={(e) => setFiltroMes(e.target.value)}>
-                <option value="">-- Todos los meses --</option>
+              <label>Seleccionar Mes</label>
+              <select value={filtroMes} onChange={(e) => setFiltroMes(e.target.value)}>
+                <option value="">-- Todos --</option>
                 {meses.map(m => (
                   <option key={m.value} value={m.value}>{m.name}</option>
                 ))}
               </select>
             </div>
-
             <div className="input-cell">
-              <label htmlFor="filtro-material">Material de BD</label>
-              <select id="filtro-material" value={filtroMaterial} onChange={(e) => setFiltroMaterial(e.target.value)}>
-                <option value="">-- Todos los materiales --</option>
-                {materiales.map(mat => (
-                  <option key={mat.id} value={mat.id}>{mat.nombre} ({mat.referenciaColor || 'Sin Color'})</option>
+              <label>Insumo</label>
+              <select value={filtroInsumo} onChange={(e) => setFiltroInsumo(e.target.value)}>
+                <option value="">-- Todos --</option>
+                {insumos.map(ins => (
+                  <option key={ins.idInsumo} value={ins.idInsumo}>{ins.nombreInsumo}</option>
                 ))}
               </select>
             </div>
-
-            <div className="input-cell">
-              <label htmlFor="filtro-cliente">Asignado al Cliente</label>
-              <select id="filtro-cliente" value={filtroCliente} onChange={(e) => setFiltroCliente(e.target.value)}>
-                <option value="">-- Todos los clientes --</option>
-                {clientes.map(cli => (
-                  <option key={cli.id} value={cli.id}>{cli.nombre}</option>
-                ))}
-              </select>
-            </div>
-
-            <button type="submit" className="btn-submit btn-reporte-submit">
-              Generar Gráfica
-            </button>
+            <button type="submit" className="btn-submit btn-reporte-submit">Generar Gráfica</button>
           </form>
         </div>
 
-        {/*  CONTENEDOR DE LA GRÁFICA: Limpio de estilos CSS en línea */}
         <div className="panel-gestion contenedor-grafica-reporte">
           <h3 className="table-title text-center margin-b-20 titulo-color-alerta">Métricas de Consolidado</h3>
           <div className="wrapper-canvas-chart">
-            <Bar 
-              data={datosGrafica} 
+            <Bar
+              data={datosGrafica}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                  legend: { labels: { color: '#ffffff' } }
-                },
+                plugins: { legend: { labels: { color: '#ffffff' } } },
                 scales: {
                   x: { grid: { color: '#333333' }, ticks: { color: '#ffffff' } },
                   y: { grid: { color: '#333333' }, ticks: { color: '#ffffff' } }
                 }
-              }} 
+              }}
             />
           </div>
         </div>

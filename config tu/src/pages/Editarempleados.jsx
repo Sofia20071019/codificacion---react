@@ -1,74 +1,59 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom'; 
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { api } from '../api';
 
-function Editarempleados(){
-    const { id } = useParams(); 
+function Editarempleados() {
+    const { id } = useParams();
     const navigate = useNavigate();
-    const API_URL = `http://localhost:5000/personal/${id}`; 
 
     const [adminName, setAdminName] = useState('ADMINISTRADOR');
     const [formData, setFormData] = useState({
-        id: "",
-        nombre: "",
-        apellido: "",
-        email: "",
-        celular: "",
+        pNombre: "",
+        sNombre: "",
+        pApellido: "",
+        sApellido: "",
+        correo: "",
         password: "",
-        foto: "",
-        edad: "",
-        fechaRegistro: "",
-        rol: ""
+        idRol: ""
     });
 
     useEffect(() => {
-        // Cargar nombre del administrador activo transformado a mayúsculas sostenidas
         const usuarioLogueado = localStorage.getItem('usuarioLogueado');
         if (usuarioLogueado) {
             const user = JSON.parse(usuarioLogueado);
-            if (user.nombre) {
-                setAdminName(user.nombre.toUpperCase());
-            }
+            if (user.nombre) setAdminName(user.nombre.toUpperCase());
         }
 
-        if (!id) return; 
-        fetch(API_URL)
+        if (!id) return;
+        api.usuarios.obtener(id)
             .then((res) => {
-                if (!res.ok) throw new Error("No se encontró el usuario");
-                return res.json();
+                const u = res.data;
+                setFormData({
+                    pNombre: u.pNombre || "",
+                    sNombre: u.sNombre || "",
+                    pApellido: u.pApellido || "",
+                    sApellido: u.sApellido || "",
+                    correo: u.correo || "",
+                    password: "",
+                    idRol: u.idRol || ""
+                });
             })
-            .then((data) => setFormData(data))
             .catch((err) => console.error("Error al traer el empleado:", err));
-    }, [id, API_URL]);
+    }, [id]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleFotoChange = (e) => {
-        const archivo = e.target.files[0];
-        if (archivo) {
-            const nombreArchivo = archivo.name;
-            setFormData({ ...formData, foto: `../img/${nombreArchivo}` });
-        }
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        fetch(API_URL, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData)
-        })
-        .then((res) => {
-            if(res.ok) {
-                alert("¡Cambios guardados exitosamente en Kimuka!");
-                navigate("/empleados");
-            } else {
-                alert("Hubo un problema al guardar los cambios.");
-            }
-        })
-        .catch((err) => console.error("Error al actualizar:", err));
+        try {
+            await api.usuarios.actualizar(id, formData);
+            alert("¡Cambios guardados exitosamente en Kimuka!");
+            navigate("/empleados");
+        } catch (err) {
+            alert("Hubo un problema al guardar los cambios.");
+        }
     };
 
     return (
@@ -82,13 +67,12 @@ function Editarempleados(){
                     <div className="logo-principal-cell">
                         <div className="logo-principal">
                             <div className="logo-circle">
-                                <img src="../img/logo kimuka.png" alt="logo Kimuka"/>
+                                <img src="../img/logo kimuka.png" alt="logo Kimuka" />
                             </div>
                             <h1>Editar Personal</h1>
                         </div>
                     </div>
                     <div className="header-actions-cell">
-                        {/* Muestra el nombre real del administrador logueado */}
                         <button className="btn-login">{adminName}</button>
                     </div>
                 </div>
@@ -97,77 +81,38 @@ function Editarempleados(){
             <main className="content-wrapper">
                 <div className="panel-registro">
                     <section className="form-section-cell">
-                        <h2 className="form-title">Editar Perfil (Campos restringidos)</h2>
+                        <h2 className="form-title">Editar Perfil</h2>
                         <form className="grid-form" onSubmit={handleSubmit}>
-                            
-                            {/* Nombres y Apellidos (Bloqueados) */}
-                            <div className="input-group">
-                                <label>Nombres De La Persona (No Editable)</label>
-                                <input type="text" name="nombre" value={formData.nombre || ""} disabled/>
-                            </div>
-                            <div className="input-group">
-                                <label>Apellidos De La Persona (No Editable)</label>
-                                <input type="text" name="apellido" value={formData.apellido || ""} disabled/>
-                            </div>
-
-                            {/* Edad y Rol (Bloqueados) */}
-                            <div className="input-group">
-                                <label>Edad (No Editable)</label>
-                                <input type="number" name="edad" value={formData.edad || ""} disabled />
-                            </div>
-                            <div className="input-group">
-                                <label>Rol / Perfil (No Editable)</label>
-                                <input type="text" name="rol" value={formData.rol || ""} disabled />
+                            <div className="input-row">
+                                <div className="input-cell">
+                                    <label>Primer Nombre</label>
+                                    <input type="text" name="pNombre" value={formData.pNombre} onChange={handleChange} required />
+                                </div>
+                                <div className="input-cell">
+                                    <label>Segundo Nombre</label>
+                                    <input type="text" name="sNombre" value={formData.sNombre} onChange={handleChange} />
+                                </div>
                             </div>
 
-                            {/* Fecha de Registro (Bloqueado) */}
-                            <div className="input-group">
-                                <label>Fecha de Registro (No Editable)</label>
-                                <input type="date" name="fechaRegistro" value={formData.fechaRegistro || ""} disabled />
+                            <div className="input-row">
+                                <div className="input-cell">
+                                    <label>Primer Apellido</label>
+                                    <input type="text" name="pApellido" value={formData.pApellido} onChange={handleChange} required />
+                                </div>
+                                <div className="input-cell">
+                                    <label>Segundo Apellido</label>
+                                    <input type="text" name="sApellido" value={formData.sApellido} onChange={handleChange} />
+                                </div>
                             </div>
 
-                            {/* Correo Electrónico (EDITABLE con validación) */}
                             <div className="input-group">
-                                <label>Correo Electrónico *</label>
-                                <input 
-                                    type="email" 
-                                    name="email" 
-                                    value={formData.email || ""} 
-                                    onChange={handleChange} 
-                                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                                    title="Por favor, introduzca un correo electrónico válido."
-                                    required
-                                />
+                                <label>Correo Electrónico</label>
+                                <input type="email" name="correo" value={formData.correo} onChange={handleChange} required />
                             </div>
 
-                            {/* Número de Celular (EDITABLE con validación de Colombia) */}
                             <div className="input-group">
-                                <label>Número De Celular *</label>
-                                <input 
-                                    type="text" 
-                                    name="celular" 
-                                    value={formData.celular || ""} 
-                                    onChange={handleChange} 
-                                    pattern="3[0-9]{9}"
-                                    maxLength="10"
-                                    title="El número de celular en Colombia debe iniciar con 3 y tener exactamente 10 dígitos numéricos."
-                                    required
-                                />
-                            </div>
-
-                            {/* Contraseña asignada (EDITABLE con restricción numérica) */}
-                            <div className="input-group">
-                                <label>Contraseña asignada (Identificación) *</label>
-                                <input 
-                                    type="password" 
-                                    name="password" 
-                                    value={formData.password || ""} 
-                                    onChange={handleChange} 
-                                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
-                                    maxLength="16"
-                                    title="La contraseña debe contener únicamente números."
-                                    required
-                                />
+                                <label>Nueva Contraseña (dejar vacío para mantener)</label>
+                                <input type="password" name="password" value={formData.password} onChange={handleChange} />
                             </div>
 
                             <button type="submit" className="btn-submit">Guardar cambios</button>
@@ -177,11 +122,7 @@ function Editarempleados(){
                     <section className="image-section-cell">
                         <h2 className="avatar-preview-text">Foto-Trabajador</h2>
                         <div className="portrait-wrapper">
-                            <img src={formData.foto || "../img/registroDePersonal kk .png"} alt="Vista previa"/>
-                        </div>
-                        <div className="margin-t-15">
-                            <label className="display-block margin-b-5">Actualizar Fotografía Corporativa</label>
-                            <input type="file" className="font-size-sm" accept="image/*" onChange={handleFotoChange}/>
+                            <img src="../img/registroDePersonal kk .png" alt="Vista previa" />
                         </div>
                     </section>
                 </div>

@@ -1,13 +1,10 @@
 from flask import Blueprint
 from app.controllers.usuario_controller import UsuarioController
 
-# Creamos el Blueprint para los usuarios
 usuario_bp = Blueprint("usuario", __name__)
 
-# Mapeo directo al método del controlador para registrar (POST)
-# Esto equivale a enlazar la URL /usuarios con la función del controlador
-usuario_bp.add_url_rule(
-    "/usuarios", 
-    view_func=UsuarioController.registrar_usuario, 
-    methods=["POST"]
-)
+usuario_bp.add_url_rule("/api/usuarios", view_func=UsuarioController.listar_usuarios, methods=["GET"])
+usuario_bp.add_url_rule("/api/usuarios", view_func=UsuarioController.crear_usuario, methods=["POST"])
+usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>", view_func=UsuarioController.obtener_usuario, methods=["GET"])
+usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>", view_func=UsuarioController.actualizar_usuario, methods=["PUT"])
+usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>", view_func=UsuarioController.eliminar_usuario, methods=["DELETE"])

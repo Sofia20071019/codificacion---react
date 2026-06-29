@@ -1,57 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { fetchData } from '../api';
+import { api } from '../api';
 
 function InicioDeSesion() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+  }, []);
+
   const handleLogin = async (e) => {
-    e.preventDefault(); 
-
-    const emailDigitado = email.toLowerCase().trim();
-    const passwordDigitada = password.trim();
-
+    e.preventDefault();
     try {
-      const registrosPersonal = await fetchData('/api/personal');
+      const response = await api.auth.login(email, password);
+      const user = response.data;
 
-      const usuarioEncontrado = registrosPersonal.find((persona) => {
-        const correoRegistro = (persona.email || "").toLowerCase().trim();
-        return correoRegistro === emailDigitado;
-      });
+      localStorage.setItem('kimuka_sesion_activa', user.nombre);
+      localStorage.setItem('usuarioLogueado', JSON.stringify(user));
 
-      if (!usuarioEncontrado) {
-        alert("Error: Este correo electrónico no se encuentra registrado en el sistema Kimuka.");
-        return; 
-      }
-
-      const nombreParaSesion = usuarioEncontrado.nombre;
-
-      localStorage.setItem('kimuka_sesion_activa', nombreParaSesion);
-      localStorage.setItem('usuarioLogueado', JSON.stringify({ nombre: nombreParaSesion }));
-
-      const rolUsuario = usuarioEncontrado.rol.toLowerCase();
-
-      if (rolUsuario === 'administrador') {
+      if (user.idRol === 'ROL-001') {
         navigate('/dashboardadmin');
-      } else if (rolUsuario === 'empleado') {
-        navigate('/registro-horas');
       } else {
-        alert('Tu usuario no tiene un rol válido asignado en el sistema.');
+        navigate('/registro-horas');
       }
-
     } catch (error) {
-      console.error("Error crítico durante el inicio de sesión:", error);
-      alert("Hubo un problema de conexión con el backend de Kimuka. Asegúrate de que el servidor esté corriendo en el puerto 5000.");
+      alert(error.message || 'Credenciales inválidas. Verifica tu correo y contraseña.');
     }
   };
 
   return (
     <>
       <nav className="top-nav">
-        <Link to="/">VOLVER </Link>
+        <Link to="/">VOLVER</Link>
       </nav>
 
       <main className="content-wrapper flex-center">
@@ -65,25 +48,25 @@ function InicioDeSesion() {
             <form className="grid-form" id="form-login" onSubmit={handleLogin}>
               <div className="input-group">
                 <label htmlFor="user-email">Correo Electrónico Corporativo</label>
-                <input 
-                  type="email" 
-                  id="user-email" 
-                  placeholder="hola@sitioincreible.co" 
+                <input
+                  type="email"
+                  id="user-email"
+                  placeholder="hola@sitioincreible.co"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
               <div className="input-group">
                 <label htmlFor="user-pass">Contraseña Corporativa</label>
-                <input 
-                  type="password" 
-                  id="user-pass" 
-                  placeholder="••••••••" 
+                <input
+                  type="password"
+                  id="user-pass"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
@@ -91,7 +74,6 @@ function InicioDeSesion() {
                 Ingresar de Forma Segura
               </button>
 
-              {/* 🌟 SECCIÓN AÑADIDA AL FINAL DEL LOGIN */}
               <div className="text-center margin-t-20" style={{ borderTop: '1px solid #333', paddingTop: '15px' }}>
                 <p className="text-muted font-size-sm" style={{ margin: 0 }}>
                   ¿Tienes problemas para acceder?{' '}

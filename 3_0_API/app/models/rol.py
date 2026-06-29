@@ -3,18 +3,7 @@ from app.database.database import db
 class Rol(db.Model):
     __tablename__ = "rol"
 
-    id = db.Column(
-        db.Integer,
-        primary_key = True 
-    )
+    idRol = db.Column(db.String(10), primary_key=True)
+    nombreRol = db.Column(db.String(50), nullable=False)
 
-    nombre = db.Column(
-        db.String(50),
-        nullable = False,
-        unique = True
-    )
-
-    usuarios = db.relationship (
-        "Usuario",
-        back_populates = "rol"
-    )
+    usuarios = db.relationship("Usuario", back_populates="rol")

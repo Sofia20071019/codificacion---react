@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../api';
 
 function RegistroDeHoras() {
   const navigate = useNavigate();
-
-  // --- ESTADOS DE CONTROL DE REACT ---
   const [nombreOperario, setNombreOperario] = useState(() => {
     const sesionGuardada = localStorage.getItem('kimuka_sesion_activa');
     return sesionGuardada ? sesionGuardada.toUpperCase() : 'OPERARIO NO IDENTIFICADO';
@@ -12,15 +11,11 @@ function RegistroDeHoras() {
   const [horaInicio, setHoraInicio] = useState('');
   const [fechaInicio, setFechaInicio] = useState('');
 
-  // 1. CARGA INICIAL: Calcula el tiempo actual y re-verifica la sesión activa
   useEffect(() => {
     const sesionActiva = localStorage.getItem('kimuka_sesion_activa');
-    if (sesionActiva) {
-      setNombreOperario(sesionActiva.toUpperCase());
-    }
+    if (sesionActiva) setNombreOperario(sesionActiva.toUpperCase());
 
     const fechaActual = new Date();
-
     const anio = fechaActual.getFullYear();
     const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
     const dia = String(fechaActual.getDate()).padStart(2, '0');
@@ -31,41 +26,23 @@ function RegistroDeHoras() {
     setHoraInicio(`${horas}:${minutos}`);
   }, []);
 
-  // 2. CONTROLADOR DEL ENVÍO DEL FORMULARIO CONECTADO AL SIMULADOR
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+      const user = JSON.parse(usuarioLogueado);
 
-    // Estructura exacta requerida por la colección "jornadas" en tu db.json
-    const registroAsistencia = {
-      idRegistro: 'JOR-' + Date.now(),
-      operario: nombreOperario, // Mantiene la consistencia de datos en mayúsculas
-      fecha: fechaInicio,
-      horaEntrada: horaInicio
-    };
-
-    // Reemplazamos la persistencia local por una petición HTTP POST al simulador backend
-    fetch('http://localhost:5000/jornadas', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(registroAsistencia)
-    })
-      .then(respuesta => {
-        if (!respuesta.ok) {
-          throw new Error('Error al guardar la jornada en el servidor');
-        }
-        return respuesta.json();
-      })
-      .then(data => {
-        // Notificación de éxito con datos confirmados por el servidor
-        alert(`¡Ingreso Autorizado!\nOperario: ${data.operario}\nHora: ${data.horaEntrada}`);
-        navigate('/'); // Redirecciona al menú principal
-      })
-      .catch(error => {
-        console.error("Error crítico de persistencia en jornadas:", error);
-        alert("Hubo un fallo de comunicación. Asegúrate de que el servidor en el puerto 5000 esté activo.");
+      const response = await api.jornadas.crear({
+        idUsuario_Empleado: user.idUsuario,
+        fecha: fechaInicio,
+        hInicio: horaInicio,
       });
+
+      alert(`¡Ingreso Autorizado!\nOperario: ${nombreOperario}\nHora: ${response.data.horaEntrada}`);
+      navigate('/');
+    } catch (error) {
+      alert(error.message || 'Error al registrar la jornada.');
+    }
   };
 
   return (
@@ -99,38 +76,19 @@ function RegistroDeHoras() {
               <img src="../img/horasDeTrabajadores kk.png" alt="Decoración textil" />
             </div>
           </div>
-
           <div className="form-section-cell">
-            <h2 className="user-name text-center margin-b-25 font-size-xl" id="titulo-nombre">
-              {nombreOperario}
-            </h2>
-            
-            <form className="grid-form" id="form-entrada" onSubmit={handleSubmit}>
+            <h2 className="user-name text-center margin-b-25 font-size-xl">{nombreOperario}</h2>
+            <form className="grid-form" onSubmit={handleSubmit}>
               <div className="input-group">
-                <label htmlFor="hora-inicio">Hora de Inicio (Automática Colombia)</label>
-                <input 
-                  type="time" 
-                  id="hora-inicio" 
-                  value={horaInicio}
-                  readOnly 
-                  required 
-                />
+                <label>Hora de Inicio (Automática Colombia)</label>
+                <input type="time" value={horaInicio} readOnly required />
               </div>
-
               <div className="input-group">
-                <label htmlFor="fecha-inicio">Día de Jornada (Automático)</label>
-                <input 
-                  type="date" 
-                  id="fecha-inicio" 
-                  value={fechaInicio}
-                  readOnly 
-                  required 
-                />
+                <label>Día de Jornada (Automático)</label>
+                <input type="date" value={fechaInicio} readOnly required />
               </div>
-
-              <button type="submit" className="btn-submit w-100 margin-t-15"> 
-                <Link to="/">
-                Ingresar Al Sistema</Link>
+              <button type="submit" className="btn-submit w-100 margin-t-15">
+                Ingresar Al Sistema
               </button>
             </form>
           </div>

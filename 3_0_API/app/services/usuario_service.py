@@ -1,26 +1,54 @@
 from app.database.database import db, bcrypt
 from app.models import Usuario
+from app.utils.generar_id import generar_id
 
 class UsuarioService:
 
     @staticmethod
-    def crear_usuario(nombre, apellido, edad, email, celular, password, rol_id):
-        # 1. Encriptar la contraseña antes de guardarla en la base de datos
-        password_encriptado = bcrypt.generate_password_hash(password).decode('utf-8')
+    def listar_todos():
+        return Usuario.query.all()
 
-        # 2. Instanciar el modelo con los datos recibidos
+    @staticmethod
+    def obtener_por_id(idUsuario):
+        return Usuario.query.get(idUsuario)
+
+    @staticmethod
+    def crear_usuario(pNombre, sNombre, pApellido, sApellido, correo, password, idRol, idEstado):
+        password_encriptado = bcrypt.generate_password_hash(password).decode("utf-8")
+        nuevo_id = generar_id("USR", Usuario, "idUsuario")
         usuario = Usuario(
-            nombre=nombre,
-            apellido=apellido,
-            edad=edad,
-            email=email,
-            celular=celular,
-            password=password_encriptado,  # Guardamos la versión segura encriptada
-            rol_id=rol_id
+            idUsuario=nuevo_id,
+            pNombre=pNombre,
+            sNombre=sNombre,
+            pApellido=pApellido,
+            sApellido=sApellido,
+            correo=correo,
+            passwordHash=password_encriptado,
+            idRol=idRol,
+            idEstado=idEstado
         )
-
-        # 3. Guardar en la base de datos siguiendo tu patrón
         db.session.add(usuario)
         db.session.commit()
-
         return usuario
+
+    @staticmethod
+    def actualizar_usuario(idUsuario, **kwargs):
+        usuario = Usuario.query.get(idUsuario)
+        if not usuario:
+            return None
+        for key, value in kwargs.items():
+            if key == "password" and value:
+                setattr(usuario, "passwordHash", bcrypt.generate_password_hash(value).decode("utf-8"))
+            elif value is not None and hasattr(usuario, key):
+                setattr(usuario, key, value)
+        db.session.commit()
+        return usuario
+
+    @staticmethod
+    def eliminar_usuario(idUsuario):
+        usuario = Usuario.query.get(idUsuario)
+        if not usuario:
+            return False
+        db.session.delete(usuario)
+        db.session.commit()
+        return True

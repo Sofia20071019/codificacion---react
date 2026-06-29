@@ -1,49 +1,96 @@
 from flask import request, jsonify
 
 class UsuarioController:
-    
+
     @staticmethod
-    def registrar_usuario():
-        # 1. Obtener el cuerpo de la petición en formato JSON desde React
-        data = request.get_json()
-
-        # 2. Extraer los datos enviados por el frontend
-        nombre = data.get("nombre")
-        apellido = data.get("apellido")
-        edad = data.get("edad")
-        email = data.get("email")
-        celular = data.get("celular")
-        password = data.get("password")
-        rol_id = data.get("rol_id")
-
+    def listar_usuarios():
         try:
-            # 3. Delegar la lógica de negocio a la capa de servicios 
-            # (Aquí es donde se encriptará la contraseña y se guardará en la BD)
             from app.services.usuario_service import UsuarioService
-            
-            nuevo_usuario = UsuarioService.crear_usuario(
-                nombre=nombre,
-                apellido=apellido,
-                edad=edad,
-                email=email,
-                celular=celular,
-                password=password,
-                rol_id=rol_id
-            )
+            usuarios = UsuarioService.listar_todos()
+            data = []
+            for u in usuarios:
+                data.append({
+                    "idUsuario": u.idUsuario,
+                    "pNombre": u.pNombre,
+                    "sNombre": u.sNombre,
+                    "pApellido": u.pApellido,
+                    "sApellido": u.sApellido,
+                    "correo": u.correo,
+                    "idRol": u.idRol,
+                    "nombreRol": u.rol.nombreRol if u.rol else None,
+                    "idEstado": u.idEstado,
+                    "nombreEstado": u.estado.nombreEstado if u.estado else None
+                })
+            return jsonify({"status": "success", "data": data}), 200
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
 
-            # 4. Responder exitosamente al frontend
+    @staticmethod
+    def obtener_usuario(idUsuario):
+        try:
+            from app.services.usuario_service import UsuarioService
+            u = UsuarioService.obtener_por_id(idUsuario)
+            if not u:
+                return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+            return jsonify({
+                "status": "success",
+                "data": {
+                    "idUsuario": u.idUsuario,
+                    "pNombre": u.pNombre,
+                    "sNombre": u.sNombre,
+                    "pApellido": u.pApellido,
+                    "sApellido": u.sApellido,
+                    "correo": u.correo,
+                    "idRol": u.idRol,
+                    "nombreRol": u.rol.nombreRol if u.rol else None,
+                    "idEstado": u.idEstado,
+                    "nombreEstado": u.estado.nombreEstado if u.estado else None
+                }
+            }), 200
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+    @staticmethod
+    def crear_usuario():
+        data = request.get_json()
+        try:
+            from app.services.usuario_service import UsuarioService
+            usuario = UsuarioService.crear_usuario(
+                pNombre=data.get("pNombre"),
+                sNombre=data.get("sNombre"),
+                pApellido=data.get("pApellido"),
+                sApellido=data.get("sApellido"),
+                correo=data.get("correo", "").lower().strip(),
+                password=data.get("password"),
+                idRol=data.get("idRol"),
+                idEstado=data.get("idEstado", "EST-001")
+            )
             return jsonify({
                 "status": "success",
                 "message": "Usuario registrado exitosamente",
-                "data": {
-                    "id": nuevo_usuario.id,
-                    "email": nuevo_usuario.email
-                }
+                "data": {"idUsuario": usuario.idUsuario, "correo": usuario.correo}
             }), 201
-
         except Exception as e:
-            # En caso de que falle (ej. email duplicado) devolvemos el error
-            return jsonify({
-                "status": "error",
-                "message": str(e)
-            }), 400
+            return jsonify({"status": "error", "message": str(e)}), 400
+
+    @staticmethod
+    def actualizar_usuario(idUsuario):
+        data = request.get_json()
+        try:
+            from app.services.usuario_service import UsuarioService
+            usuario = UsuarioService.actualizar_usuario(idUsuario, **data)
+            if not usuario:
+                return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+            return jsonify({"status": "success", "message": "Usuario actualizado"}), 200
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 400
+
+    @staticmethod
+    def eliminar_usuario(idUsuario):
+        try:
+            from app.services.usuario_service import UsuarioService
+            if UsuarioService.eliminar_usuario(idUsuario):
+                return jsonify({"status": "success", "message": "Usuario eliminado"}), 200
+            return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500

@@ -1,16 +1,23 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../api';
 
 function RecuperarContrasena() {
-  const handleRecuperar = (e) => {
+  const [correo, setCorreo] = useState('');
+
+  const handleRecuperar = async (e) => {
     e.preventDefault();
-    // Aquí puedes añadir la lógica operativa más adelante
-    alert('Solicitud enviada al administrador.');
+    try {
+      await api.auth.recuperarContrasena(correo);
+      alert('Solicitud enviada al administrador.');
+    } catch (error) {
+      alert(error.message || 'Correo no registrado.');
+    }
   };
 
   return (
     <>
       <nav className="top-nav">
-        {/* Corrección: Apuntar a la ruta del enrutador de React, no al archivo .html */}
         <Link to="/login">VOLVER</Link>
       </nav>
 
@@ -19,21 +26,20 @@ function RecuperarContrasena() {
           <div className="form-section-cell w-100">
             <h2 className="form-title font-size-lg text-center margin-b-20">Restablecer Contraseña</h2>
             <p className="text-muted font-size-md text-center margin-b-25">
-              Ingrese el correo institucional de su administrador registrado. Él se encargará de darle una nueva contraseña.
+              Ingrese el correo institucional. El administrador se encargará de darle una nueva contraseña.
             </p>
 
-            <form className="grid-form" id="form-recuperar" onSubmit={handleRecuperar}>
+            <form className="grid-form" onSubmit={handleRecuperar}>
               <div className="input-group">
-                <label htmlFor="recuperar-email">Correo Electrónico Corporativo</label>
-                {/* Corrección: input autocontenido /> */}
-                <input 
-                  type="email" 
-                  id="recuperar-email" 
-                  placeholder="ejemplo@titansports.com" 
-                  required 
+                <label>Correo Electrónico Corporativo</label>
+                <input
+                  type="email"
+                  placeholder="ejemplo@titansports.com"
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
+                  required
                 />
               </div>
-
               <button type="submit" className="btn-submit w-100 margin-t-15">Enviar</button>
             </form>
           </div>

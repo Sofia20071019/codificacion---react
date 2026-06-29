@@ -1,54 +1,38 @@
 import { useState, useEffect } from "react";
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
+import { api } from '../api';
 
 function GestionEmpleados() {
     const [empleados, setEmpleados] = useState([]);
     const [busqueda, setBusqueda] = useState("");
     const [adminName, setAdminName] = useState('ADMINISTRADOR');
-    
-    // URL Actualizada para Flask
-    const API_URL = "http://localhost:5000/api/personal";
 
-    // Cargar empleados de la base de datos y obtener el administrador de la sesión
     useEffect(() => {
         const usuarioLogueado = localStorage.getItem('usuarioLogueado');
         if (usuarioLogueado) {
             const user = JSON.parse(usuarioLogueado);
-            if (user.nombre) {
-                setAdminName(user.nombre.toUpperCase());
-            }
+            if (user.nombre) setAdminName(user.nombre.toUpperCase());
         }
 
-        fetch(API_URL)
-            .then((res) => {
-                if (!res.ok) throw new Error("Error en la respuesta del servidor");
-                return res.json();
-            })
-            .then((data) => setEmpleados(data))
+        api.usuarios.listar()
+            .then((res) => setEmpleados(res.data || []))
             .catch((err) => console.error("Error cargando personal:", err));
     }, []);
 
-    // Función para conectar el botón Eliminar con el DELETE de Flask
-    const eliminarEmpleado = (id) => {
+    const eliminarEmpleado = async (id) => {
         if (window.confirm("¿Desea eliminar este empleado del sistema Kimuka?")) {
-            fetch(`${API_URL}/${id}`, {
-                method: "DELETE",
-            })
-            .then((res) => {
-                if (res.ok) {
-                    setEmpleados(empleados.filter((emp) => emp.id !== id));
-                    alert("Empleado eliminado con éxito.");
-                } else {
-                    alert("No se pudo eliminar el empleado.");
-                }
-            })
-            .catch((err) => console.error("Error al eliminar:", err));
+            try {
+                await api.usuarios.eliminar(id);
+                setEmpleados(empleados.filter((emp) => emp.idUsuario !== id));
+                alert("Empleado eliminado con éxito.");
+            } catch (err) {
+                alert("No se pudo eliminar el empleado.");
+            }
         }
     };
 
-    // Filtrado en tiempo real por nombres o apellidos
     const empleadosFiltrados = empleados.filter((emp) => {
-        const nombreCompleto = `${emp.nombre || ''} ${emp.apellido || ''}`.toLowerCase();
+        const nombreCompleto = `${emp.pNombre || ''} ${emp.pApellido || ''}`.toLowerCase();
         return nombreCompleto.includes(busqueda.toLowerCase());
     });
 
@@ -81,11 +65,11 @@ function GestionEmpleados() {
                 <div className="toolbar margin-b-20">
                     <div className="max-w-500">
                         <label className="margin-b-10 text-center display-block">Buscador de Personal</label>
-                        <input 
-                            type="text" 
-                            placeholder="Buscar por nombre o apellido..." 
-                            value={busqueda} 
-                            onChange={(e) => setBusqueda(e.target.value)} 
+                        <input
+                            type="text"
+                            placeholder="Buscar por nombre..."
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)}
                         />
                     </div>
                 </div>
@@ -97,32 +81,32 @@ function GestionEmpleados() {
                                 <th>ID</th>
                                 <th>Nombre Completo</th>
                                 <th>Correo</th>
-                                <th>Cargo / Rol</th>
-                                <th>Celular</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
                                 <th className="text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {empleadosFiltrados.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="text-center">No hay registros disponibles en este momento.</td>
+                                    <td colSpan="6" className="text-center">No hay registros disponibles.</td>
                                 </tr>
                             ) : (
                                 empleadosFiltrados.map((emp) => (
-                                    <tr key={emp.id}>
-                                        <td>{emp.id}</td>
-                                        <td>{emp.nombre} {emp.apellido}</td>
-                                        <td>{emp.email}</td>
-                                        <td><span className="status status-pending">{emp.rol}</span></td>
-                                        <td>{emp.celular || "N/A"}</td>
+                                    <tr key={emp.idUsuario}>
+                                        <td>{emp.idUsuario}</td>
+                                        <td>{emp.pNombre} {emp.pApellido}</td>
+                                        <td>{emp.correo}</td>
+                                        <td><span className="status status-pending">{emp.nombreRol}</span></td>
+                                        <td><span className="status status-success">{emp.nombreEstado}</span></td>
                                         <td className="text-right">
                                             <div className="flex-row-gap-10">
                                                 <button className="btn-action">
-                                                    <Link to={`/editarempleados/${emp.id}`} className="no-text-decor">Editar</Link>
+                                                    <Link to={`/editarempleados/${emp.idUsuario}`} className="no-text-decor">Editar</Link>
                                                 </button>
-                                                <button 
-                                                    className="btn-action btn-alert-color" 
-                                                    onClick={() => eliminarEmpleado(emp.id)}
+                                                <button
+                                                    className="btn-action btn-alert-color"
+                                                    onClick={() => eliminarEmpleado(emp.idUsuario)}
                                                 >
                                                     Eliminar
                                                 </button>

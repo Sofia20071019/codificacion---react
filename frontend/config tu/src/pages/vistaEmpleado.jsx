@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import Nav from '../components/Nav';
 import Header from '../components/Header';
 
-// Importamos tus imágenes respetando los nombres exactos que pusiste en tu HTML
 import portadaImg from '../img/portadakk .jpg';
 import inventarioImg from '../img/inventarioDeMaterial kk .png';
 import horasImg from '../img/horasDeEmpleado kk .png';
@@ -15,7 +14,6 @@ function VistaEmpleado() {
       <Header />
 
       <main className="content-wrapper">
-        {/* BANNER PRINCIPAL DE BIENVENIDA */}
         <div className="main-banner">
           <img src={portadaImg} alt="Fondo Titan Sports" className="banner-img" />
           <div className="banner-text">
@@ -26,10 +24,8 @@ function VistaEmpleado() {
 
         <h3 className="section-title">Módulos del sistema</h3>
 
-        {/* REJILLA DE TARJETAS DE MÓDULOS */}
         <div className="card-grid">
           
-          {/* ENLACE AL MÓDULO DE INVENTARIO */}
           <Link to="/asignacion-material" className="module-card-link">
             <div className="module-card">
               <div className="card-image-wrapper">
@@ -52,7 +48,6 @@ function VistaEmpleado() {
             </div>
           </Link>
 
-          {/* ENLACE AL MÓDULO DE PEDIDOS / ÓRDENES */}
           <Link to="/asignacion-orden" className="module-card-link">
             <div className="module-card">
               <div className="card-image-wrapper">

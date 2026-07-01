@@ -1,55 +1,49 @@
-# app/routes/routes.py
 from flask import Blueprint, jsonify, request
 from app.database.database import db
-from app.models.models import MateriaPrima # 🌟 Ahora sí lo importamos directo
 
-main_bp = Blueprint('main', __name__)
+admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
-@main_bp.route('/', methods=['GET'])
+@admin_bp.route('/', methods=['GET'])
 def index():
     return jsonify({
         "status": "success",
-        "message": "¡API de Kimuka corriendo perfectamente!"
+        "message": "¡Módulo de Administración de Kimuka corriendo perfectamente!"
     }), 200
 
-@main_bp.route('/api/inventario', methods=['GET', 'POST'])
-def inventario():
-    if request.method == 'POST':
-        data = request.get_json()
-        
-        if not data or 'nombre' not in data or 'cantidad' not in data or 'categoria' not in data:
-            return jsonify({"error": "Faltan campos obligatorios"}), 400
-        
-        nuevo_material = MateriaPrima(
-            nombre=data['nombre'],
-            cantidad=data['cantidad'],
-            unidad=data['unidad'],
-            categoria=data['categoria'],
-            referenciaColor=data.get('referenciaColor', ''),
-            imagen=data.get('imagen', '')
-        )
-        
-        try:
-            db.session.add(nuevo_material)
-            db.session.commit()
-            return jsonify({"message": "Insumo registrado con éxito"}), 201
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({"error": "No se pudo guardar el insumo", "detalle": str(e)}), 500
-
-    # Lógica para retornar la lista completa (GET)
+@admin_bp.route('/pedidos', methods=['GET'])
+def listar_pedidos():
     try:
-        materiales = MateriaPrima.query.all()
-        resultado = [{
-            "id": m.id,
-            "nombre": m.nombre,
-            "cantidad": m.cantidad,
-            "unidad": m.unidad,
-            "categoria": m.categoria,
-            "referenciaColor": m.referenciaColor,
-            "imagen": m.imagen
-        } for m in materiales]
+        from app.models.cliente import Cliente
         
-        return jsonify(resultado), 200
+        clientes = Cliente.query.all()
+        resultado = [{
+            "idCliente": c.idCliente,
+            "nombreCliente": c.nombreCliente,
+            "telefono": c.telefono
+        } for c in clientes]
+        
+        return jsonify({
+            "status": "success",
+            "data": resultado
+        }), 200
     except Exception as e:
-        return jsonify({"error": "Error al consultar el inventario", "detalle": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@admin_bp.route('/produccion/asignar-operario', methods=['POST'])
+def asignar_operario():
+    data = request.get_json() or {}
+    id_produccion = data.get("idProduccion")
+    id_operario = data.get("idOperario")
+    fecha = data.get("fechaAsignacion")
+    cantidad = data.get("cantidadAsignada")
+
+    if not id_produccion or not id_operario:
+        return jsonify({"status": "error", "message": "ID de Producción y Operario son obligatorios"}), 400
+
+    try:
+        return jsonify({
+            "status": "success", 
+            "message": f"Operario {id_operario} asignado con éxito a la producción {id_produccion}"
+        }), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500

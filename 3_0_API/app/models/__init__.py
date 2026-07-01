@@ -12,3 +12,4 @@ from app.models.detalle_orden import DetalleOrden
 from app.models.metodo_pago import MetodoPago
 from app.models.jornada_laboral import JornadaLaboral
 from app.models.pago import Pago
+from app.models.asignacion import Asignacion

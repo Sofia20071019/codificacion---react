@@ -52,6 +52,7 @@ function CierreDeSesionEmpleado() {
 
       localStorage.removeItem('kimuka_sesion_activa');
       localStorage.removeItem('usuarioLogueado');
+      localStorage.removeItem('token');
       sessionStorage.clear();
       navigate('/login', { replace: true });
     } catch (error) {
@@ -62,7 +63,7 @@ function CierreDeSesionEmpleado() {
   return (
     <>
       <nav className="top-nav">
-        <Link to="/" className="no-text-decor">VOLVER</Link>
+        <Link to="/dashboard-empleado" className="no-text-decor">VOLVER</Link>
       </nav>
 
       <header className="main-header">

@@ -6,7 +6,11 @@ class PagoService:
 
     @staticmethod
     def listar_todos():
-        return Pago.query.all()
+        return Pago.query.order_by(Pago.fechaPago.desc()).all()
+
+    @staticmethod
+    def listar_por_jornada(idJornada):
+        return Pago.query.filter_by(idJornada=idJornada).all()
 
     @staticmethod
     def obtener_por_id(idPago):

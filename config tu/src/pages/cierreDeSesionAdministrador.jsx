@@ -20,6 +20,7 @@ function CierreDeSesionAdministrador() {
   const handleCierreSesion = () => {
     localStorage.removeItem('kimuka_sesion_activa');
     localStorage.removeItem('usuarioLogueado');
+    localStorage.removeItem('token');
     sessionStorage.clear();
     navigate('/login', { replace: true });
   };

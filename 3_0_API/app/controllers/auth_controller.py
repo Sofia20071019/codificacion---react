@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from app.utils.jwt_utils import generar_token
 
 class AuthController:
 
@@ -14,6 +15,8 @@ class AuthController:
             if not usuario:
                 return jsonify({"status": "error", "message": "Credenciales inválidas"}), 401
 
+            token = generar_token(usuario)
+
             pNombreCompleto = f"{usuario.pNombre or ''} {usuario.sNombre or ''}".strip()
             pApellidoCompleto = f"{usuario.pApellido or ''} {usuario.sApellido or ''}".strip()
             nombreCompleto = f"{pNombreCompleto} {pApellidoCompleto}".strip()
@@ -25,7 +28,8 @@ class AuthController:
                     "nombre": nombreCompleto,
                     "correo": usuario.correo,
                     "rol": usuario.rol.nombreRol if usuario.rol else None,
-                    "idRol": usuario.idRol
+                    "idRol": usuario.idRol,
+                    "token": token
                 }
             }), 200
 
@@ -45,3 +49,11 @@ class AuthController:
             return jsonify({"status": "error", "message": "Correo no registrado."}), 404
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
+
+    @staticmethod
+    def verificar_token():
+        from app.utils.decorators import token_requerido
+        return jsonify({
+            "status": "success",
+            "data": request.usuario
+        }), 200

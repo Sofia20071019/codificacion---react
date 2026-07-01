@@ -8,3 +8,5 @@ usuario_bp.add_url_rule("/api/usuarios", view_func=UsuarioController.crear_usuar
 usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>", view_func=UsuarioController.obtener_usuario, methods=["GET"])
 usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>", view_func=UsuarioController.actualizar_usuario, methods=["PUT"])
 usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>", view_func=UsuarioController.eliminar_usuario, methods=["DELETE"])
+usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>/desactivar", view_func=UsuarioController.desactivar_usuario, methods=["PUT"])
+usuario_bp.add_url_rule("/api/empleados", view_func=UsuarioController.listar_empleados, methods=["GET"])

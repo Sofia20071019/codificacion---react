@@ -1,8 +1,10 @@
 from flask import jsonify
+from app.utils.decorators import token_requerido
 
 class UnidadMedidaController:
 
     @staticmethod
+    @token_requerido
     def listar_unidades():
         try:
             from app.services.unidad_medida_service import UnidadMedidaService

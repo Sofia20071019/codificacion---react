@@ -39,7 +39,7 @@ function RegistroDeHoras() {
       });
 
       alert(`¡Ingreso Autorizado!\nOperario: ${nombreOperario}\nHora: ${response.data.horaEntrada}`);
-      navigate('/');
+      navigate('/dashboard-empleado');
     } catch (error) {
       alert(error.message || 'Error al registrar la jornada.');
     }

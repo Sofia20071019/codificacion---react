@@ -1,9 +1,26 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
+function getToken() {
+  const user = localStorage.getItem('usuarioLogueado');
+  if (user) {
+    try {
+      return JSON.parse(user).token;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export const api = {
   async request(endpoint, options = {}) {
+    const token = getToken();
+    const headers = { 'Content-Type': 'application/json', ...options.headers };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+      headers,
       ...options,
     });
     const data = await response.json();
@@ -22,6 +39,8 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ correo }),
       }),
+    verificarToken: () =>
+      api.request('/api/auth/verificar-token'),
   },
 
   usuarios: {
@@ -39,6 +58,12 @@ export const api = {
       }),
     eliminar: (id) =>
       api.request(`/api/usuarios/${id}`, { method: 'DELETE' }),
+    desactivar: (id) =>
+      api.request(`/api/usuarios/${id}/desactivar`, { method: 'PUT' }),
+  },
+
+  empleados: {
+    listar: () => api.request('/api/empleados'),
   },
 
   roles: {
@@ -59,6 +84,21 @@ export const api = {
       }),
     eliminar: (id) =>
       api.request(`/api/insumos/${id}`, { method: 'DELETE' }),
+  },
+
+  asignaciones: {
+    listar: () => api.request('/api/asignaciones'),
+    crear: (data) =>
+      api.request('/api/asignaciones', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    porEmpleado: (id) => api.request(`/api/asignaciones/empleado/${id}`),
+    cambiarEstado: (id, data) =>
+      api.request(`/api/asignaciones/${id}/estado`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
   },
 
   categorias: {
@@ -96,6 +136,8 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
+    porEmpleado: (id) => api.request(`/api/jornadas/empleado/${id}`),
+    calcularPago: (id) => api.request(`/api/jornadas/calcular-pago/${id}`),
   },
 
   pagos: {

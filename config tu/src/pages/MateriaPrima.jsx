@@ -16,6 +16,8 @@ function MateriaPrima() {
   const [formNombre, setFormNombre] = useState('');
   const [formCategoria, setFormCategoria] = useState('');
   const [formUnidad, setFormUnidad] = useState('');
+  const [formCantidad, setFormCantidad] = useState('');
+  const [stockAgregar, setStockAgregar] = useState({});
 
   useEffect(() => {
     const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
@@ -47,12 +49,14 @@ function MateriaPrima() {
         nombreInsumo: formNombre.trim(),
         idCategoria: formCategoria,
         idUnidad: formUnidad,
+        cantidad: formCantidad || 0
       });
 
       alert(`¡Material ${formNombre} registrado con éxito!`);
       setFormNombre('');
       setFormCategoria('');
       setFormUnidad('');
+      setFormCantidad('');
       setMostrarFormulario(false);
       cargarInventario();
     } catch (error) {
@@ -139,6 +143,10 @@ function MateriaPrima() {
                   ))}
                 </select>
               </div>
+              <div className="input-group">
+                <label>CANTIDAD INICIAL</label>
+                <input type="number" step="0.01" min="0" value={formCantidad} onChange={(e) => setFormCantidad(e.target.value)} placeholder="0" />
+              </div>
               <div className="flex-row-gap-10 margin-t-20-end">
                 <button type="button" className="btn-login" onClick={() => setMostrarFormulario(false)}>Cancelar</button>
                 <button type="submit" className="btn-submit">Registrar en Inventario</button>
@@ -158,6 +166,25 @@ function MateriaPrima() {
                 <h2>{item.nombreInsumo || 'Sin nombre'}</h2>
                 <p className="text-secondary">{item.nombreCategoria}</p>
                 <p className="text-muted font-size-sm">{item.nombreUnidad}</p>
+                <p className={`font-size-lg margin-t-10 ${item.cantidad > 0 ? 'text-primary' : 'status-fail'}`}>
+                  {item.cantidad || 0}
+                </p>
+                <div className="flex-row-gap-10 margin-t-10" style={{ justifyContent: 'center' }}>
+                  <input type="number" min="0" style={{ width: '80px', padding: '6px' }}
+                    value={stockAgregar[item.idInsumo] || ''}
+                    onChange={(e) => setStockAgregar({ ...stockAgregar, [item.idInsumo]: e.target.value })}
+                    placeholder="+" />
+                  <button className="btn-login" style={{ padding: '6px 12px' }}
+                    onClick={async () => {
+                      const cantidad = parseFloat(stockAgregar[item.idInsumo]);
+                      if (!cantidad || cantidad <= 0) return;
+                      try {
+                        await api.insumos.actualizar(item.idInsumo, { cantidad: (item.cantidad || 0) + cantidad });
+                        setStockAgregar({ ...stockAgregar, [item.idInsumo]: '' });
+                        cargarInventario();
+                      } catch (err) { alert(err.message); }
+                    }}>Agregar</button>
+                </div>
               </div>
             ))
           )}

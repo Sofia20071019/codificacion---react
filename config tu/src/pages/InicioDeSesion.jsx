@@ -20,6 +20,7 @@ function InicioDeSesion() {
 
       localStorage.setItem('kimuka_sesion_activa', user.nombre);
       localStorage.setItem('usuarioLogueado', JSON.stringify(user));
+      localStorage.setItem('token', user.token);
 
       if (user.idRol === 'ROL-001') {
         navigate('/dashboardadmin');

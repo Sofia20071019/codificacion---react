@@ -6,20 +6,17 @@ class InsumoService:
 
     @staticmethod
     def listar_todos():
-        return Insumo.query.all()
+        return Insumo.query.order_by(Insumo.nombreInsumo).all()
 
     @staticmethod
-    def obtener_por_id(idInsumo):
-        return Insumo.query.get(idInsumo)
-
-    @staticmethod
-    def crear_insumo(nombreInsumo, idCategoria=None, idUnidad=None):
+    def crear_insumo(nombreInsumo, idCategoria, idUnidad):
         nuevo_id = generar_id("INS", Insumo, "idInsumo")
         insumo = Insumo(
             idInsumo=nuevo_id,
             nombreInsumo=nombreInsumo,
             idCategoria=idCategoria,
-            idUnidad=idUnidad
+            idUnidad=idUnidad,
+            cantidad=0
         )
         db.session.add(insumo)
         db.session.commit()
@@ -30,9 +27,9 @@ class InsumoService:
         insumo = Insumo.query.get(idInsumo)
         if not insumo:
             return None
-        for key, value in kwargs.items():
-            if value is not None and hasattr(insumo, key):
-                setattr(insumo, key, value)
+        for key in ["nombreInsumo", "idCategoria", "idUnidad", "cantidad"]:
+            if key in kwargs and kwargs[key] is not None:
+                setattr(insumo, key, kwargs[key])
         db.session.commit()
         return insumo
 
@@ -40,7 +37,7 @@ class InsumoService:
     def eliminar_insumo(idInsumo):
         insumo = Insumo.query.get(idInsumo)
         if not insumo:
-            return False
+            return None
         db.session.delete(insumo)
         db.session.commit()
-        return True
+        return insumo

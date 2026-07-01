@@ -19,14 +19,16 @@ function GestionEmpleados() {
             .catch((err) => console.error("Error cargando personal:", err));
     }, []);
 
-    const eliminarEmpleado = async (id) => {
-        if (window.confirm("¿Desea eliminar este empleado del sistema Kimuka?")) {
+    const desactivarEmpleado = async (id) => {
+        if (window.confirm("¿Desea desactivar este empleado? Sus registros históricos se conservarán.")) {
             try {
-                await api.usuarios.eliminar(id);
-                setEmpleados(empleados.filter((emp) => emp.idUsuario !== id));
-                alert("Empleado eliminado con éxito.");
+                await api.usuarios.desactivar(id);
+                setEmpleados(empleados.map((emp) =>
+                    emp.idUsuario === id ? { ...emp, idEstado: 'EST-002', estado: 'INACTIVO' } : emp
+                ));
+                alert("Empleado desactivado con éxito.");
             } catch (err) {
-                alert("No se pudo eliminar el empleado.");
+                alert("No se pudo desactivar el empleado.");
             }
         }
     };
@@ -97,8 +99,8 @@ function GestionEmpleados() {
                                         <td>{emp.idUsuario}</td>
                                         <td>{emp.pNombre} {emp.pApellido}</td>
                                         <td>{emp.correo}</td>
-                                        <td><span className="status status-pending">{emp.nombreRol}</span></td>
-                                        <td><span className="status status-success">{emp.nombreEstado}</span></td>
+                                        <td><span className={`status ${emp.idRol === 'ROL-001' ? 'status-success' : 'status-pending'}`}>{emp.rol || emp.nombreRol}</span></td>
+                                        <td><span className={`status ${emp.idEstado === 'EST-001' ? 'status-success' : 'status-fail'}`}>{emp.estado || emp.nombreEstado}</span></td>
                                         <td className="text-right">
                                             <div className="flex-row-gap-10">
                                                 <button className="btn-action">
@@ -106,9 +108,9 @@ function GestionEmpleados() {
                                                 </button>
                                                 <button
                                                     className="btn-action btn-alert-color"
-                                                    onClick={() => eliminarEmpleado(emp.idUsuario)}
+                                                    onClick={() => desactivarEmpleado(emp.idUsuario)}
                                                 >
-                                                    Eliminar
+                                                    Desactivar
                                                 </button>
                                             </div>
                                         </td>

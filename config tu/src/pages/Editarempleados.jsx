@@ -14,7 +14,8 @@ function Editarempleados() {
         sApellido: "",
         correo: "",
         password: "",
-        idRol: ""
+        idRol: "",
+        idEstado: "EST-001"
     });
 
     useEffect(() => {
@@ -35,7 +36,8 @@ function Editarempleados() {
                     sApellido: u.sApellido || "",
                     correo: u.correo || "",
                     password: "",
-                    idRol: u.idRol || ""
+                    idRol: u.idRol || "",
+                    idEstado: u.idEstado || "EST-001"
                 });
             })
             .catch((err) => console.error("Error al traer el empleado:", err));
@@ -113,6 +115,14 @@ function Editarempleados() {
                             <div className="input-group">
                                 <label>Nueva Contraseña (dejar vacío para mantener)</label>
                                 <input type="password" name="password" value={formData.password} onChange={handleChange} />
+                            </div>
+
+                            <div className="input-group">
+                                <label>Estado</label>
+                                <select name="idEstado" value={formData.idEstado} onChange={handleChange}>
+                                    <option value="EST-001">ACTIVO</option>
+                                    <option value="EST-002">INACTIVO</option>
+                                </select>
                             </div>
 
                             <button type="submit" className="btn-submit">Guardar cambios</button>

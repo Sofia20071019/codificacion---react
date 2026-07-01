@@ -1,8 +1,10 @@
-from flask import request, jsonify
+from flask import jsonify
+from app.utils.decorators import token_requerido
 
 class CategoriaController:
 
     @staticmethod
+    @token_requerido
     def listar_categorias():
         try:
             from app.services.categoria_service import CategoriaService

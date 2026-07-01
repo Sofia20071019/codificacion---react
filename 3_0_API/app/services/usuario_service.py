@@ -6,26 +6,30 @@ class UsuarioService:
 
     @staticmethod
     def listar_todos():
-        return Usuario.query.all()
+        return Usuario.query.order_by(Usuario.pNombre).all()
+
+    @staticmethod
+    def listar_empleados():
+        return Usuario.query.filter_by(idRol="ROL-002").order_by(Usuario.pNombre).all()
 
     @staticmethod
     def obtener_por_id(idUsuario):
         return Usuario.query.get(idUsuario)
 
     @staticmethod
-    def crear_usuario(pNombre, sNombre, pApellido, sApellido, correo, password, idRol, idEstado):
-        password_encriptado = bcrypt.generate_password_hash(password).decode("utf-8")
+    def crear_usuario(pNombre, sNombre, pApellido, sApellido, correo, password, idRol):
         nuevo_id = generar_id("USR", Usuario, "idUsuario")
+        hash_pw = bcrypt.generate_password_hash(password).decode("utf-8")
         usuario = Usuario(
             idUsuario=nuevo_id,
             pNombre=pNombre,
             sNombre=sNombre,
             pApellido=pApellido,
             sApellido=sApellido,
-            correo=correo,
-            passwordHash=password_encriptado,
+            correo=correo.lower().strip(),
+            passwordHash=hash_pw,
             idRol=idRol,
-            idEstado=idEstado
+            idEstado="EST-001"
         )
         db.session.add(usuario)
         db.session.commit()
@@ -36,11 +40,11 @@ class UsuarioService:
         usuario = Usuario.query.get(idUsuario)
         if not usuario:
             return None
-        for key, value in kwargs.items():
-            if key == "password" and value:
-                setattr(usuario, "passwordHash", bcrypt.generate_password_hash(value).decode("utf-8"))
-            elif value is not None and hasattr(usuario, key):
-                setattr(usuario, key, value)
+        if "password" in kwargs and kwargs["password"]:
+            usuario.passwordHash = bcrypt.generate_password_hash(kwargs["password"]).decode("utf-8")
+        for key in ["pNombre", "sNombre", "pApellido", "sApellido", "correo", "idRol", "idEstado"]:
+            if key in kwargs and kwargs[key] is not None:
+                setattr(usuario, key, kwargs[key])
         db.session.commit()
         return usuario
 
@@ -48,7 +52,16 @@ class UsuarioService:
     def eliminar_usuario(idUsuario):
         usuario = Usuario.query.get(idUsuario)
         if not usuario:
-            return False
+            return None
         db.session.delete(usuario)
         db.session.commit()
-        return True
+        return usuario
+
+    @staticmethod
+    def desactivar_usuario(idUsuario):
+        usuario = Usuario.query.get(idUsuario)
+        if not usuario:
+            return None
+        usuario.idEstado = "EST-002"
+        db.session.commit()
+        return usuario

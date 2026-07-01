@@ -83,6 +83,50 @@ function Dashboardadmin() {
                             </Link>
                         </h2>
                     </div>
+
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            <img src="../img/horasDeTrabajadores kk.png" alt="Horas" />
+                        </div>
+                        <h2 className="margin-t-15">
+                            <Link to="/admin-horas" className="no-text-decor display-block">
+                                Horas de Empleados
+                            </Link>
+                        </h2>
+                    </div>
+
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            <img src="../img/registroDePersonal kk .png" alt="Pagos" />
+                        </div>
+                        <h2 className="margin-t-15">
+                            <Link to="/admin-pagos" className="no-text-decor display-block">
+                                Gestión de Pagos
+                            </Link>
+                        </h2>
+                    </div>
+
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            <img src="../img/inventarioDeMaterial kk .png" alt="Asignar" />
+                        </div>
+                        <h2 className="margin-t-15">
+                            <Link to="/admin-asignar-insumos" className="no-text-decor display-block">
+                                Asignar Materiales
+                            </Link>
+                        </h2>
+                    </div>
+
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            <img src="../img/horasDeEmpleado kk .png" alt="Tareas" />
+                        </div>
+                        <h2 className="margin-t-15">
+                            <Link to="/admin-tareas-empleados" className="no-text-decor display-block">
+                                Tareas de Empleados
+                            </Link>
+                        </h2>
+                    </div>
                 </div>
             </main>
         </div>

@@ -33,6 +33,7 @@ def create_app():
     from app.routes.cliente_routes import cliente_bp
     from app.routes.producto_routes import producto_bp
     from app.routes.metodo_pago_routes import metodo_pago_bp
+    from app.routes.asignacion_routes import asignacion_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(usuario_bp)
@@ -46,5 +47,6 @@ def create_app():
     app.register_blueprint(cliente_bp)
     app.register_blueprint(producto_bp)
     app.register_blueprint(metodo_pago_bp)
+    app.register_blueprint(asignacion_bp)
 
     return app

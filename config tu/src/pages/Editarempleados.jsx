@@ -1,144 +1,258 @@
+/* ============================================================
+   ARCHIVO: Editarempleados.jsx
+   PROPOSITO: Componente de página que permite editar los datos
+              de un empleado/usuario existente en el sistema
+              Kimuka. Recibe el ID del empleado a través de la
+              URL (parámetro de ruta), carga sus datos actuales
+              desde el backend y muestra un formulario prellenado
+              para modificar nombre, apellidos, correo, contraseña
+              y estado. Tras guardar los cambios, redirige a la
+              lista de empleados.
+   ============================================================ */
+
+// Importación de hooks de estado y efecto de React
 import { useState, useEffect } from 'react';
+// Importación de Link para navegación, useParams para obtener parámetros de URL
+// y useNavigate para redirección programática
 import { Link, useParams, useNavigate } from 'react-router-dom';
+// Importación del módulo de API para realizar peticiones HTTP al backend
 import { api } from '../api';
 
+/* ============================================================
+   Componente principal: Editarempleados
+   Renderiza el formulario de edición de un empleado con sus
+   datos actuales prellenados y una sección de vista previa.
+   ============================================================ */
 function Editarempleados() {
-    const { id } = useParams();
-    const navigate = useNavigate();
 
-    const [adminName, setAdminName] = useState('ADMINISTRADOR');
-    const [formData, setFormData] = useState({
-        pNombre: "",
-        sNombre: "",
-        pApellido: "",
-        sApellido: "",
-        correo: "",
-        password: "",
-        idRol: "",
-        idEstado: "EST-001"
-    });
+  /* ----------------------------------------------------------
+     OBTENCIÓN DE PARÁMETROS DE RUTA
+     useParams extrae el ID del empleado de la URL
+     (ejemplo: /editarempleados/USR-001 → id = "USR-001")
+     ---------------------------------------------------------- */
+  const { id } = useParams();
 
-    useEffect(() => {
-        const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-        if (usuarioLogueado) {
-            const user = JSON.parse(usuarioLogueado);
-            if (user.nombre) setAdminName(user.nombre.toUpperCase());
-        }
+  /* ----------------------------------------------------------
+     HOOK DE NAVEGACIÓN
+     useNavigate permite redirigir programáticamente a otra
+     ruta después de guardar los cambios exitosamente.
+     ---------------------------------------------------------- */
+  const navigate = useNavigate();
 
-        if (!id) return;
-        api.usuarios.obtener(id)
-            .then((res) => {
-                const u = res.data;
-                setFormData({
-                    pNombre: u.pNombre || "",
-                    sNombre: u.sNombre || "",
-                    pApellido: u.pApellido || "",
-                    sApellido: u.sApellido || "",
-                    correo: u.correo || "",
-                    password: "",
-                    idRol: u.idRol || "",
-                    idEstado: u.idEstado || "EST-001"
-                });
-            })
-            .catch((err) => console.error("Error al traer el empleado:", err));
-    }, [id]);
+  /* ----------------------------------------------------------
+     ESTADOS (useState)
+     ---------------------------------------------------------- */
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  // Nombre del administrador logueado, se muestra en el encabezado
+  const [adminName, setAdminName] = useState('ADMINISTRADOR');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await api.usuarios.actualizar(id, formData);
-            alert("¡Cambios guardados exitosamente en Kimuka!");
-            navigate("/empleados");
-        } catch (err) {
-            alert("Hubo un problema al guardar los cambios.");
-        }
-    };
+  // Objeto que contiene todos los campos del formulario de edición
+  const [formData, setFormData] = useState({
+    pNombre: "",      // Primer nombre del empleado
+    sNombre: "",      // Segundo nombre del empleado
+    pApellido: "",    // Primer apellido del empleado
+    sApellido: "",    // Segundo apellido del empleado
+    correo: "",       // Correo electrónico del empleado
+    password: "",     // Nueva contraseña (vacío para mantener la actual)
+    idRol: "",        // ID del rol asignado al empleado
+    idEstado: "EST-001" // ID del estado del empleado (por defecto: ACTIVO)
+  });
 
-    return (
-        <div className="dark-theme">
-            <nav className="top-nav">
-                <Link to="/empleados" className="no-text-decor">VOLVER</Link>
-            </nav>
+  /* ----------------------------------------------------------
+     EFECTO SECUNDARIO (useEffect)
+     Se ejecuta al montar el componente y cada vez que cambia
+     el parámetro 'id' de la URL.
+     1. Obtiene el nombre del administrador desde localStorage
+     2. Carga los datos del empleado desde la API usando el ID
+     3. Rellena el formulario con los datos obtenidos
+     ---------------------------------------------------------- */
+  useEffect(() => {
+    // Obtener el usuario logueado desde localStorage
+    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+    // Si hay usuario logueado, establecer su nombre en el estado
+    if (usuarioLogueado) {
+      const user = JSON.parse(usuarioLogueado); // Parsear el objeto de usuario
+      if (user.nombre) setAdminName(user.nombre.toUpperCase()); // Nombre en mayúsculas
+    }
 
-            <header className="main-header">
-                <div className="header-container">
-                    <div className="logo-principal-cell">
-                        <div className="logo-principal">
-                            <div className="logo-circle">
-                                <img src="../img/logo kimuka.png" alt="logo Kimuka" />
-                            </div>
-                            <h1>Editar Personal</h1>
-                        </div>
-                    </div>
-                    <div className="header-actions-cell">
-                        <button className="btn-login">{adminName}</button>
-                    </div>
-                </div>
-            </header>
+    // Si no hay ID en la URL, salir sin cargar datos
+    if (!id) return;
 
-            <main className="content-wrapper">
-                <div className="panel-registro">
-                    <section className="form-section-cell">
-                        <h2 className="form-title">Editar Perfil</h2>
-                        <form className="grid-form" onSubmit={handleSubmit}>
-                            <div className="input-row">
-                                <div className="input-cell">
-                                    <label>Primer Nombre</label>
-                                    <input type="text" name="pNombre" value={formData.pNombre} onChange={handleChange} required />
-                                </div>
-                                <div className="input-cell">
-                                    <label>Segundo Nombre</label>
-                                    <input type="text" name="sNombre" value={formData.sNombre} onChange={handleChange} />
-                                </div>
-                            </div>
+    // Realizar petición GET para obtener los datos del empleado por su ID
+    api.usuarios.obtener(id)
+      .then((res) => {
+        const u = res.data; // Extraer los datos del empleado de la respuesta
+        // Rellenar el formulario con los datos obtenidos del empleado
+        setFormData({
+          pNombre: u.pNombre || "",      // Primer nombre (vacío si no existe)
+          sNombre: u.sNombre || "",      // Segundo nombre (vacío si no existe)
+          pApellido: u.pApellido || "",  // Primer apellido (vacío si no existe)
+          sApellido: u.sApellido || "",  // Segundo apellido (vacío si no existe)
+          correo: u.correo || "",        // Correo electrónico (vacío si no existe)
+          password: "",                  // Contraseña siempre vacía por seguridad
+          idRol: u.idRol || "",         // Rol del empleado
+          idEstado: u.idEstado || "EST-001" // Estado (ACTIVO por defecto)
+        });
+      })
+      .catch((err) => console.error("Error al traer el empleado:", err)); // Log de errores
+  }, [id]); // Se re-ejecuta cuando cambia el ID de la URL
 
-                            <div className="input-row">
-                                <div className="input-cell">
-                                    <label>Primer Apellido</label>
-                                    <input type="text" name="pApellido" value={formData.pApellido} onChange={handleChange} required />
-                                </div>
-                                <div className="input-cell">
-                                    <label>Segundo Apellido</label>
-                                    <input type="text" name="sApellido" value={formData.sApellido} onChange={handleChange} />
-                                </div>
-                            </div>
+  /* ----------------------------------------------------------
+     FUNCIÓN: handleChange
+     Propósito: Actualizar dinámicamente los campos del formulario
+                cuando el usuario escribe o selecciona un valor.
+     Parámetros: e - evento del input/select
+     Comportamiento: Usa el atributo 'name' del elemento para
+     determinar qué campo del objeto formData actualizar.
+     ---------------------------------------------------------- */
+  const handleChange = (e) => {
+    // Actualizar solo el campo cuyo name coincida con el del input modificado
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-                            <div className="input-group">
-                                <label>Correo Electrónico</label>
-                                <input type="email" name="correo" value={formData.correo} onChange={handleChange} required />
-                            </div>
+  /* ----------------------------------------------------------
+     FUNCIÓN: handleSubmit
+     Propósito: Enviar los datos actualizados del empleado al
+                backend y redirigir a la lista de empleados.
+     Parámetros: e - evento del formulario (submit)
+     Comportamiento: Previene la recarga de página, envía los
+     datos del formulario a la API para actualizar el empleado,
+     muestra una alerta de éxito y redirige a /empleados.
+     ---------------------------------------------------------- */
+  const handleSubmit = async (e) => {
+    // Prevenir comportamiento por defecto del formulario
+    e.preventDefault();
+    try {
+      // Enviar petición PUT para actualizar los datos del empleado
+      await api.usuarios.actualizar(id, formData);
+      // Mostrar confirmación de éxito al usuario
+      alert("¡Cambios guardados exitosamente en Kimuka!");
+      // Redirigir a la página de gestión de empleados
+      navigate("/empleados");
+    } catch (err) {
+      // Mostrar mensaje de error si la actualización falla
+      alert("Hubo un problema al guardar los cambios.");
+    }
+  };
 
-                            <div className="input-group">
-                                <label>Nueva Contraseña (dejar vacío para mantener)</label>
-                                <input type="password" name="password" value={formData.password} onChange={handleChange} />
-                            </div>
+  /* ----------------------------------------------------------
+     RENDERIZADO (JSX)
+     Estructura visual completa de la página de edición de empleados
+     ---------------------------------------------------------- */
+  return (
+    <div className="dark-theme">
+      {/* Barra de navegación superior con enlace para volver a la lista de empleados */}
+      <nav className="top-nav">
+        <Link to="/empleados" className="no-text-decor">VOLVER</Link>
+      </nav>
 
-                            <div className="input-group">
-                                <label>Estado</label>
-                                <select name="idEstado" value={formData.idEstado} onChange={handleChange}>
-                                    <option value="EST-001">ACTIVO</option>
-                                    <option value="EST-002">INACTIVO</option>
-                                </select>
-                            </div>
-
-                            <button type="submit" className="btn-submit">Guardar cambios</button>
-                        </form>
-                    </section>
-
-                    <section className="image-section-cell">
-                        <h2 className="avatar-preview-text">Foto-Trabajador</h2>
-                        <div className="portrait-wrapper">
-                            <img src="../img/registroDePersonal kk .png" alt="Vista previa" />
-                        </div>
-                    </section>
-                </div>
-            </main>
+      {/* Encabezado principal con logo, título y nombre del admin */}
+      <header className="main-header">
+        {/* Contenedor flex del encabezado */}
+        <div className="header-container">
+          {/* Celda del logo principal */}
+          <div className="logo-principal-cell">
+            {/* Contenedor del logo y título */}
+            <div className="logo-principal">
+              {/* Círculo contenedor de la imagen del logo */}
+              <div className="logo-circle">
+                {/* Imagen del logo de Kimuka */}
+                <img src="../img/logo kimuka.png" alt="logo Kimuka" />
+              </div>
+              {/* Título de la página de edición de personal */}
+              <h1>Editar Personal</h1>
+            </div>
+          </div>
+          {/* Celda de acciones: nombre del administrador */}
+          <div className="header-actions-cell">
+            {/* Botón que muestra el nombre del administrador logueado */}
+            <button className="btn-login">{adminName}</button>
+          </div>
         </div>
-    );
+      </header>
+
+      {/* Contenido principal de la página */}
+      <main className="content-wrapper">
+        {/* Panel de registro/edición con diseño de dos columnas */}
+        <div className="panel-registro">
+          {/* Sección izquierda: formulario de edición */}
+          <section className="form-section-cell">
+            {/* Título del formulario */}
+            <h2 className="form-title">Editar Perfil</h2>
+            {/* Formulario de edición con grid layout */}
+            <form className="grid-form" onSubmit={handleSubmit}>
+              {/* Fila: Primer Nombre y Segundo Nombre */}
+              <div className="input-row">
+                {/* Campo de Primer Nombre */}
+                <div className="input-cell">
+                  <label>Primer Nombre</label>
+                  <input type="text" name="pNombre" value={formData.pNombre} onChange={handleChange} required />
+                </div>
+                {/* Campo de Segundo Nombre (opcional) */}
+                <div className="input-cell">
+                  <label>Segundo Nombre</label>
+                  <input type="text" name="sNombre" value={formData.sNombre} onChange={handleChange} />
+                </div>
+              </div>
+
+              {/* Fila: Primer Apellido y Segundo Apellido */}
+              <div className="input-row">
+                {/* Campo de Primer Apellido */}
+                <div className="input-cell">
+                  <label>Primer Apellido</label>
+                  <input type="text" name="pApellido" value={formData.pApellido} onChange={handleChange} required />
+                </div>
+                {/* Campo de Segundo Apellido (opcional) */}
+                <div className="input-cell">
+                  <label>Segundo Apellido</label>
+                  <input type="text" name="sApellido" value={formData.sApellido} onChange={handleChange} />
+                </div>
+              </div>
+
+              {/* Campo: Correo Electrónico */}
+              <div className="input-group">
+                <label>Correo Electrónico</label>
+                <input type="email" name="correo" value={formData.correo} onChange={handleChange} required />
+              </div>
+
+              {/* Campo: Nueva Contraseña (dejar vacío para mantener la actual) */}
+              <div className="input-group">
+                <label>Nueva Contraseña (dejar vacío para mantener)</label>
+                <input type="password" name="password" value={formData.password} onChange={handleChange} />
+              </div>
+
+              {/* Campo: Estado del empleado (ACTIVO/INACTIVO) */}
+              <div className="input-group">
+                <label>Estado</label>
+                {/* Selector de estado del empleado */}
+                <select name="idEstado" value={formData.idEstado} onChange={handleChange}>
+                  {/* Opción: ACTIVO */}
+                  <option value="EST-001">ACTIVO</option>
+                  {/* Opción: INACTIVO */}
+                  <option value="EST-002">INACTIVO</option>
+                </select>
+              </div>
+
+              {/* Botón para enviar el formulario y guardar los cambios */}
+              <button type="submit" className="btn-submit">Guardar cambios</button>
+            </form>
+          </section>
+
+          {/* Sección derecha: imagen de vista previa/avatar */}
+          <section className="image-section-cell">
+            {/* Título de la sección de imagen */}
+            <h2 className="avatar-preview-text">Foto-Trabajador</h2>
+            {/* Contenedor de la imagen de vista previa */}
+            <div className="portrait-wrapper">
+              {/* Imagen decorativa de vista previa del empleado */}
+              <img src="../img/registroDePersonal kk .png" alt="Vista previa" />
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
 }
 
+// Exportar el componente como exportación por defecto
 export default Editarempleados;

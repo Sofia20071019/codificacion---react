@@ -45,8 +45,13 @@ function AdminPagos() {
     const [calculo, setCalculo] = useState(null);
 
     /* Nombre del administrador logueado, se obtiene del localStorage
-       y se muestra en el encabezado */
-    const [adminName, setAdminName] = useState('ADMINISTRADOR');
+       y se muestra en el encabezado. Se inicializa de forma perezosa
+       para no depender de un setState dentro del useEffect
+       (evita lint set-state-in-effect) */
+    const [adminName] = useState(() => {
+        const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+        return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+    });
 
     /* Estado del formulario de registro de pago, contiene los campos:
        idJornada, idMetodo y monto */
@@ -69,10 +74,6 @@ function AdminPagos() {
        montar el componente. Carga el nombre de sesión del admin,
        la lista de empleados, métodos de pago, jornadas y pagos. */
     useEffect(() => {
-        /* Obtener el nombre de sesión activa desde localStorage */
-        const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-        if (nombreSesion) setAdminName(nombreSesion.toUpperCase());
-
         /* Petición GET para listar todos los empleados registrados */
         api.empleados.listar()
             .then((res) => setEmpleados(res.data || []))

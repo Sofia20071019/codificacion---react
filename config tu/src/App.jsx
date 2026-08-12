@@ -55,8 +55,16 @@ import Aprobarpago from './pages/Aprobarpago';
 import Dashboardadmin from './pages/Dashboardadmin';
 // Gestión y listado de empleados (solo administradores)
 import GestionEmpleados from './pages/GestionEmpleados';
-// Panel de reportes y estadísticas (solo administradores)
+// Panel de reportes y estadísticas (hub de reportes, solo administradores)
 import PanelReportes from './pages/Panelreportes';
+// Reporte de materias primas (inventario, solo administradores)
+import ReporteMateriasPrimas from './pages/ReporteMateriasPrimas';
+// Reporte de horas trabajadas (solo administradores)
+import ReporteHoras from './pages/ReporteHoras';
+// Reporte de trabajos más realizados (solo administradores)
+import ReporteTrabajos from './pages/ReporteTrabajos';
+// Reporte de producción (solo administradores)
+import ReporteProduccion from './pages/ReporteProduccion';
 // Dashboard del empleado (panel personal del trabajador)
 import DashboardEmpleado from './pages/DashboardEmpleado';
 // Inventario de materia prima visto por el empleado (solo lectura)
@@ -247,8 +255,20 @@ function App() {
         {/* Gestión de empleados: listado, búsqueda y administración de todo el personal */}
         <Route path='/empleados' element={<RutaProtegida rolRequerido="ROL-001"><GestionEmpleados /></RutaProtegida>} />
 
-        {/* Panel de reportes: estadísticas y métricas del negocio */}
+        {/* Panel de reportes: hub con acceso a todos los reportes del negocio */}
         <Route path='/reportes' element={<RutaProtegida rolRequerido="ROL-001"><PanelReportes /></RutaProtegida>} />
+
+        {/* Reporte de materias primas: inventario y stock de materiales */}
+        <Route path='/reporte-materias-primas' element={<RutaProtegida rolRequerido="ROL-001"><ReporteMateriasPrimas /></RutaProtegida>} />
+
+        {/* Reporte de horas trabajadas: jornadas y horas por empleado */}
+        <Route path='/reporte-horas' element={<RutaProtegida rolRequerido="ROL-001"><ReporteHoras /></RutaProtegida>} />
+
+        {/* Reporte de trabajos más realizados: materiales y empleados más activos */}
+        <Route path='/reporte-trabajos' element={<RutaProtegida rolRequerido="ROL-001"><ReporteTrabajos /></RutaProtegida>} />
+
+        {/* Reporte de producción: órdenes y unidades fabricadas */}
+        <Route path='/reporte-produccion' element={<RutaProtegida rolRequerido="ROL-001"><ReporteProduccion /></RutaProtegida>} />
 
         {/* Edición de empleado: formulario para modificar datos de un empleado específico */}
         {/* :id es un parámetro dinámico que captura el ID del empleado a editar */}

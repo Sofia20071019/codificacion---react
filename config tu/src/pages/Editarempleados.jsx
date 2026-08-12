@@ -43,8 +43,17 @@ function Editarempleados() {
      ESTADOS (useState)
      ---------------------------------------------------------- */
 
-  // Nombre del administrador logueado, se muestra en el encabezado
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  // Nombre del administrador logueado, se muestra en el encabezado.
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+    if (usuarioLogueado) {
+      const user = JSON.parse(usuarioLogueado);
+      return user.nombre ? user.nombre.toUpperCase() : 'ADMINISTRADOR';
+    }
+    return 'ADMINISTRADOR';
+  });
 
   // Objeto que contiene todos los campos del formulario de edición
   const [formData, setFormData] = useState({
@@ -62,19 +71,10 @@ function Editarempleados() {
      EFECTO SECUNDARIO (useEffect)
      Se ejecuta al montar el componente y cada vez que cambia
      el parámetro 'id' de la URL.
-     1. Obtiene el nombre del administrador desde localStorage
-     2. Carga los datos del empleado desde la API usando el ID
-     3. Rellena el formulario con los datos obtenidos
+     1. Carga los datos del empleado desde la API usando el ID
+     2. Rellena el formulario con los datos obtenidos
      ---------------------------------------------------------- */
   useEffect(() => {
-    // Obtener el usuario logueado desde localStorage
-    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-    // Si hay usuario logueado, establecer su nombre en el estado
-    if (usuarioLogueado) {
-      const user = JSON.parse(usuarioLogueado); // Parsear el objeto de usuario
-      if (user.nombre) setAdminName(user.nombre.toUpperCase()); // Nombre en mayúsculas
-    }
-
     // Si no hay ID en la URL, salir sin cargar datos
     if (!id) return;
 
@@ -129,7 +129,7 @@ function Editarempleados() {
       alert("¡Cambios guardados exitosamente en Kimuka!");
       // Redirigir a la página de gestión de empleados
       navigate("/empleados");
-    } catch (err) {
+    } catch {
       // Mostrar mensaje de error si la actualización falla
       alert("Hubo un problema al guardar los cambios.");
     }

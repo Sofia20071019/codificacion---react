@@ -9,8 +9,8 @@
               persistir y consultar los datos en tiempo real.
    ============================================================ */
 
-// Importación de React y hooks de estado y efecto
-import React, { useState, useEffect } from 'react';
+// Importación de hooks de estado y efecto
+import { useState, useEffect } from 'react';
 // Importación de Link para navegación entre rutas sin recarga de página
 import { Link } from 'react-router-dom';
 // Importación del módulo de API para realizar peticiones HTTP al backend
@@ -60,17 +60,9 @@ function GestionDePedidos() {
   /* ----------------------------------------------------------
      EFECTO SECUNDARIO (useEffect)
      Se ejecuta una sola vez al montar el componente.
-     Verifica que haya un usuario logueado en localStorage
-     y carga la lista de pedidos y clientes desde la API.
+     Carga la lista de pedidos y clientes desde la API.
      ---------------------------------------------------------- */
   useEffect(() => {
-    // Obtener el usuario logueado desde localStorage
-    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-    // Si no hay usuario logueado, salir sin hacer nada
-    if (!usuarioLogueado) return;
-    // Parsear el objeto de usuario desde JSON
-    const user = JSON.parse(usuarioLogueado);
-
     // Realizar petición GET para obtener todas las órdenes/pedidos
     api.ordenes.listar()
       .then((res) => setListaPedidos(res.data || [])) // Guardar la lista de pedidos en el estado

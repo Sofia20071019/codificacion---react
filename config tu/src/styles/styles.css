@@ -451,6 +451,55 @@ input[type="file"] {
 .card-materia-prima p { margin-bottom: 4px; }
 
 /* ==========================================================================
+   BOTÓN DE EXPORTACIÓN A EXCEL (Módulo de Reportes)
+   ========================================================================== */
+
+/* Celda de filtro que alberga el botón: alineada a la derecha */
+.filter-cell-btn {
+    text-align: right;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.filter-cell-btn button {
+    width: auto;
+}
+
+/* Botón verde de exportación a Excel */
+.btn-export {
+    background: var(--color-success);
+    color: #000000;
+    border: none;
+    padding: 12px 24px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    display: inline-block;
+}
+
+.btn-export:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background-color: #27ae60;
+}
+
+.btn-export:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-export span {
+    margin-right: 8px;
+}
+
+/* Mensaje de error de la exportación */
+.text-error {
+    color: var(--color-error);
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
    MAIN FOOTER
    ========================================================================== */
 

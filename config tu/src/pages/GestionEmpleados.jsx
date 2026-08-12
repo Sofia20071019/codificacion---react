@@ -33,24 +33,24 @@ function GestionEmpleados() {
   // Texto de búsqueda para filtrar empleados por nombre
   const [busqueda, setBusqueda] = useState("");
 
-  // Nombre del administrador logueado, se muestra en el encabezado
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  // Nombre del administrador logueado, se muestra en el encabezado.
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+    if (usuarioLogueado) {
+      const user = JSON.parse(usuarioLogueado);
+      return user.nombre ? user.nombre.toUpperCase() : 'ADMINISTRADOR';
+    }
+    return 'ADMINISTRADOR';
+  });
 
   /* ----------------------------------------------------------
      EFECTO SECUNDARIO (useEffect)
      Se ejecuta una sola vez al montar el componente.
-     Obtiene el nombre del administrador desde localStorage
-     y carga la lista de empleados/usuarios desde la API.
+     Carga la lista de empleados/usuarios desde la API.
      ---------------------------------------------------------- */
   useEffect(() => {
-    // Obtener el usuario logueado desde localStorage
-    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-    // Si hay usuario logueado, establecer su nombre en el estado
-    if (usuarioLogueado) {
-      const user = JSON.parse(usuarioLogueado); // Parsear el objeto de usuario desde JSON
-      if (user.nombre) setAdminName(user.nombre.toUpperCase()); // Nombre en mayúsculas
-    }
-
     // Realizar petición GET para obtener la lista de usuarios/empleados
     api.usuarios.listar()
       .then((res) => setEmpleados(res.data || [])) // Guardar la lista de empleados en el estado
@@ -80,7 +80,7 @@ function GestionEmpleados() {
         ));
         // Mostrar confirmación de éxito
         alert("Empleado desactivado con éxito.");
-      } catch (err) {
+      } catch {
         // Mostrar mensaje de error si la desactivación falla
         alert("No se pudo desactivar el empleado.");
       }

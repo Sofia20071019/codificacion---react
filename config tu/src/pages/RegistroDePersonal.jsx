@@ -12,8 +12,8 @@
               la página de gestión de empleados.
    ============================================================ */
 
-// Importación de React y hooks de estado y efecto
-import React, { useState, useEffect } from 'react';
+// Importación de hooks de estado y efecto
+import { useState, useEffect } from 'react';
 // Importación de Link para navegación y useNavigate para redirección programática
 import { Link, useNavigate } from 'react-router-dom';
 // Importación del módulo de API para realizar peticiones HTTP al backend
@@ -37,8 +37,17 @@ function RegistroDePersonal() {
      ESTADOS (useState)
      ---------------------------------------------------------- */
 
-  // Nombre del administrador logueado, se muestra en el encabezado
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  // Nombre del administrador logueado, se muestra en el encabezado.
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+    if (usuarioLogueado) {
+      const user = JSON.parse(usuarioLogueado);
+      return user.nombre ? user.nombre.toUpperCase() : 'ADMINISTRADOR';
+    }
+    return 'ADMINISTRADOR';
+  });
 
   // Lista de roles disponibles obtenidos desde el backend
   const [roles, setRoles] = useState([]);
@@ -70,18 +79,9 @@ function RegistroDePersonal() {
   /* ----------------------------------------------------------
      EFECTO SECUNDARIO (useEffect)
      Se ejecuta una sola vez al montar el componente.
-     1. Obtiene el nombre del administrador desde localStorage
-     2. Carga la lista de roles disponibles desde la API
+     Carga la lista de roles disponibles desde la API
      ---------------------------------------------------------- */
   useEffect(() => {
-    // Obtener el usuario logueado desde localStorage
-    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-    // Si hay usuario logueado, establecer su nombre en el estado
-    if (usuarioLogueado) {
-      const user = JSON.parse(usuarioLogueado); // Parsear el objeto de usuario
-      if (user.nombre) setAdminName(user.nombre.toUpperCase()); // Nombre en mayúsculas
-    }
-
     // Realizar petición GET para obtener la lista de roles del sistema
     api.roles.listar()
       .then((res) => setRoles(res.data || [])) // Guardar los roles en el estado

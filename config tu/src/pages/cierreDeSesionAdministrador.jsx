@@ -15,9 +15,8 @@
    programática después del cierre de sesión */
 import { Link, useNavigate } from 'react-router-dom';
 
-/* Importación de hooks de React: useState para estado local,
-   useEffect para efectos al montar */
-import { useState, useEffect } from 'react';
+/* Importación de hooks de React: useState para estado local */
+import { useState } from 'react';
 
 /* Definición del componente funcional CierreDeSesionAdministrador */
 function CierreDeSesionAdministrador() {
@@ -26,15 +25,10 @@ function CierreDeSesionAdministrador() {
     const navigate = useNavigate();
 
     /* Nombre del administrador logueado, se obtiene del localStorage
-       y se muestra en el mensaje de confirmación */
-    const [adminName, setAdminName] = useState('ADMINISTRADOR');
-
-    /* ---------- EFECTO AL MONTAR EL COMPONENTE ---------- */
-
-    /* useEffect con dependencias vacías: se ejecuta una sola vez al montar.
-       Obtiene el nombre del administrador desde localStorage usando
-       dos posibles claves: 'usuarioLogueado' o 'kimuka_sesion_activa'. */
-    useEffect(() => {
+       y se muestra en el mensaje de confirmación.
+       Se inicializa de forma perezosa desde localStorage para no depender
+       de un setState dentro del useEffect (evita lint set-state-in-effect) */
+    const [adminName] = useState(() => {
         /* Obtener el objeto de usuario logueado desde localStorage */
         const usuarioLogueado = localStorage.getItem('usuarioLogueado');
         /* Obtener el nombre de sesión activa como alternativa */
@@ -45,12 +39,11 @@ function CierreDeSesionAdministrador() {
             /* Parsear el objeto de usuario desde JSON */
             const user = JSON.parse(usuarioLogueado);
             /* Si el usuario tiene nombre, mostrarlo en mayúsculas */
-            if (user.nombre) setAdminName(user.nombre.toUpperCase());
-        } else if (nombreSesion) {
-            /* Si no hay usuario logueado pero hay sesión activa, usar ese nombre */
-            setAdminName(nombreSesion.toUpperCase());
+            if (user.nombre) return user.nombre.toUpperCase();
         }
-    }, []); /* Array vacío: solo se ejecuta al montar */
+        /* Si no hay usuario logueado pero hay sesión activa, usar ese nombre */
+        return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+    });
 
     /* ---------- FUNCIONES MANEJADORAS ---------- */
 

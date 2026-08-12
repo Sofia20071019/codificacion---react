@@ -12,25 +12,18 @@
 
 // Importa Link de React Router para crear enlaces SPA entre módulos
 import { Link } from 'react-router-dom';
-// Importa useState (estado local) y useEffect (efectos al montar)
-import { useState, useEffect } from 'react';
+// Importa useState para el estado local
+import { useState } from 'react';
 
 // Función componente que renderiza el dashboard del empleado
 function DashboardEmpleado() {
     // Estado local para almacenar y mostrar el nombre del empleado logueado
-    // Valor por defecto: 'EMPLEADO' por si no se encuentra en localStorage
-    const [empleadoName, setEmpleadoName] = useState('EMPLEADO');
-
-    // Efecto secundario que se ejecuta una vez al montar el componente
-    // Lee el nombre del usuario logueado desde localStorage para personalizar la vista
-    useEffect(() => {
-        // Obtiene el nombre de sesión que se guardó al hacer login
+    // Se inicializa de forma perezosa desde localStorage para no depender de un
+    // setState dentro del useEffect (evita lint set-state-in-effect)
+    const [empleadoName] = useState(() => {
         const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-        if (nombreSesion) {
-            // Convierte a mayúsculas y lo guarda en el estado local
-            setEmpleadoName(nombreSesion.toUpperCase());
-        }
-    }, []); // Dependencias vacías = se ejecuta solo una vez al montar
+        return nombreSesion ? nombreSesion.toUpperCase() : 'EMPLEADO';
+    });
 
     return (
         <div className="dark-theme">

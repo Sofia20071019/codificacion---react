@@ -9,8 +9,8 @@
               para obtener la lista de insumos disponibles.
    ============================================================ */
 
-// Importación de React y hooks de estado y efecto
-import React, { useState, useEffect } from 'react';
+// Importación de hooks de estado y efecto
+import { useState, useEffect } from 'react';
 // Importación de Link para navegación entre rutas
 import { Link } from 'react-router-dom';
 // Importación del componente Bar de react-chartjs-2 para gráficas de barras
@@ -42,8 +42,18 @@ function ReporteDePedidos() {
      ESTADOS (useState)
      ---------------------------------------------------------- */
 
-  // Nombre del administrador logueado, usado en el encabezado
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  // Nombre del administrador logueado, usado en el encabezado.
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+    if (usuarioLogueado) {
+      const user = JSON.parse(usuarioLogueado);
+      if (user.nombre) return user.nombre.toUpperCase();
+    }
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+  });
 
   // Lista de insumos obtenidos desde el backend para el selector de insumos
   const [insumos, setInsumos] = useState([]);
@@ -107,24 +117,9 @@ function ReporteDePedidos() {
   /* ----------------------------------------------------------
      EFECTO SECUNDARIO (useEffect)
      Se ejecuta una sola vez al montar el componente.
-     Obtiene el nombre del administrador desde localStorage
-     y carga la lista de insumos desde la API.
+     Carga la lista de insumos desde la API.
      ---------------------------------------------------------- */
   useEffect(() => {
-    // Obtener el usuario logueado desde localStorage
-    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-    // Obtener la sesión activa de Kimuka como respaldo
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-
-    // Si hay un usuario logueado, usar su nombre
-    if (usuarioLogueado) {
-      const user = JSON.parse(usuarioLogueado); // Parsear el objeto de usuario
-      if (user.nombre) setAdminName(user.nombre.toUpperCase()); // Establecer nombre en mayúsculas
-    } else if (nombreSesion) {
-      // Si no hay usuario pero hay sesión activa, usar ese nombre
-      setAdminName(nombreSesion.toUpperCase());
-    }
-
     // Realizar petición GET para obtener la lista de insumos disponibles
     api.insumos.listar()
       .then((res) => setInsumos(res.data || [])) // Guardar insumos en el estado

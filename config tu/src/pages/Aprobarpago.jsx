@@ -27,15 +27,30 @@ function Aprobarpago() {
     /* ---------- ESTADOS DEL COMPONENTE ---------- */
 
     /* Estado del formulario de aprobación de pago, contiene los campos:
-       nombre, cedula, monto, idMetodo, concepto, estado y responsable */
-    const [pago, setPago] = useState({
-        nombre: "",
-        cedula: "",
-        monto: "",
-        idMetodo: "",
-        concepto: "",
-        estado: "Pendiente",     /* Estado inicial: Pendiente hasta que se apruebe */
-        responsable: "ADMIN"     /* Responsable por defecto, se actualiza con el usuario logueado */
+       nombre, cedula, monto, idMetodo, concepto, estado y responsable.
+       El responsable se inicializa de forma perezosa desde localStorage para
+       no depender de un setState dentro del useEffect (evita lint set-state-in-effect) */
+    const [pago, setPago] = useState(() => {
+        /* Obtener el usuario logueado desde localStorage para usar su nombre
+           como responsable del pago, o 'ADMIN' como respaldo */
+        let responsable = "ADMIN";
+        const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+        if (usuarioLogueado) {
+            try {
+                responsable = JSON.parse(usuarioLogueado).nombre?.toUpperCase() || "ADMIN";
+            } catch {
+                responsable = "ADMIN";
+            }
+        }
+        return {
+            nombre: "",
+            cedula: "",
+            monto: "",
+            idMetodo: "",
+            concepto: "",
+            estado: "Pendiente",     /* Estado inicial: Pendiente hasta que se apruebe */
+            responsable              /* Responsable obtenido del usuario logueado */
+        };
     });
 
     /* Lista de métodos de pago disponibles cargados desde la API */
@@ -49,16 +64,6 @@ function Aprobarpago() {
     /* useEffect con dependencias vacías: se ejecuta una sola vez al
        montar el componente para cargar datos iniciales */
     useEffect(() => {
-        /* Obtener el usuario logueado desde localStorage */
-        const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-        if (usuarioLogueado) {
-            /* Parsear el objeto de usuario desde JSON */
-            const user = JSON.parse(usuarioLogueado);
-            /* Actualizar el responsable con el nombre del usuario logueado
-               en mayúsculas, o usar 'ADMIN' como respaldo */
-            setPago(prev => ({ ...prev, responsable: user.nombre?.toUpperCase() || 'ADMIN' }));
-        }
-
         /* Petición GET para listar todos los métodos de pago disponibles */
         api.metodosPago.listar()
             .then((res) => setMetodosPago(res.data || []))

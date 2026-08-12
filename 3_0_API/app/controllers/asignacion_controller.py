@@ -32,31 +32,12 @@ class AsignacionController:
         información del empleado y del insumo asignado.
         """
         try:
-            # Importación diferida del servicio de asignaciones
-            from app.services.asignacion_service import AsignacionService
-            # Importación de modelos para resolver relaciones de empleados e insumos
-            from app.models import Usuario, Insumo
+            # Importación diferida del servicio de reportes para evitar dependencias circulares.
+            # El servicio de reportes es la fuente única de datos que comparten la vista
+            # y la exportación a Excel, garantizando consistencia entre ambas.
+            from app.services.reporte_service import ReporteService
             # Obtener todas las asignaciones registradas en la base de datos
-            asignaciones = AsignacionService.listar_todas()
-            # Lista para almacenar los datos formateados de cada asignación
-            data = []
-            # Iterar sobre cada asignación para construir la respuesta
-            for a in asignaciones:
-                # Buscar el empleado asociado a la asignación por su ID
-                empleado = Usuario.query.get(a.idUsuario_Empleado)
-                # Buscar el insumo asociado a la asignación por su ID
-                insumo = Insumo.query.get(a.idInsumo)
-                # Agregar los datos formateados de la asignación a la lista
-                data.append({
-                    "idAsignacion": a.idAsignacion,
-                    "idUsuario_Empleado": a.idUsuario_Empleado,
-                    "nombreEmpleado": f"{empleado.pNombre or ''} {empleado.pApellido or ''}".strip() if empleado else "Desconocido",
-                    "idInsumo": a.idInsumo,
-                    "nombreInsumo": insumo.nombreInsumo if insumo else "Desconocido",
-                    "cantidad": float(a.cantidad) if a.cantidad else 0,
-                    "fechaAsignacion": str(a.fechaAsignacion) if a.fechaAsignacion else None,
-                    "estado": a.estado
-                })
+            data = ReporteService.obtener_asignaciones()
             # Retornar respuesta exitosa con la lista de asignaciones
             return jsonify({"status": "success", "data": data}), 200
         except Exception as e:

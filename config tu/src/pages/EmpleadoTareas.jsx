@@ -23,20 +23,20 @@ import { api } from '../api';
 function EmpleadoTareas() {
   /* Estado que almacena la lista de asignaciones de materiales del empleado */
   const [asignaciones, setAsignaciones] = useState([]);
-  /* Estado que almacena el nombre del empleado para mostrarlo en el header */
-  const [empleadoName, setEmpleadoName] = useState('EMPLEADO');
+  /* Estado que almacena el nombre del empleado para mostrarlo en el header.
+     Se inicializa de forma perezosa desde localStorage para no depender de un
+     setState dentro del useEffect (evita lint set-state-in-effect) */
+  const [empleadoName] = useState(() => {
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'EMPLEADO';
+  });
 
   /**
    * Efecto que se ejecuta una sola vez al montar el componente.
-   * Lee el nombre de sesión y los datos del usuario desde localStorage,
+   * Lee los datos del usuario desde localStorage,
    * luego realiza una petición API para obtener las asignaciones del empleado.
    */
   useEffect(() => {
-    /* Obtener el nombre de la sesión activa desde localStorage */
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-    /* Si existe la sesión, actualizar el nombre del empleado en mayúsculas */
-    if (nombreSesion) setEmpleadoName(nombreSesion.toUpperCase());
-
     /* Obtener los datos completos del usuario logueado desde localStorage */
     const usuarioLogueado = localStorage.getItem('usuarioLogueado');
     /* Verificar que exista un usuario logueado antes de hacer la petición */

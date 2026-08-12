@@ -33,40 +33,22 @@ class JornadaController:
         del empleado autenticado.
         """
         try:
-            # Importación diferida del servicio de jornadas para evitar dependencias circulares
-            from app.services.jornada_service import JornadaService
-            # Importación del modelo Usuario para resolver la relación de empleados
-            from app.models import Usuario
+            # Importación diferida del servicio de reportes para evitar dependencias circulares.
+            # El servicio de reportes es la fuente única de datos que comparten la vista
+            # y la exportación a Excel, garantizando consistencia entre ambas.
+            from app.services.reporte_service import ReporteService
             # Obtener el ID del usuario autenticado desde el token JWT
             usuario_id = request.usuario.get("idUsuario")
             # Obtener el ID del rol del usuario autenticado
             id_rol = request.usuario.get("idRol")
 
             # Verificar si el usuario es administrador para mostrar todas las jornadas
-            if id_rol == "ROL-001":
-                # Administrador: obtener todas las jornadas del sistema
-                jornadas = JornadaService.listar_todas()
-            else:
-                # Empleado: obtener solo sus propias jornadas
-                jornadas = JornadaService.listar_por_empleado(usuario_id)
+            es_admin = id_rol == "ROL-001"
 
-            # Lista para almacenar los datos formateados de cada jornada
-            data = []
-            # Iterar sobre cada jornada para construir la respuesta
-            for j in jornadas:
-                # Buscar el empleado asociado a la jornada por su ID
-                empleado = Usuario.query.get(j.idUsuario_Empleado)
-                # Construir el nombre completo del empleado o usar "Desconocido" si no se encuentra
-                nombre_empleado = f"{empleado.pNombre or ''} {empleado.pApellido or ''}".strip() if empleado else "Desconocido"
-                # Agregar los datos formateados de la jornada a la lista
-                data.append({
-                    "idJornada": j.idJornada,
-                    "idUsuario_Empleado": j.idUsuario_Empleado,
-                    "nombreEmpleado": nombre_empleado,
-                    "fecha": str(j.fecha) if j.fecha else None,
-                    "hInicio": str(j.hInicio) if j.hInicio else None,
-                    "hFin": str(j.hFin) if j.hFin else None
-                })
+            # Obtener las jornadas con la misma lógica que comparte el Excel:
+            # el administrador ve todas, el empleado solo sus propias jornadas.
+            data = ReporteService.obtener_jornadas(es_admin=es_admin, id_usuario=usuario_id)
+
             # Retornar respuesta exitosa con la lista de jornadas
             return jsonify({"status": "success", "data": data}), 200
         except Exception as e:

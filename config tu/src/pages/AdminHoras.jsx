@@ -6,8 +6,8 @@
               el detalle de cada jornada (entrada, salida, estado).
    ========================================================================== */
 
-// Importa React y los hooks useState (estado local) y useEffect (efectos secundarios)
-import React, { useState, useEffect } from 'react';
+// Importa los hooks useState (estado local) y useEffect (efectos secundarios)
+import { useState, useEffect } from 'react';
 // Importa Link para navegación entre rutas sin recargar la página
 import { Link } from 'react-router-dom';
 // Importa el módulo api que contiene los métodos para llamar al backend
@@ -24,15 +24,15 @@ function AdminHoras() {
   // Estado: resultado del cálculo de pago del empleado seleccionado (null si no hay selección)
   const [calculo, setCalculo] = useState(null);
   // Estado: nombre del administrador obtenido de la sesión activa
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  // Se inicializa de forma perezosa desde localStorage para no depender
+  // de un setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+  });
 
   // useEffect que se ejecuta al montar el componente para cargar datos iniciales
   useEffect(() => {
-    // Obtiene el nombre de sesión guardado en localStorage
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-    // Si existe sesión activa, actualiza el nombre del administrador en mayúsculas
-    if (nombreSesion) setAdminName(nombreSesion.toUpperCase());
-
     // Llama al endpoint para listar todos los empleados
     api.empleados.listar()
       .then((res) => setEmpleados(res.data || []))

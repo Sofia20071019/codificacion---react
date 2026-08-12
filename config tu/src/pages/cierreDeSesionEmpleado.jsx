@@ -29,14 +29,44 @@ function CierreDeSesionEmpleado() {
     const navigate = useNavigate();
 
     /* Nombre del empleado logueado, se obtiene del localStorage
-       y se muestra en la interfaz */
-    const [empleadoName, setEmpleadoName] = useState('EMPLEADO');
+       y se muestra en la interfaz.
+       Se inicializa de forma perezosa desde localStorage para no depender
+       de un setState dentro del useEffect (evita lint set-state-in-effect) */
+    const [empleadoName] = useState(() => {
+        /* Obtener el usuario logueado desde localStorage */
+        const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+        /* Obtener el nombre de sesión activa como alternativa */
+        const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+
+        /* Si existe el usuario logueado y tiene nombre, usar ese nombre */
+        if (usuarioLogueado) {
+            try {
+                const user = JSON.parse(usuarioLogueado);
+                if (user.nombre) return user.nombre.toUpperCase();
+            } catch {
+                /* Si el JSON no es válido, usar la sesión activa */
+            }
+        }
+        /* Si no hay usuario logueado pero sí sesión activa, usar ese nombre */
+        return nombreSesion ? nombreSesion.toUpperCase() : 'EMPLEADO';
+    });
 
     /* Hora de salida del empleado, se inicializa con la hora actual */
-    const [horaSalida, setHoraSalida] = useState('');
+    const [horaSalida, setHoraSalida] = useState(() => {
+        const hoy = new Date();
+        const horas = String(hoy.getHours()).padStart(2, '0');
+        const minutos = String(hoy.getMinutes()).padStart(2, '0');
+        return `${horas}:${minutos}`;
+    });
 
     /* Fecha de salida del empleado, se inicializa con la fecha actual */
-    const [fechaSalida, setFechaSalida] = useState('');
+    const [fechaSalida, setFechaSalida] = useState(() => {
+        const hoy = new Date();
+        const año = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        return `${año}-${mes}-${dia}`;
+    });
 
     /* ID de la jornada activa del empleado, se busca automáticamente
        al montar el componente para poder finalizarla */
@@ -45,44 +75,8 @@ function CierreDeSesionEmpleado() {
     /* ---------- EFECTO AL MONTAR EL COMPONENTE ---------- */
 
     /* useEffect con dependencias vacías: se ejecuta una sola vez al montar.
-       Inicializa la fecha y hora actual, obtiene el nombre del empleado,
-       y busca la jornada activa en la API. */
+       Busca la jornada activa del empleado en la API. */
     useEffect(() => {
-        /* Obtener la fecha y hora actual del sistema */
-        const hoy = new Date();
-
-        /* Extraer y formatear el año con 4 dígitos */
-        const año = hoy.getFullYear();
-        /* Extraer y formatear el mes con 2 dígitos (01-12) */
-        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-        /* Extraer y formatear el día con 2 dígitos (01-31) */
-        const dia = String(hoy.getDate()).padStart(2, '0');
-        /* Establecer la fecha de salida en formato YYYY-MM-DD */
-        setFechaSalida(`${año}-${mes}-${dia}`);
-
-        /* Extraer y formatear las horas con 2 dígitos (00-23) */
-        const horas = String(hoy.getHours()).padStart(2, '0');
-        /* Extraer y formatear los minutos con 2 dígitos (00-59) */
-        const minutos = String(hoy.getMinutes()).padStart(2, '0');
-        /* Establecer la hora de salida en formato HH:MM */
-        setHoraSalida(`${horas}:${minutos}`);
-
-        /* Obtener el usuario logueado desde localStorage */
-        const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-        /* Obtener el nombre de sesión activa como alternativa */
-        const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-
-        /* Si existe el usuario logueado, usar su nombre */
-        if (usuarioLogueado) {
-            /* Parsear el objeto de usuario desde JSON */
-            const user = JSON.parse(usuarioLogueado);
-            /* Si el usuario tiene nombre, mostrarlo en mayúsculas */
-            if (user.nombre) setEmpleadoName(user.nombre.toUpperCase());
-        } else if (nombreSesion) {
-            /* Si no hay usuario logueado pero hay sesión activa, usar ese nombre */
-            setEmpleadoName(nombreSesion.toUpperCase());
-        }
-
         /* Buscar la jornada activa del empleado actual en la API.
            Una jornada activa es aquella que tiene hora de inicio pero
            aún no tiene hora de fin (hFin es null/undefined). */

@@ -16,25 +16,18 @@
 
 // Importa Link de React Router para crear enlaces SPA entre módulos
 import { Link } from 'react-router-dom';
-// Importa useState (estado local) y useEffect (efectos al montar)
-import { useState, useEffect } from 'react';
+// Importa useState para el estado local
+import { useState } from 'react';
 
 // Función componente que renderiza el dashboard del administrador
 function Dashboardadmin() {
     // Estado local para almacenar y mostrar el nombre del administrador logueado
-    // Valor por defecto: 'ADMINISTRADOR' por si no se encuentra en localStorage
-    const [adminName, setAdminName] = useState('ADMINISTRADOR');
-
-    // Efecto secundario que se ejecuta una vez al montar el componente
-    // Lee el nombre del usuario logueado desde localStorage para personalizar la vista
-    useEffect(() => {
-        // Obtiene el nombre de sesión que se guardó al hacer login
+    // Se inicializa de forma perezosa desde localStorage para no depender de un
+    // setState dentro del useEffect (evita lint set-state-in-effect)
+    const [adminName] = useState(() => {
         const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-        if (nombreSesion) {
-            // Convierte a mayúsculas y lo guarda en el estado local
-            setAdminName(nombreSesion.toUpperCase());
-        }
-    }, []); // Dependencias vacías = se ejecuta solo una vez al montar
+        return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+    });
 
     return (
         <div className="dark-theme">
@@ -125,8 +118,8 @@ function Dashboardadmin() {
                             <img src="../img/panelAdministracion kk .png" alt="Reportes" />
                         </div>
                         <h2 className="margin-t-15">
-                            {/* Enlace al módulo de reportes de pedidos (ruta /reporte-pedidos) */}
-                            <Link to="/reporte-pedidos" className="no-text-decor display-block">
+                            {/* Enlace al hub de reportes del sistema (ruta /reportes) */}
+                            <Link to="/reportes" className="no-text-decor display-block">
                                 Panel De Reportes
                             </Link>
                         </h2>

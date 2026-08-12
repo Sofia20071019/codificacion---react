@@ -7,8 +7,8 @@
  *            entrada, hora de salida y duración calculada.
  */
 
-/* Importación de React y hooks necesarios */
-import React, { useState, useEffect } from 'react';
+/* Importación de hooks necesarios */
+import { useState, useEffect } from 'react';
 /* Link de react-router-dom para navegación interna sin recarga de página */
 import { Link } from 'react-router-dom';
 /* Cliente API centralizado para realizar peticiones al backend */
@@ -25,23 +25,26 @@ function MisHoras() {
   const [jornadas, setJornadas] = useState([]);
   /* Estado que almacena el objeto con el cálculo de pago (horas totales, tarifa, pago total, etc.) */
   const [calculo, setCalculo] = useState(null);
-  /* Estado que almacena el nombre del empleado para mostrarlo en el header */
-  const [empleadoName, setEmpleadoName] = useState('EMPLEADO');
-  /* Estado booleano que controla si los datos están siendo cargados */
-  const [cargando, setCargando] = useState(true);
+  /* Estado que almacena el nombre del empleado para mostrarlo en el header.
+     Se inicializa de forma perezosa desde localStorage para no depender de un
+     setState dentro del useEffect (evita lint set-state-in-effect) */
+  const [empleadoName] = useState(() => {
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'EMPLEADO';
+  });
+  /* Estado booleano que controla si los datos están siendo cargados.
+     Se inicializa de forma perezosa: solo hay carga si existe un usuario
+     logueado, evitando un setState síncrono dentro del useEffect
+     (evita lint set-state-in-effect) */
+  const [cargando, setCargando] = useState(() => !!localStorage.getItem('usuarioLogueado'));
 
   /**
    * Efecto que se ejecuta una sola vez al montar el componente.
-   * Lee el nombre de sesión y los datos del usuario desde localStorage,
-   * luego realiza dos peticiones API en paralelo: las jornadas del empleado
-   * y el cálculo de su pago proyectado.
+   * Lee los datos del usuario desde localStorage, luego realiza dos
+   * peticiones API en paralelo: las jornadas del empleado y el cálculo
+   * de su pago proyectado.
    */
   useEffect(() => {
-    /* Obtener el nombre de la sesión activa desde localStorage */
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-    /* Si existe la sesión, actualizar el nombre del empleado en mayúsculas */
-    if (nombreSesion) setEmpleadoName(nombreSesion.toUpperCase());
-
     /* Obtener los datos completos del usuario logueado desde localStorage */
     const usuarioLogueado = localStorage.getItem('usuarioLogueado');
     /* Verificar que exista un usuario logueado antes de hacer las peticiones */
@@ -62,9 +65,6 @@ function MisHoras() {
         })
         .catch(() => {}) /* Silenciar errores de red (no mostrar nada al usuario) */
         .finally(() => setCargando(false)); /* Siempre ocultar el indicador de carga al finalizar */
-    } else {
-      /* Si no hay usuario logueado, simplemente ocultar el indicador de carga */
-      setCargando(false);
     }
   }, []); /* Array de dependencias vacío: se ejecuta solo al montar el componente */
 

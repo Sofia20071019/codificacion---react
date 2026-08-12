@@ -28,32 +28,12 @@ class OrdenController:
         datos del cliente, fecha, estado de producción y detalles de productos.
         """
         try:
-            # Importación diferida del servicio de órdenes para evitar dependencias circulares
-            from app.services.orden_service import OrdenService
+            # Importación diferida del servicio de reportes para evitar dependencias circulares.
+            # El servicio de reportes es la fuente única de datos que comparten la vista
+            # y la exportación a Excel, garantizando consistencia entre ambas.
+            from app.services.reporte_service import ReporteService
             # Obtener todas las órdenes registradas en la base de datos
-            ordenes = OrdenService.listar_todas()
-            # Lista para almacenar los datos formateados de cada orden
-            data = []
-            # Iterar sobre cada orden para construir la respuesta
-            for o in ordenes:
-                # Agregar los datos formateados de la orden a la lista
-                data.append({
-                    "idOrden": o.idOrden,
-                    "idCliente": o.idCliente,
-                    "nombreCliente": o.cliente.nombreCliente if o.cliente else None,
-                    "idUsuario_Admin": o.idUsuario_Admin,
-                    "fechaPedido": str(o.fechaPedido) if o.fechaPedido else None,
-                    "estadoProd": o.estadoProd,
-                    # Construir lista de detalles de productos asociados a la orden
-                    "detalles": [
-                        {
-                            "idDetalle": d.idDetalle,
-                            "idProducto": d.idProducto,
-                            "nombreProducto": d.producto.nombreProducto if d.producto else None,
-                            "cantidadTotal": d.cantidadTotal
-                        } for d in o.detalles
-                    ]
-                })
+            data = ReporteService.obtener_ordenes()
             # Retornar respuesta exitosa con la lista de órdenes
             return jsonify({"status": "success", "data": data}), 200
         except Exception as e:

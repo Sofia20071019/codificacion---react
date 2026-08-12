@@ -36,6 +36,57 @@ function getToken() {
 }
 
 // ---------------------------------------------------------------------------
+// Función auxiliar: construirQuery
+// ---------------------------------------------------------------------------
+// Convierte un objeto de filtros en una query string para la URL.
+// Omite los valores vacíos, nulos o 'todos' (sin filtro) para no enviarlos.
+// Ejemplo: { mes: '03', anio: '2026' } → '?mes=03&anio=2026'
+// ---------------------------------------------------------------------------
+function construirQuery(params = {}) {
+  const query = Object.entries(params)
+    .filter(([, valor]) => valor !== '' && valor !== null && valor !== undefined && valor !== 'todos')
+    .map(([clave, valor]) => `${encodeURIComponent(clave)}=${encodeURIComponent(valor)}`)
+    .join('&');
+  return query ? `?${query}` : '';
+}
+
+// ---------------------------------------------------------------------------
+// Función auxiliar: descargarBlob
+// ---------------------------------------------------------------------------
+// Dispara la descarga en el navegador de un Blob recibido del backend.
+// Crea un objeto URL temporal, simula un click en un enlace y lo libera.
+// ---------------------------------------------------------------------------
+export function descargarBlob(blob, nombreArchivo = 'reporte.xlsx') {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = nombreArchivo;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ---------------------------------------------------------------------------
+// Función auxiliar: nombreArchivoDeRespuesta
+// ---------------------------------------------------------------------------
+// Extrae el nombre del archivo descargable del header Content-Disposition
+// que envía el backend (ej: "attachment; filename=reporte.xlsx").
+// ---------------------------------------------------------------------------
+function nombreArchivoDeRespuesta(response, porDefecto = 'reporte.xlsx') {
+  const header = response.headers.get('Content-Disposition') || '';
+  const match = header.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+  if (match && match[1]) {
+    try {
+      return decodeURIComponent(match[1]);
+    } catch {
+      return match[1];
+    }
+  }
+  return porDefecto;
+}
+
+// ---------------------------------------------------------------------------
 // Objeto api: Cliente API completo
 // ---------------------------------------------------------------------------
 // Exporta un objeto con todos los endpoints de la API organizados por dominio.
@@ -89,6 +140,51 @@ export const api = {
 
     // Retorna los datos exitosos de la respuesta
     return data;
+  },
+
+  // -----------------------------------------------------------------------
+  // Método base: descargar
+  // -----------------------------------------------------------------------
+  // Ejecuta una petición HTTP autenticada que espera un archivo binario
+  // (por ejemplo un .xlsx generado por el backend) en lugar de JSON.
+  // Verifica el estado HTTP, extrae el nombre del archivo del header
+  // Content-Disposition y retorna { blob, nombreArchivo } para que la página
+  // dispare la descarga. Si la respuesta es un error JSON, lanza su mensaje.
+  // -----------------------------------------------------------------------
+  async descargar(endpoint, options = {}) {
+    // Obtiene el token JWT de la sesión activa
+    const token = getToken();
+
+    // Headers con la autenticación Bearer (sin Content-Type JSON,
+    // la respuesta esperada es un archivo binario)
+    const headers = { ...options.headers };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Ejecuta la petición fetch contra la URL completa de la API
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers,
+      ...options,
+    });
+
+    // Si la respuesta HTTP indica error (4xx, 5xx), intenta leer el mensaje
+    // del backend en formato JSON o usa el código de estado como fallback
+    if (!response.ok) {
+      let mensaje = `Error ${response.status}`;
+      try {
+        const err = await response.json();
+        if (err.message) mensaje = err.message;
+      } catch {
+        // La respuesta no era JSON (ej: archivo no generado)
+      }
+      throw new Error(mensaje);
+    }
+
+    // Convierte la respuesta a Blob y obtiene el nombre del archivo
+    const blob = await response.blob();
+    const nombreArchivo = nombreArchivoDeRespuesta(response);
+    return { blob, nombreArchivo };
   },
 
   // =====================================================================
@@ -361,5 +457,46 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+  },
+
+  // =====================================================================
+  // DOMINIO: REPORTES (consulta de datos y exportación a Excel)
+  // =====================================================================
+  reportes: {
+    // Reporte de horas trabajadas por empleado, filtrable por mes y año.
+    // Retorna resumen de horas + detalle de jornadas del filtro.
+    horas: (params = {}) =>
+      api.request(`/api/reportes/horas${construirQuery(params)}`),
+
+    // Versión Excel del reporte de horas: descarga el archivo .xlsx
+    exportarHoras: (params = {}) =>
+      api.descargar(`/api/reportes/horas/excel${construirQuery(params)}`),
+
+    // Reporte de trabajos/asignaciones de insumos a empleados.
+    // Filtrable por mes y año; retorna resumen y detalle de asignaciones.
+    trabajos: (params = {}) =>
+      api.request(`/api/reportes/trabajos${construirQuery(params)}`),
+
+    // Versión Excel del reporte de trabajos
+    exportarTrabajos: (params = {}) =>
+      api.descargar(`/api/reportes/trabajos/excel${construirQuery(params)}`),
+
+    // Reporte de producción de órdenes/pedidos.
+    // Filtrable por mes y año; retorna resumen y detalle de órdenes.
+    produccion: (params = {}) =>
+      api.request(`/api/reportes/produccion${construirQuery(params)}`),
+
+    // Versión Excel del reporte de producción
+    exportarProduccion: (params = {}) =>
+      api.descargar(`/api/reportes/produccion/excel${construirQuery(params)}`),
+
+    // Reporte de materias primas (insumos), filtrable por categoría.
+    // Retorna resumen de stock total y detalle de insumos con existencia.
+    materiasPrimas: (params = {}) =>
+      api.request(`/api/reportes/materias-primas${construirQuery(params)}`),
+
+    // Versión Excel del reporte de materias primas
+    exportarMateriasPrimas: (params = {}) =>
+      api.descargar(`/api/reportes/materias-primas/excel${construirQuery(params)}`),
   },
 };

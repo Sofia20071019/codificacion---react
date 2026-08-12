@@ -21,7 +21,12 @@ function AdminAsignarInsumos() {
   // Estado: historial de asignaciones realizadas
   const [asignaciones, setAsignaciones] = useState([]);
   // Estado: nombre del administrador obtenido de la sesión activa
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  // Se inicializa de forma perezosa desde localStorage para no depender
+  // de un setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+  });
   // Estado: datos del formulario de asignación (empleado, insumo, cantidad)
   const [form, setForm] = useState({ idUsuario_Empleado: '', idInsumo: '', cantidad: '' });
   // Estado: mensaje informativo de éxito o error tras una asignación
@@ -29,11 +34,6 @@ function AdminAsignarInsumos() {
 
   // useEffect que se ejecuta al montar el componente para cargar datos iniciales
   useEffect(() => {
-    // Obtiene el nombre de sesión guardado en localStorage
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-    // Si existe sesión activa, actualiza el nombre del administrador en mayúsculas
-    if (nombreSesion) setAdminName(nombreSesion.toUpperCase());
-
     // Carga la lista de empleados desde el backend
     api.empleados.listar().then((r) => setEmpleados(r.data || [])).catch(() => {});
     // Carga la lista de insumos desde el backend

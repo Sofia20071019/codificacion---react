@@ -11,8 +11,8 @@
 //            Incluye enlace a la página de recuperación de contraseña.
 // ============================================================================
 
-// Importa React y los hooks useState (estado local) y useEffect (efectos secundarios)
-import React, { useState, useEffect } from 'react';
+// Importa los hooks useState (estado local)
+import { useState } from 'react';
 // Importa Link para navegación y useNavigate para redireccionamiento programático
 import { Link, useNavigate } from 'react-router-dom';
 // Importa el cliente API para realizar la petición de login al backend
@@ -26,14 +26,6 @@ function InicioDeSesion() {
   const [password, setPassword] = useState('');
   // Hook de navegación programática: permite redirigir al usuario después del login
   const navigate = useNavigate();
-
-  // Efecto secundario que se ejecuta una vez al montar el componente
-  // Limpia los campos del formulario para evitar datos residuales
-  // de sesiones anteriores (por ejemplo, si el usuario presionó "atrás")
-  useEffect(() => {
-    setEmail('');     // Limpia el campo de email
-    setPassword('');  // Limpia el campo de contraseña
-  }, []); // Array de dependencias vacío = se ejecuta solo una vez al montar
 
   // ---------------------------------------------------------------------------
   // Función: handleLogin

@@ -111,6 +111,9 @@ def create_app():
     # Blueprint para rutas de asignaciones (asignar insumos a ordenes/productos)
     from app.routes.asignacion_routes import asignacion_bp
 
+    # Blueprint para rutas de reportes (consulta y exportacion a Excel)
+    from app.routes.reporte_routes import reporte_bp
+
     # --- REGISTRO DE BLUEPRINTS ---
     # Registrar cada blueprint en la aplicacion Flask para que sus rutas
     # esten disponibles bajo los prefijos definidos en cada blueprint
@@ -153,6 +156,9 @@ def create_app():
 
     # Registrar blueprint de asignaciones
     app.register_blueprint(asignacion_bp)
+
+    # Registrar blueprint de reportes
+    app.register_blueprint(reporte_bp)
 
     # Retornar la instancia completamente configurada de la aplicacion Flask
     return app

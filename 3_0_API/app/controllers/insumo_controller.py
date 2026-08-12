@@ -31,26 +31,14 @@ class InsumoController:
         incluyendo categoría, unidad de medida y cantidad disponible.
         """
         try:
-            # Importación diferida del servicio de insumos para evitar dependencias circulares
-            from app.services.insumo_service import InsumoService
+            # Importación diferida del servicio de reportes para evitar dependencias circulares.
+            # El servicio de reportes es la fuente única de datos que comparten la vista
+            # y la exportación a Excel, garantizando consistencia entre ambas.
+            from app.services.reporte_service import ReporteService
             # Obtener todos los insumos registrados en la base de datos
-            insumos = InsumoService.listar_todos()
-            # Lista para almacenar los datos formateados de cada insumo
-            data = []
-            # Iterar sobre cada insumo para construir la respuesta
-            for i in insumos:
-                # Agregar los datos formateados del insumo incluyendo relaciones
-                data.append({
-                    "idInsumo": i.idInsumo,
-                    "nombreInsumo": i.nombreInsumo,
-                    "idCategoria": i.idCategoria,
-                    "nombreCategoria": i.categoria.nombreCategoria if i.categoria else None,
-                    "idUnidad": i.idUnidad,
-                    "nombreUnidad": i.unidad.nombreUnidad if i.unidad else None,
-                    "cantidad": float(i.cantidad) if i.cantidad else 0
-                })
+            insumos = ReporteService.obtener_materias_primas()
             # Retornar respuesta exitosa con la lista de insumos
-            return jsonify({"status": "success", "data": data}), 200
+            return jsonify({"status": "success", "data": insumos}), 200
         except Exception as e:
             # Capturar excepciones y retornar error 500
             return jsonify({"status": "error", "message": str(e)}), 500

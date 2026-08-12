@@ -6,8 +6,8 @@
               endpoints de insumos, categorías y unidades de medida.
    ========================================================================== */
 
-// Importa React y los hooks useState (estado local) y useEffect (efectos secundarios)
-import React, { useState, useEffect } from 'react';
+// Importa los hooks useState (estado local) y useEffect (efectos secundarios)
+import { useState, useEffect } from 'react';
 // Importa Link para navegación entre rutas sin recargar la página
 import { Link } from 'react-router-dom';
 // Importa el módulo api que contiene los métodos para llamar al backend
@@ -23,15 +23,18 @@ function MateriaPrima() {
   const [unidades, setUnidades] = useState([]);
   // Estado: controla si se muestra u oculta el formulario de registro de material
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  // Estado: nombre del administrador obtenido de la sesión activa
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  // Estado: nombre del administrador obtenido de la sesión activa.
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+  });
 
   // Estado: texto de búsqueda para filtrar insumos por nombre
   const [buscarNombre, setBuscarNombre] = useState('');
   // Estado: valor del filtro de categoría (por defecto "todos")
   const [filtroCategoria, setFiltroCategoria] = useState('todos');
-  // Estado: valor del filtro por cantidad (por defecto "todos")
-  const [filtroCantidad, setFiltroCantidad] = useState('todos');
 
   // Estado: nombre del material en el formulario de registro
   const [formNombre, setFormNombre] = useState('');
@@ -46,11 +49,6 @@ function MateriaPrima() {
 
   // useEffect que se ejecuta al montar el componente para cargar datos iniciales
   useEffect(() => {
-    // Obtiene el nombre de sesión guardado en localStorage
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-    // Si existe sesión activa, actualiza el nombre del administrador en mayúsculas
-    if (nombreSesion) setAdminName(nombreSesion.toUpperCase());
-
     // Llama al endpoint para listar todos los insumos y los guarda en el estado
     api.insumos.listar()
       .then((res) => setInventario(res.data || []))

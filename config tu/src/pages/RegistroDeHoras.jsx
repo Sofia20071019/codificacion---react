@@ -6,8 +6,8 @@
  *            Al enviar, crea una nueva jornada en el backend y redirige al dashboard del empleado.
  */
 
-/* Importación de React y hooks de estado y efecto */
-import React, { useState, useEffect } from 'react';
+/* Importación de hooks de estado */
+import { useState } from 'react';
 /* Link para navegación y useNavigate para redirección programática */
 import { Link, useNavigate } from 'react-router-dom';
 /* Cliente API centralizado para realizar peticiones al backend */
@@ -28,48 +28,32 @@ function RegistroDeHoras() {
    * Se inicializa con una función que lee el nombre de sesión desde localStorage.
    * Si no existe sesión, muestra un valor por defecto.
    */
-  const [nombreOperario, setNombreOperario] = useState(() => {
+  const [nombreOperario] = useState(() => {
     /* Leer el nombre de la sesión activa desde localStorage */
     const sesionGuardada = localStorage.getItem('kimuka_sesion_activa');
     /* Si existe, retornar en mayúsculas; si no, retornar texto por defecto */
     return sesionGuardada ? sesionGuardada.toUpperCase() : 'OPERARIO NO IDENTIFICADO';
   });
 
-  /* Estado que almacena la hora de inicio en formato HH:MM */
-  const [horaInicio, setHoraInicio] = useState('');
-  /* Estado que almacena la fecha de inicio en formato YYYY-MM-DD */
-  const [fechaInicio, setFechaInicio] = useState('');
-
-  /**
-   * Efecto que se ejecuta una sola vez al montar el componente.
-   * Actualiza el nombre del operario desde localStorage y configura
-   * la fecha y hora actuales del sistema como valores por defecto.
-   */
-  useEffect(() => {
-    /* Obtener el nombre de la sesión activa desde localStorage */
-    const sesionActiva = localStorage.getItem('kimuka_sesion_activa');
-    /* Si existe la sesión, actualizar el nombre del operario en mayúsculas */
-    if (sesionActiva) setNombreOperario(sesionActiva.toUpperCase());
-
-    /* Obtener la fecha y hora actuales del sistema */
+  /* Estado que almacena la hora de inicio en formato HH:MM.
+     Se inicializa de forma perezosa con la hora actual del sistema para
+     no depender de un setState dentro del useEffect (evita lint set-state-in-effect) */
+  const [horaInicio] = useState(() => {
     const fechaActual = new Date();
-
-    /* Obtener el año completo (四位数) */
-    const anio = fechaActual.getFullYear();
-    /* Obtener el mes (0-11), sumar 1 y rellenar con cero a la izquierda si es necesario */
-    const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
-    /* Obtener el día del mes y rellenar con cero a la izquierda si es necesario */
-    const dia = String(fechaActual.getDate()).padStart(2, '0');
-    /* Establecer la fecha de inicio en formato ISO: YYYY-MM-DD */
-    setFechaInicio(`${anio}-${mes}-${dia}`);
-
-    /* Obtener las horas (0-23) y rellenar con cero a la izquierda */
     const horas = String(fechaActual.getHours()).padStart(2, '0');
-    /* Obtener los minutos (0-59) y rellenar con cero a la izquierda */
     const minutos = String(fechaActual.getMinutes()).padStart(2, '0');
-    /* Establecer la hora de inicio en formato HH:MM */
-    setHoraInicio(`${horas}:${minutos}`);
-  }, []); /* Array de dependencias vacío: se ejecuta solo al montar el componente */
+    return `${horas}:${minutos}`;
+  });
+  /* Estado que almacena la fecha de inicio en formato YYYY-MM-DD.
+     Se inicializa de forma perezosa con la fecha actual del sistema para
+     no depender de un setState dentro del useEffect (evita lint set-state-in-effect) */
+  const [fechaInicio] = useState(() => {
+    const fechaActual = new Date();
+    const anio = fechaActual.getFullYear();
+    const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
+    const dia = String(fechaActual.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+  });
 
   /**
    * Función que maneja el envío del formulario de registro de jornada.

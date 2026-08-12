@@ -27,20 +27,19 @@ function AdminTareasEmpleados() {
   const [empleados, setEmpleados] = useState([]);
   /* Estado que almacena el ID del empleado seleccionado en el filtro (vacío = todos) */
   const [filtroEmpleado, setFiltroEmpleado] = useState('');
-  /* Estado que almacena el nombre del administrador logueado para mostrarlo en el header */
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
+  /* Estado que almacena el nombre del administrador logueado para mostrarlo en el header.
+     Se inicializa de forma perezosa desde localStorage para no depender de un
+     setState dentro del useEffect (evita lint set-state-in-effect) */
+  const [adminName] = useState(() => {
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'ADMINISTRADOR';
+  });
 
   /**
    * Efecto que se ejecuta una sola vez al montar el componente.
-   * Carga el nombre del administrador desde localStorage y realiza
-   * dos peticiones API: listar todas las asignaciones y listar todos los empleados.
+   * Realiza dos peticiones API: listar todas las asignaciones y listar todos los empleados.
    */
   useEffect(() => {
-    /* Obtener el nombre de la sesión activa desde localStorage */
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-    /* Si existe la sesión, actualizar el nombre del administrador en mayúsculas */
-    if (nombreSesion) setAdminName(nombreSesion.toUpperCase());
-
     /* Petición API: obtener todas las asignaciones de materiales a empleados */
     api.asignaciones.listar()
       .then((r) => setAsignaciones(r.data || [])) /* Guardar las asignaciones, fallback a array vacío */

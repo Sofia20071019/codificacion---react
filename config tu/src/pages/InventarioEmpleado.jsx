@@ -6,8 +6,8 @@
               lectura (sin opciones de crear o editar).
    ========================================================================== */
 
-// Importa React y los hooks useState (estado local) y useEffect (efectos secundarios)
-import React, { useState, useEffect } from 'react';
+// Importa los hooks useState (estado local) y useEffect (efectos secundarios)
+import { useState, useEffect } from 'react';
 // Importa Link para navegación entre rutas sin recargar la página
 import { Link } from 'react-router-dom';
 // Importa el módulo api que contiene los métodos para llamar al backend
@@ -20,7 +20,12 @@ function InventarioEmpleado() {
   // Estado: lista de categorías para el filtro desplegable
   const [categorias, setCategorias] = useState([]);
   // Estado: nombre del empleado obtenido de la sesión activa
-  const [empleadoName, setEmpleadoName] = useState('EMPLEADO');
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [empleadoName] = useState(() => {
+    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
+    return nombreSesion ? nombreSesion.toUpperCase() : 'EMPLEADO';
+  });
 
   // Estado: texto de búsqueda para filtrar insumos por nombre
   const [buscarNombre, setBuscarNombre] = useState('');
@@ -29,11 +34,6 @@ function InventarioEmpleado() {
 
   // useEffect que se ejecuta al montar el componente para cargar datos iniciales
   useEffect(() => {
-    // Obtiene el nombre de sesión guardado en localStorage
-    const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-    // Si existe sesión activa, actualiza el nombre del empleado en mayúsculas
-    if (nombreSesion) setEmpleadoName(nombreSesion.toUpperCase());
-
     // Llama al endpoint para listar todos los insumos y los guarda en el estado
     api.insumos.listar()
       .then((res) => setInventario(res.data || []))

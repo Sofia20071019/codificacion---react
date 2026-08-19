@@ -82,6 +82,33 @@ with app.app_context():
         # Mensaje de confirmacion mostrando las credenciales del administrador creado
         print("Administrador creado: admin@titan.com / admin123")
 
+    if Usuario.query.filter_by(correo="empleado@titan.com").first() is None:
+        # Crear la instancia del usuario empleado con todos sus atributos:
+        # - ID unico del usuario
+        # - Primer y segundo nombre (segundo nombre es opcional, puede ser None)
+        # - Primer y segundo apellido (segundo apellido es opcional, puede ser None)
+        # - Correo electronico unico para autenticacion
+        # - Contrasena hasheada con bcrypt para seguridad
+        # - Rol asignado (ADMIN)
+        # - Estado inicial (ACTIVO)
+        empleado = Usuario(
+            idUsuario="USR-002",
+            pNombre="brayan",
+            sNombre=None,
+            pApellido="valderrama",
+            sApellido=None,
+            correo="empleado@titan.com",
+            passwordHash=bcrypt.generate_password_hash("1234").decode("utf-8"),
+            idRol="ROL-002",
+            idEstado="EST-001"
+        )
+        # Agregar el usuario empleado a la sesion de la base de datos
+        db.session.add(empleado)
+        # Confirmar la transaccion para persistir el empleado en la base de datos
+        db.session.commit()
+        # Mensaje de confirmacion mostrando las credenciales del empleado creado
+        print("Empleado creado: empleado@titan.com / 1234")
+
     # --- SEED DE CATEGORIAS DE INSUMOS ---
     # Verificar si la categoria con ID "CAT-001" ya existe en la base de datos
     if Categoria.query.filter_by(idCategoria="CAT-001").first() is None:

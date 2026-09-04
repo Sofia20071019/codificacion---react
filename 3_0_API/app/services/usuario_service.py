@@ -196,3 +196,17 @@ class UsuarioService:
 
         # Retornar el usuario desactivado
         return usuario
+    
+    @staticmethod
+    def activar_usuario(idUsuario):
+        """
+        Método estático que reactiva un usuario cambiando su estado a activo (EST-001).
+        """
+        usuario = Usuario.query.get(idUsuario)
+        if not usuario:
+            return None
+
+        usuario.idEstado = "EST-001"
+        db.session.commit()
+        return usuario
+    

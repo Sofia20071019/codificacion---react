@@ -209,7 +209,23 @@ class UsuarioController:
         except Exception as e:
             # Capturar excepciones y retornar error 400
             return jsonify({"status": "error", "message": str(e)}), 400
-
+        
+    @staticmethod
+    @rol_requerido("ROL-001")
+    def activar_usuario(idUsuario):
+        """
+        Endpoint para activar un usuario previamente desactivado.
+        Requiere rol de administrador (ROL-001).
+        """
+        try:
+            from app.services.usuario_service import UsuarioService
+            usuario = UsuarioService.activar_usuario(idUsuario)
+            if not usuario:
+                return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+            return jsonify({"status": "success", "message": "Usuario activado correctamente"}), 200
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 400
+        
     @staticmethod
     @token_requerido
     def listar_empleados():

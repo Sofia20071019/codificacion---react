@@ -39,6 +39,9 @@ usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>", view_func=UsuarioCon
 # A diferencia de eliminar, conserva el registro pero lo marca como no activo
 usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>/desactivar", view_func=UsuarioController.desactivar_usuario, methods=["PUT"])
 
+# Registrar la ruta PUT /api/usuarios/<id>/activar que reactiva al usuario
+usuario_bp.add_url_rule("/api/usuarios/<string:idUsuario>/activar", view_func=UsuarioController.activar_usuario, methods=["PUT"])
 # Registrar la ruta GET /api/empleados que lista solo los usuarios con rol de empleado
+
 # Endpoint dedicado para consultar la lista de empleados del sistema
 usuario_bp.add_url_rule("/api/empleados", view_func=UsuarioController.listar_empleados, methods=["GET"])

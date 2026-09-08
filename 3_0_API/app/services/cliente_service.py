@@ -31,29 +31,32 @@ class ClienteService:
         return Cliente.query.all()
 
     @staticmethod
-    def crear_cliente(nombreCliente, telefono=None):
+    def crear_cliente(nombreCliente, telefono=None, correo=None):
         """
-        Metodo estatico que registra un nuevo cliente en el sistema.
-        Genera automaticamente un ID unico con prefijo "CLI" para el cliente.
+        Método estático que registra un nuevo cliente en el sistema.
+        Genera automáticamente un ID único con prefijo "CLI" para el cliente.
         
         Args:
-            nombreCliente (str): Nombre o razon social del cliente.
-            telefono (str, optional): Numero de telefono del cliente. Por defecto None.
+            nombreCliente (str): Nombre o razón social del cliente.
+            telefono (str, optional): Número de teléfono del cliente.
+            correo (str, optional): Correo electrónico del cliente.
         
         Returns:
-            Cliente: Objeto del cliente recien creado con su ID asignado.
+            Cliente: Objeto del cliente recién creado con su ID asignado.
         """
-        # Generar un nuevo ID unico con prefijo "CLI" para el modelo Cliente
+        # Generar un nuevo ID único con prefijo "CLI" para el modelo Cliente
         nuevo_id = generar_id("CLI", Cliente, "idCliente")
 
-        # Crear la instancia del nuevo cliente con los datos proporcionados
-        c = Cliente(idCliente=nuevo_id, nombreCliente=nombreCliente, telefono=telefono)
+        # Crear la instancia del nuevo cliente con correo incluido
+        c = Cliente(
+            idCliente=nuevo_id,
+            nombreCliente=nombreCliente,
+            telefono=telefono,
+            correo=correo.lower().strip() if correo else None
+        )
 
-        # Agregar el nuevo cliente a la sesion de la base de datos
+        # Agregar a la sesión y confirmar
         db.session.add(c)
-
-        # Confirmar los cambios en la base de datos
         db.session.commit()
 
-        # Retornar el cliente recien creado
         return c

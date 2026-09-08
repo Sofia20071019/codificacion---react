@@ -7,9 +7,7 @@ PROPOSITO: Controlador de órdenes encargado de gestionar las operaciones CRUD
            órdenes existentes. No requiere autenticación para acceder a los endpoints.
 """
 
-# Importación de 'request' para acceder a los datos de la petición HTTP entrante
 from flask import request
-# Importación de 'jsonify' para construir respuestas HTTP en formato JSON
 from flask import jsonify
 
 
@@ -21,42 +19,20 @@ class OrdenController:
 
     @staticmethod
     def listar_ordenes():
-        """
-        Endpoint para listar todas las órdenes de producción registradas.
-        No requiere autenticación.
-        Retorna una lista completa con la información de cada orden incluyendo
-        datos del cliente, fecha, estado de producción y detalles de productos.
-        """
         try:
-            # Importación diferida del servicio de reportes para evitar dependencias circulares.
-            # El servicio de reportes es la fuente única de datos que comparten la vista
-            # y la exportación a Excel, garantizando consistencia entre ambas.
             from app.services.reporte_service import ReporteService
-            # Obtener todas las órdenes registradas en la base de datos
             data = ReporteService.obtener_ordenes()
-            # Retornar respuesta exitosa con la lista de órdenes
             return jsonify({"status": "success", "data": data}), 200
         except Exception as e:
-            # Capturar excepciones y retornar error 500
             return jsonify({"status": "error", "message": str(e)}), 500
 
     @staticmethod
     def obtener_orden(idOrden):
-        """
-        Endpoint para obtener los detalles completos de una orden específica.
-        No requiere autenticación.
-        Retorna la información de la orden incluyendo cliente y detalles
-        de productos, o error 404 si la orden no existe.
-        """
         try:
-            # Importación diferida del servicio de órdenes
             from app.services.orden_service import OrdenService
-            # Buscar la orden por su ID en la base de datos
             o = OrdenService.obtener_por_id(idOrden)
-            # Si no se encontró la orden, retornar error 404
             if not o:
                 return jsonify({"status": "error", "message": "Orden no encontrada"}), 404
-            # Retornar respuesta exitosa con los datos completos de la orden
             return jsonify({
                 "status": "success",
                 "data": {
@@ -66,73 +42,109 @@ class OrdenController:
                     "idUsuario_Admin": o.idUsuario_Admin,
                     "fechaPedido": str(o.fechaPedido) if o.fechaPedido else None,
                     "estadoProd": o.estadoProd,
-                    # Construir lista de detalles de productos de la orden
                     "detalles": [
                         {
                             "idDetalle": d.idDetalle,
                             "idProducto": d.idProducto,
                             "nombreProducto": d.producto.nombreProducto if d.producto else None,
+                            "talla": d.producto.talla if d.producto else None,
+                            "color": d.producto.color if d.producto else None,
                             "cantidadTotal": d.cantidadTotal
                         } for d in o.detalles
                     ]
                 }
             }), 200
         except Exception as e:
-            # Capturar excepciones y retornar error 500
             return jsonify({"status": "error", "message": str(e)}), 500
 
     @staticmethod
     def crear_orden():
         """
-        Endpoint para crear una nueva orden de producción.
-        No requiere autenticación.
-        Recibe ID del cliente, ID del administrador, fecha de pedido
-        y estado de producción en el cuerpo JSON.
-        Retorna el ID de la orden creada con código 201.
+        Endpoint para registrar la orden:
+        Crea/asocia el cliente, crea/asocia la prenda con talla y color, y registra el detalle.
         """
-        # Obtener el cuerpo de la petición HTTP en formato JSON
+        from datetime import date
         data = request.get_json()
         try:
-            # Importación diferida del servicio de órdenes
             from app.services.orden_service import OrdenService
-            # Crear la orden con los datos recibidos del JSON
-            # El estado de producción tiene un valor por defecto ".." si no se proporciona
+            from app.services.cliente_service import ClienteService
+            from app.models import Producto
+            from app.database.database import db
+            from app.utils.generar_id import generar_id
+
+            id_cliente = data.get("idCliente")
+
+            # 1. Crear cliente si no existe
+            if not id_cliente and data.get("nombreCliente"):
+                nuevo_c = ClienteService.crear_cliente(
+                    data.get("nombreCliente"),
+                    telefono=data.get("telefono"),
+                    correo=data.get("correo")
+                )
+                id_cliente = nuevo_c.idCliente
+
+            if not id_cliente:
+                return jsonify({"status": "error", "message": "El cliente es obligatorio"}), 400
+
+            # 2. Fecha automática
+            fecha_pedido = data.get("fechaPedido") or date.today().strftime("%Y-%m-%d")
+
+            # 3. Crear cabecera de la orden
             orden = OrdenService.crear_orden(
-                idCliente=data.get("idCliente"),
+                idCliente=id_cliente,
                 idUsuario_Admin=data.get("idUsuario_Admin"),
-                fechaPedido=data.get("fechaPedido"),
-                estadoProd=data.get("estadoProd", "..")
+                fechaPedido=fecha_pedido,
+                estadoProd=data.get("estadoProd", "En proceso")
             )
-            # Retornar respuesta exitosa con el ID de la orden creada (código 201)
+
+            # 4. Registrar prenda con su talla y color seleccionados
+            nombre_producto = data.get("nombreProducto")
+            cantidad = data.get("cantidadTotal")
+            talla = data.get("talla", "M")
+            color = data.get("color", "Negro")
+
+            if nombre_producto and cantidad:
+                # Buscar si existe la prenda con la misma talla y color
+                prod = Producto.query.filter_by(
+                    nombreProducto=nombre_producto.strip(),
+                    talla=talla,
+                    color=color
+                ).first()
+
+                if not prod:
+                    nuevo_id_prod = generar_id("PRD", Producto, "idProducto")
+                    prod = Producto(
+                        idProducto=nuevo_id_prod,
+                        nombreProducto=nombre_producto.strip(),
+                        talla=talla,
+                        color=color
+                    )
+                    db.session.add(prod)
+                    db.session.commit()
+
+                # Vincular en detalle_orden
+                OrdenService.agregar_detalle(
+                    idOrden=orden.idOrden,
+                    idProducto=prod.idProducto,
+                    cantidadTotal=int(cantidad)
+                )
+
             return jsonify({
                 "status": "success",
+                "message": "Pedido registrado exitosamente",
                 "data": {"idOrden": orden.idOrden}
             }), 201
         except Exception as e:
-            # Capturar excepciones y retornar error 400
             return jsonify({"status": "error", "message": str(e)}), 400
 
     @staticmethod
     def actualizar_orden(idOrden):
-        """
-        Endpoint para actualizar los datos de una orden existente.
-        No requiere autenticación.
-        Recibe los campos a actualizar en el cuerpo JSON.
-        Retorna mensaje de éxito o error 404 si la orden no existe.
-        """
-        # Obtener el cuerpo de la petición HTTP en formato JSON
         data = request.get_json()
         try:
-            # Importación diferida del servicio de órdenes
             from app.services.orden_service import OrdenService
-            # Llamar al servicio para actualizar la orden con los datos recibidos
-            # Se desempaqueta el diccionario **data para pasar cada campo como argumento
             orden = OrdenService.actualizar_orden(idOrden, **data)
-            # Si la orden no fue encontrada, retornar error 404
             if not orden:
                 return jsonify({"status": "error", "message": "Orden no encontrada"}), 404
-            # Retornar mensaje de éxito si la actualización fue correcta
             return jsonify({"status": "success", "message": "Orden actualizada"}), 200
         except Exception as e:
-            # Capturar excepciones y retornar error 400
             return jsonify({"status": "error", "message": str(e)}), 400

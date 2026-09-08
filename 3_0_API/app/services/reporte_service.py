@@ -279,6 +279,8 @@ class ReporteService:
                     "idDetalle": d.idDetalle,
                     "idProducto": d.idProducto,
                     "nombreProducto": d.producto.nombreProducto if d.producto else None,
+                    "talla": d.producto.talla if d.producto else None,
+                    "color": d.producto.color if d.producto else None,
                     "cantidadTotal": d.cantidadTotal
                 } for d in o.detalles
             ]
@@ -286,11 +288,13 @@ class ReporteService:
                 "idOrden": o.idOrden,
                 "idCliente": o.idCliente,
                 "nombreCliente": o.cliente.nombreCliente if o.cliente else None,
+                "telefonoCliente": o.cliente.telefono if o.cliente else None,   
+                "correoCliente": getattr(o.cliente, 'correo', None),
                 "idUsuario_Admin": o.idUsuario_Admin,
                 "fechaPedido": str(o.fechaPedido) if o.fechaPedido else None,
                 "estadoProd": o.estadoProd,
                 "detalles": detalles,
-                "unidades": sum(d.cantidadTotal or 0 for d in detalles)
+                "unidades": sum(d.get("cantidadTotal") or 0 for d in detalles)
             })
         return data
 

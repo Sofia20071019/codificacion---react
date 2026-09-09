@@ -34,3 +34,5 @@ jornada_bp.add_url_rule("/api/jornadas/empleado/<string:idUsuario>", view_func=J
 # Registrar la ruta GET /api/jornadas/calcular-pago/<id> que calcula el pago total
 # de un empleado basado en todas sus jornadas finalizadas y la tarifa por hora
 jornada_bp.add_url_rule("/api/jornadas/calcular-pago/<string:idUsuario>", view_func=JornadaController.calcular_pago, methods=["GET"])
+
+jornada_bp.add_url_rule("/api/jornadas/pendientes/<string:idUsuario_Empleado>",view_func=JornadaController.jornadas_pendientes, methods=["GET"])

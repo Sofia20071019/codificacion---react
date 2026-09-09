@@ -33,39 +33,40 @@ class InsumoService:
         return Insumo.query.order_by(Insumo.nombreInsumo).all()
 
     @staticmethod
-    def crear_insumo(nombreInsumo, idCategoria, idUnidad):
+    def crear_insumo(nombreInsumo, idCategoria, idUnidad, cantidad=0):
         """
-        Metodo estatico que registra un nuevo insumo en el inventario.
-        Genera automaticamente un ID unico con prefijo "INS" y establece
-        la cantidad inicial en 0.
+        Método estático que registra un nuevo insumo en el inventario.
+        Genera automáticamente un ID único con prefijo "INS" y establece
+        la cantidad inicial proporcionada.
         
         Args:
             nombreInsumo (str): Nombre descriptivo del insumo.
-            idCategoria (str): Identificador de la categoria a la que pertenece el insumo.
+            idCategoria (str): Identificador de la categoría a la que pertenece el insumo.
             idUnidad (str): Identificador de la unidad de medida del insumo.
+            cantidad (float, optional): Cantidad inicial ingresada. Por defecto 0.
         
         Returns:
-            Insumo: Objeto del insumo recien creado con su ID asignado.
+            Insumo: Objeto del insumo recién creado con su ID asignado.
         """
-        # Generar un nuevo ID unico con prefijo "INS" para el modelo Insumo
+        # Generar un nuevo ID único con prefijo "INS" para el modelo Insumo
         nuevo_id = generar_id("INS", Insumo, "idInsumo")
 
-        # Crear la instancia del nuevo insumo con los datos proporcionados
+        # Crear la instancia del nuevo insumo asignando la cantidad recibida
         insumo = Insumo(
-            idInsumo=nuevo_id,       # ID unico generado automaticamente
-            nombreInsumo=nombreInsumo, # Nombre del insumo
-            idCategoria=idCategoria,  # Categoria del insumo
-            idUnidad=idUnidad,        # Unidad de medida del insumo
-            cantidad=0                # Cantidad inicial en cero
+            idInsumo=nuevo_id,
+            nombreInsumo=nombreInsumo,
+            idCategoria=idCategoria,
+            idUnidad=idUnidad,
+            cantidad=float(cantidad or 0)
         )
 
-        # Agregar el nuevo insumo a la sesion de la base de datos
+        # Agregar el nuevo insumo a la sesión de la base de datos
         db.session.add(insumo)
 
         # Confirmar los cambios en la base de datos
         db.session.commit()
 
-        # Retornar el insumo recien creado
+        # Retornar el insumo recién creado
         return insumo
 
     @staticmethod

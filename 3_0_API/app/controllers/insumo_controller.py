@@ -49,29 +49,28 @@ class InsumoController:
         """
         Endpoint para crear un nuevo insumo en el sistema.
         Requiere rol de administrador (ROL-001).
-        Recibe nombre, categoría y unidad de medida en el cuerpo JSON.
+        Recibe nombre, categoría, unidad de medida y cantidad en el cuerpo JSON.
         Retorna los datos del insumo creado con código 201.
         """
-        # Obtener el cuerpo de la petición HTTP en formato JSON
         data = request.get_json()
         try:
-            # Importación diferida del servicio de insumos
             from app.services.insumo_service import InsumoService
-            # Crear el insumo con los datos recibidos del JSON
             insumo = InsumoService.crear_insumo(
                 nombreInsumo=data.get("nombreInsumo"),
                 idCategoria=data.get("idCategoria"),
-                idUnidad=data.get("idUnidad")
+                idUnidad=data.get("idUnidad"),
+                cantidad=data.get("cantidad", 0)  # <-- Leemos y enviamos la cantidad
             )
-            # Retornar respuesta exitosa con los datos del insumo creado (código 201)
             return jsonify({
                 "status": "success",
-                "data": {"idInsumo": insumo.idInsumo, "nombreInsumo": insumo.nombreInsumo, "cantidad": float(insumo.cantidad)}
+                "data": {
+                    "idInsumo": insumo.idInsumo,
+                    "nombreInsumo": insumo.nombreInsumo,
+                    "cantidad": float(insumo.cantidad)
+                }
             }), 201
         except Exception as e:
-            # Capturar excepciones y retornar error 400
             return jsonify({"status": "error", "message": str(e)}), 400
-
     @staticmethod
     @rol_requerido("ROL-001")
     def actualizar_insumo(idInsumo):

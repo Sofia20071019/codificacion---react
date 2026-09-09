@@ -230,3 +230,42 @@ class JornadaService:
             "tarifaPorHora": TARIFA_POR_HORA,             # Tarifa por hora aplicada
             "totalJornadas": len(jornadas)                # Numero de jornadas consideradas
         }
+        
+        
+    @staticmethod
+    def listar_pendientes_pago(idUsuario_Empleado):
+        """
+        Obtiene las jornadas finalizadas de un empleado que aún no tienen pago registrado.
+        Calcula horas trabajadas y pago sugerido según TARIFA_POR_HORA.
+        """
+        from app.models import Pago
+
+        jornadas = JornadaLaboral.query.filter(
+            JornadaLaboral.idUsuario_Empleado == idUsuario_Empleado,
+            JornadaLaboral.hFin.isnot(None)
+        ).order_by(JornadaLaboral.fecha.desc()).all()
+
+        pendientes = []
+        for j in jornadas:
+            # Si ya fue pagada, se omite
+            ya_pagada = Pago.query.filter_by(idJornada=j.idJornada).first()
+            if ya_pagada:
+                continue
+
+            inicio = datetime.combine(date.today(), j.hInicio)
+            fin = datetime.combine(date.today(), j.hFin)
+            if fin < inicio:
+                fin += timedelta(days=1)
+            horas = round((fin - inicio).total_seconds() / 3600, 2)
+            pago_estimado = round(horas * TARIFA_POR_HORA, 2)
+
+            pendientes.append({
+                "idJornada": j.idJornada,
+                "fecha": str(j.fecha),
+                "hInicio": str(j.hInicio),
+                "hFin": str(j.hFin),
+                "horas": horas,
+                "pagoEstimado": pago_estimado
+            })
+
+        return pendientes

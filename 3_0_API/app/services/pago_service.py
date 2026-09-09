@@ -15,6 +15,7 @@ from app.models import Pago
 # Importacion de la funcion utilitaria para generar identificadores unicos
 from app.utils.generar_id import generar_id
 
+from datetime import date
 
 class PagoService:
     """Clase que concentra todos los servicios de gestion de pagos a empleados."""
@@ -62,39 +63,28 @@ class PagoService:
     @staticmethod
     def crear_pago(idJornada, idUsuario_Admin, montoPagado, idMetodo, fechaPago=None):
         """
-        Metodo estatico que registra un nuevo pago a un empleado.
-        Genera automaticamente un ID unico con prefijo "PAG".
-        
-        Args:
-            idJornada (str): Identificador de la jornada laboral por la que se paga.
-            idUsuario_Admin (str): Identificador del administrador que autoriza el pago.
-            montoPagado (float): Monto total a pagar al empleado.
-            idMetodo (str): Identificador del metodo de pago utilizado.
-            fechaPago (date, optional): Fecha en que se realiza el pago. Por defecto None.
-        
-        Returns:
-            Pago: Objeto del pago recien creado con su ID asignado.
+        Registra un nuevo pago a un empleado.
+        Impide registrar más de un pago para la misma jornada laboral.
         """
-        # Generar un nuevo ID unico con prefijo "PAG" para el pago
+        # Validación: evitar pagos duplicados sobre la misma jornada
+        pago_existente = Pago.query.filter_by(idJornada=idJornada).first()
+        if pago_existente:
+            raise ValueError("Esta jornada laboral ya ha sido pagada previamente.")
+
         nuevo_id = generar_id("PAG", Pago, "idPago")
 
-        # Crear la instancia del nuevo pago con los datos proporcionados
         pago = Pago(
-            idPago=nuevo_id,              # ID unico generado automaticamente
-            idJornada=idJornada,           # Jornada laboral asociada al pago
-            idUsuario_Admin=idUsuario_Admin,  # Administrador que autoriza el pago
-            montoPagado=montoPagado,       # Monto a pagar al empleado
-            idMetodo=idMetodo,             # Metodo de pago utilizado
-            fechaPago=fechaPago            # Fecha del pago
+            idPago=nuevo_id,
+            idJornada=idJornada,
+            idUsuario_Admin=idUsuario_Admin,
+            montoPagado=montoPagado,
+            idMetodo=idMetodo,
+            fechaPago=fechaPago or date.today()
         )
 
-        # Agregar el nuevo pago a la sesion de la base de datos
         db.session.add(pago)
-
-        # Confirmar los cambios en la base de datos
         db.session.commit()
 
-        # Retornar el pago recien creado
         return pago
 
     @staticmethod

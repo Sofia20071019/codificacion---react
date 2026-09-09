@@ -179,3 +179,14 @@ class JornadaController:
         except Exception as e:
             # Capturar excepciones y retornar error 500
             return jsonify({"status": "error", "message": str(e)}), 500
+        
+    @staticmethod
+    @token_requerido
+    def jornadas_pendientes(idUsuario_Empleado):
+        """Endpoint para listar jornadas sin pagar de un empleado."""
+        try:
+            from app.services.jornada_service import JornadaService
+            pendientes = JornadaService.listar_pendientes_pago(idUsuario_Empleado)
+            return jsonify({"status": "success", "data": pendientes}), 200
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500        

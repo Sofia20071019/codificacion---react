@@ -9,42 +9,24 @@ PROPOSITO: Controlador del modulo de reportes del sistema Kimuka. Expone los
            Tanto la vista (JSON) como la exportacion a Excel se construyen con
            el mismo ReporteService, por lo que los datos descargados son
            identicos a los mostrados en pantalla.
-
-           Estructura de endpoints:
-             GET /api/reportes/materias-primas
-             GET /api/reportes/materias-primas/excel
-             GET /api/reportes/horas
-             GET /api/reportes/horas/excel
-             GET /api/reportes/trabajos
-             GET /api/reportes/trabajos/excel
-             GET /api/reportes/produccion
-             GET /api/reportes/produccion/excel
 """
 
-# Importacion de 're' para validar el formato de los filtros (anio)
 import re
-
-# Importacion de 'request' para acceder a los parametros de la peticion HTTP
 from flask import request
-# Importacion de 'jsonify' para construir respuestas HTTP en formato JSON
 from flask import jsonify
-# Importacion de 'send_file' para devolver el archivo Excel generado en memoria
 from flask import send_file
 
-# Importacion de decoradores para control de acceso: token JWT y roles
 from app.utils.decorators import rol_requerido
-
-# Importacion del generador de Excel y utilidades de nombres de archivo
 from app.utils.generador_excel import crear_excel_reporte, nombre_archivo_excel
 
 
 class ReporteController:
     """Clase controladora de los endpoints de consulta y exportacion de reportes."""
 
-    # Conjuntos de valores validos para los filtros
     MESES_VALIDOS = {f"{m:02d}" for m in range(1, 13)}
-    ESTADOS_TRABAJOS = {"Pendiente", "En Proceso", "Completada"}
-    ESTADOS_PRODUCCION = {"✔", "..", "✖"}
+    # Normalizados para aceptar tanto "En proceso" como "En Proceso"
+    ESTADOS_TRABAJOS = {"pendiente", "en proceso", "completada"}
+    ESTADOS_PRODUCCION = {"✔", "..", "✖", "entregado", "en proceso", "cancelado"}
     NOMBRES_MESES = {
         "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
         "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
@@ -57,8 +39,7 @@ class ReporteController:
 
     @staticmethod
     def _validar_categoria(valor):
-        """Valida el filtro de categoria de materias primas."""
-        if not valor or valor == "todos":
+        if not valor or valor.lower() == "todos":
             return None
         from app.services.reporte_service import ReporteService
         if not ReporteService.existe_categoria(valor):
@@ -67,8 +48,7 @@ class ReporteController:
 
     @staticmethod
     def _validar_empleado(valor):
-        """Valida el filtro de empleado (idUsuario_Empleado)."""
-        if not valor:
+        if not valor or valor.lower() == "todos":
             return None
         from app.services.reporte_service import ReporteService
         if not ReporteService.existe_usuario(valor):
@@ -77,8 +57,7 @@ class ReporteController:
 
     @staticmethod
     def _validar_mes(valor):
-        """Valida que el mes tenga formato 'MM' (01-12)."""
-        if not valor:
+        if not valor or valor.lower() == "todos":
             return None
         if valor not in ReporteController.MESES_VALIDOS:
             raise ValueError("El mes debe tener formato MM (01-12).")
@@ -86,37 +65,40 @@ class ReporteController:
 
     @staticmethod
     def _validar_anio(valor):
-        """Valida que el anio tenga 4 digitos."""
-        if not valor:
+        if not valor or valor.lower() == "todos":
             return None
         if not re.fullmatch(r"\d{4}", valor):
             raise ValueError("El anio debe tener 4 digitos.")
         return valor
 
     @staticmethod
-    def _validar_estado(valor, permitidos):
-        """Valida que el estado este dentro de los valores permitidos."""
-        if not valor:
+    def _validar_estado_trabajos(valor):
+        if not valor or valor.lower() == "todos":
             return None
-        if valor not in permitidos:
+        if valor.strip().lower() not in ReporteController.ESTADOS_TRABAJOS:
             raise ValueError("El estado indicado no es valido.")
+        # Retornar con la capitalización estándar esperada por la BD
+        val_clean = valor.strip().lower()
+        if val_clean == "completada":
+            return "Completada"
+        elif val_clean == "en proceso":
+            return "En proceso"
+        return "Pendiente"
+
+    @staticmethod
+    def _validar_estado_produccion(valor):
+        if not valor or valor.lower() == "todos":
+            return None
         return valor
 
     @staticmethod
     def _leer_filtros(validaciones):
-        """
-        Lee y valida los filtros desde los parametros de la query string.
-
-        Args:
-            validaciones (dict): Mapeo parametro -> funcion validadora.
-
-        Returns:
-            (dict, None) si todos los filtros son validos.
-            (None, str) con el mensaje de error si alguno es invalido.
-        """
         filtros = {}
         for parametro, validador in validaciones.items():
+            # Acepta tanto "empleado" como "idUsuario_Empleado"
             valor_crudo = request.args.get(parametro)
+            if valor_crudo is None and parametro == "empleado":
+                valor_crudo = request.args.get("idUsuario_Empleado")
             try:
                 filtros[parametro] = validador(valor_crudo)
             except ValueError as e:
@@ -125,7 +107,6 @@ class ReporteController:
 
     @staticmethod
     def _filtros_resumen(filtros):
-        """Convierte los filtros a tuplas (etiqueta, valor) legibles para el Excel."""
         etiquetas = {
             "categoria": "Categoria",
             "empleado": "Empleado",
@@ -146,23 +127,22 @@ class ReporteController:
 
     @staticmethod
     def _usuario_autenticado():
-        """Obtiene el nombre legible del usuario autenticado desde el JWT."""
         from app.models import Usuario
-        usuario_id = request.usuario.get("idUsuario")
+        usuario_dict = getattr(request, 'usuario', {}) or {}
+        usuario_id = usuario_dict.get("idUsuario")
         usuario = Usuario.query.get(usuario_id) if usuario_id else None
         if usuario:
             nombre = f"{usuario.pNombre or ''} {usuario.pApellido or ''}".strip()
             if nombre:
                 return nombre
             return usuario.correo or usuario_id
-        return usuario_id or "Usuario"
+        return usuario_id or "Administrador"
 
     @staticmethod
     def _nombre_estado_produccion(estado):
-        """Traduce el codigo de estado de produccion a texto legible."""
-        if estado == "✔":
+        if estado == "✔" or str(estado).lower() == "entregado":
             return "Entregado"
-        if estado == "✖":
+        if estado == "✖" or str(estado).lower() == "cancelado":
             return "Cancelado"
         return "En Proceso"
 
@@ -173,7 +153,6 @@ class ReporteController:
     @staticmethod
     @rol_requerido("ROL-001")
     def listar_materias_primas():
-        """GET /api/reportes/materias-primas: datos del inventario filtrados."""
         filtros, error = ReporteController._leer_filtros({
             "categoria": ReporteController._validar_categoria,
         })
@@ -193,7 +172,6 @@ class ReporteController:
     @staticmethod
     @rol_requerido("ROL-001")
     def exportar_materias_primas():
-        """GET /api/reportes/materias-primas/excel: descarga el inventario en .xlsx."""
         filtros, error = ReporteController._leer_filtros({
             "categoria": ReporteController._validar_categoria,
         })
@@ -212,7 +190,7 @@ class ReporteController:
                     i["nombreCategoria"],
                     i["nombreUnidad"],
                     i["cantidad"],
-                    "Disponible" if i["cantidad"] > 0 else "Sin stock"
+                    "Disponible" if (i["cantidad"] or 0) > 0 else "Sin stock"
                 ] for i in data
             ]
 
@@ -253,7 +231,6 @@ class ReporteController:
     @staticmethod
     @rol_requerido("ROL-001")
     def listar_horas():
-        """GET /api/reportes/horas: jornadas laborales filtradas."""
         filtros, error = ReporteController._leer_filtros({
             "empleado": ReporteController._validar_empleado,
             "mes": ReporteController._validar_mes,
@@ -280,7 +257,6 @@ class ReporteController:
     @staticmethod
     @rol_requerido("ROL-001")
     def exportar_horas():
-        """GET /api/reportes/horas/excel: descarga las jornadas en .xlsx."""
         filtros, error = ReporteController._leer_filtros({
             "empleado": ReporteController._validar_empleado,
             "mes": ReporteController._validar_mes,
@@ -351,42 +327,11 @@ class ReporteController:
     @staticmethod
     @rol_requerido("ROL-001")
     def listar_trabajos():
-        """GET /api/reportes/trabajos: asignaciones y rankings filtrados."""
         filtros, error = ReporteController._leer_filtros({
             "empleado": ReporteController._validar_empleado,
             "mes": ReporteController._validar_mes,
             "anio": ReporteController._validar_anio,
-            "estado": lambda v: ReporteController._validar_estado(v, ReporteController.ESTADOS_TRABAJOS),
-        })
-        if error:
-            return jsonify({"status": "error", "message": error}), 400
-        try:
-            from app.services.reporte_service import ReporteService
-            asignaciones = ReporteService.obtener_asignaciones(
-                filtro_empleado=filtros["empleado"],
-                filtro_mes=filtros["mes"],
-                filtro_anio=filtros["anio"],
-                filtro_estado=filtros["estado"],
-            )
-            return jsonify({
-                "status": "success",
-                "data": asignaciones,
-                "materiales": ReporteService.ranking_materiales(asignaciones),
-                "empleados": ReporteService.ranking_empleados(asignaciones),
-                "filtros": {k: v for k, v in filtros.items() if v}
-            }), 200
-        except Exception as e:
-            return jsonify({"status": "error", "message": str(e)}), 500
-
-    @staticmethod
-    @rol_requerido("ROL-001")
-    def exportar_trabajos():
-        """GET /api/reportes/trabajos/excel: descarga los rankings en .xlsx."""
-        filtros, error = ReporteController._leer_filtros({
-            "empleado": ReporteController._validar_empleado,
-            "mes": ReporteController._validar_mes,
-            "anio": ReporteController._validar_anio,
-            "estado": lambda v: ReporteController._validar_estado(v, ReporteController.ESTADOS_TRABAJOS),
+            "estado": ReporteController._validar_estado_trabajos,
         })
         if error:
             return jsonify({"status": "error", "message": error}), 400
@@ -402,9 +347,52 @@ class ReporteController:
             empleados = ReporteService.ranking_empleados(asignaciones)
 
             total_asignaciones = len(asignaciones)
-            completadas = sum(1 for a in asignaciones if a["estado"] == "Completada")
-            en_proceso = sum(1 for a in asignaciones if a["estado"] == "En Proceso")
-            pendientes = sum(1 for a in asignaciones if a["estado"] == "Pendiente")
+            completadas = sum(1 for a in asignaciones if a.get("estado") == "Completada")
+            en_proceso = sum(1 for a in asignaciones if a.get("estado") == "En proceso")
+            pendientes = sum(1 for a in asignaciones if a.get("estado") == "Pendiente")
+
+            return jsonify({
+                "status": "success",
+                "data": {
+                    "asignaciones": asignaciones,
+                    "rankingMateriales": materiales,
+                    "rankingEmpleados": empleados,
+                    "total": total_asignaciones,
+                    "completadas": completadas,
+                    "enProceso": en_proceso,
+                    "pendientes": pendientes,
+                },
+                "filtros": {k: v for k, v in filtros.items() if v}
+            }), 200
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+    @staticmethod
+    @rol_requerido("ROL-001")
+    def exportar_trabajos():
+        filtros, error = ReporteController._leer_filtros({
+            "empleado": ReporteController._validar_empleado,
+            "mes": ReporteController._validar_mes,
+            "anio": ReporteController._validar_anio,
+            "estado": ReporteController._validar_estado_trabajos,
+        })
+        if error:
+            return jsonify({"status": "error", "message": error}), 400
+        try:
+            from app.services.reporte_service import ReporteService
+            asignaciones = ReporteService.obtener_asignaciones(
+                filtro_empleado=filtros["empleado"],
+                filtro_mes=filtros["mes"],
+                filtro_anio=filtros["anio"],
+                filtro_estado=filtros["estado"],
+            )
+            materiales = ReporteService.ranking_materiales(asignaciones)
+            empleados = ReporteService.ranking_empleados(asignaciones)
+
+            total_asignaciones = len(asignaciones)
+            completadas = sum(1 for a in asignaciones if a.get("estado") == "Completada")
+            en_proceso = sum(1 for a in asignaciones if a.get("estado") == "En proceso")
+            pendientes = sum(1 for a in asignaciones if a.get("estado") == "Pendiente")
 
             filas_materiales = [
                 [idx, m["nombre"], m["count"], round(m["cantidad"], 2)]
@@ -461,12 +449,11 @@ class ReporteController:
     @staticmethod
     @rol_requerido("ROL-001")
     def listar_produccion():
-        """GET /api/reportes/produccion: ordenes de produccion filtradas."""
         filtros, error = ReporteController._leer_filtros({
             "cliente": lambda v: v or None,
             "mes": ReporteController._validar_mes,
             "anio": ReporteController._validar_anio,
-            "estado": lambda v: ReporteController._validar_estado(v, ReporteController.ESTADOS_PRODUCCION),
+            "estado": ReporteController._validar_estado_produccion,
         })
         if error:
             return jsonify({"status": "error", "message": error}), 400
@@ -490,12 +477,11 @@ class ReporteController:
     @staticmethod
     @rol_requerido("ROL-001")
     def exportar_produccion():
-        """GET /api/reportes/produccion/excel: descarga la produccion en .xlsx."""
         filtros, error = ReporteController._leer_filtros({
             "cliente": lambda v: v or None,
             "mes": ReporteController._validar_mes,
             "anio": ReporteController._validar_anio,
-            "estado": lambda v: ReporteController._validar_estado(v, ReporteController.ESTADOS_PRODUCCION),
+            "estado": ReporteController._validar_estado_produccion,
         })
         if error:
             return jsonify({"status": "error", "message": error}), 400
@@ -511,9 +497,9 @@ class ReporteController:
 
             total_ordenes = len(data)
             total_unidades = sum(o["unidades"] for o in data)
-            entregadas = sum(1 for o in data if o["estadoProd"] == "✔")
-            en_proceso = sum(1 for o in data if o["estadoProd"] == "..")
-            canceladas = sum(1 for o in data if o["estadoProd"] == "✖")
+            entregadas = sum(1 for o in data if o["estadoProd"] == "✔" or str(o["estadoProd"]).lower() == "entregado")
+            en_proceso = sum(1 for o in data if o["estadoProd"] == ".." or str(o["estadoProd"]).lower() == "en proceso")
+            canceladas = sum(1 for o in data if o["estadoProd"] == "✖" or str(o["estadoProd"]).lower() == "cancelado")
             total_clientes = len({o["nombreCliente"] for o in data if o["nombreCliente"]})
 
             filas_ordenes = [

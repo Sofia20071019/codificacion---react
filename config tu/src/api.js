@@ -499,4 +499,64 @@ export const api = {
     exportarMateriasPrimas: (params = {}) =>
       api.descargar(`/api/reportes/materias-primas/excel${construirQuery(params)}`),
   },
+
+// =====================================================================
+  // DOMINIO: MOLDES
+  // =====================================================================
+  moldes: {
+    listar: (params = {}) =>
+      api.request(`/api/moldes${construirQuery(params)}`),
+
+    obtener: (id) => 
+      api.request(`/api/moldes/${id}`),
+
+    crear: (data) =>
+      api.request('/api/moldes', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    actualizar: (id, data) =>
+      api.request(`/api/moldes/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+
+    eliminar: (id) =>
+      api.request(`/api/moldes/${id}`, { method: 'DELETE' }),
+
+    listarCategorias: () => 
+      api.request('/api/moldes/categorias'),
+
+    crearCategoria: (data) =>
+      api.request('/api/moldes/categorias', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    eliminarCategoria: (id) =>
+      api.request(`/api/moldes/categorias/${id}`, {
+        method: 'DELETE',
+      }),
+
+    // Subir archivo binario de imagen (PNG, JPG, WEBP)
+    subirImagen: async (archivo) => {
+      const token = getToken();
+      const formData = new FormData();
+      formData.append('archivo', archivo);
+
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const response = await fetch(`${API_BASE_URL}/api/moldes/subir-imagen`, {
+        method: 'POST',
+        headers, // No poner 'Content-Type', fetch lo configura solo al enviar FormData
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Error al subir la imagen');
+      return data;
+    },
+  },
 };

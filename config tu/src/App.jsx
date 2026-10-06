@@ -81,6 +81,8 @@ import AdminAsignarInsumos from './pages/AdminAsignarInsumos';
 import EmpleadoTareas from './pages/EmpleadoTareas';
 // Gestión de tareas para empleados por parte del administrador
 import AdminTareasEmpleados from './pages/AdminTareasEmpleados';
+// Catálogo y gestión de moldes (Administradores y Empleados)
+import MoldesPage from './pages/MoldesPage';
 
 
 // ============================================================================
@@ -331,6 +333,18 @@ function App() {
             <a href="/" className="btn-login">Volver al inicio</a>
           </main>
         } />
+
+        {/* ================================================================= */}
+        {/* MÓDULO DE MOLDES (Acceso para usuarios autenticados) */}
+        {/* ================================================================= */}
+        <Route 
+          path="/moldes" 
+          element={
+            <RutaProtegida>
+              <MoldesPage />
+            </RutaProtegida>
+          } 
+        />
       </Routes>
 
       {/* Footer: pie de página visible en todas las páginas */}

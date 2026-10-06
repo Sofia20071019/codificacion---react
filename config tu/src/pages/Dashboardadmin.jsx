@@ -176,6 +176,19 @@ function Dashboardadmin() {
                             </Link>
                         </h2>
                     </div>
+                    {/* Tarjeta 8: Catálogo de Moldes - Gestión de patrones y tallas */}
+                    <div className="panel-gestion module-card">
+                        <div className="img-principal">
+                            {/* Puedes usar una imagen existente de tu carpeta img o una alegórica */}
+                            <img src="../img/panelAdministracion kk .png" alt="Moldes" />
+                        </div>
+                        <h2 className="margin-t-15">
+                            {/* Enlace al módulo de moldes (ruta /moldes) */}
+                            <Link to="/moldes" className="no-text-decor display-block">
+                                Catálogo de Moldes
+                            </Link>
+                        </h2>
+                    </div>
 
                 </div>
             </main>

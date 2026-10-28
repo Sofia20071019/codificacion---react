@@ -58,3 +58,9 @@ class Config:
     # en True, SQLAlchemy rastrea todos los objetos instanciados, lo
     # cual no es necesario en produccion y genera overhead
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    WTF_CSRF_ENABLED = False

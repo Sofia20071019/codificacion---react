@@ -26,13 +26,13 @@ from app.models.molde import CategoriaMolde, Molde, MoldeTallaImagen
 migrate = Migrate()
 
 
-def create_app():
+def create_app(config_class=Config):
     """
     Fabrica de aplicaciones Flask. Crea, configura y retorna una instancia
     completa de la aplicacion con todas las extensiones y blueprints registrados.
     """
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
 
     # Configuracion de carpeta de uploads para moldes
     upload_folder = os.path.join(app.root_path, "uploads", "moldes")

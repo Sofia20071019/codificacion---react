@@ -14,6 +14,36 @@ from app.services.molde_service import MoldeService
 class MoldeController:
     """Clase controladora con endpoints para la gestion de moldes y categorias."""
 
+    # ------------------ SERIALIZADORES DE CAPA DE PRESENTACION ------------------
+    @staticmethod
+    def _serializar_categoria(categoria):
+        """Transforma una entidad CategoriaMolde en diccionario para respuesta JSON."""
+        return {
+            "idCategoriaMolde": categoria.idCategoriaMolde,
+            "nombreCategoria": categoria.nombreCategoria
+        }
+
+    @staticmethod
+    def _serializar_molde(molde):
+        """Transforma una entidad Molde y sus relaciones en diccionario para respuesta JSON."""
+        return {
+            "idMolde": molde.idMolde,
+            "nombreMolde": molde.nombreMolde,
+            "descripcion": molde.descripcion,
+            "indicaciones": molde.indicaciones,
+            "genero": molde.genero,
+            "idCategoriaMolde": molde.idCategoriaMolde,
+            "categoria": molde.categoria.nombreCategoria if molde.categoria else None,
+            "tallas": [
+                {
+                    "idMoldeTalla": t.idMoldeTalla,
+                    "talla": t.talla,
+                    "imagenUrl": t.imagenUrl
+                }
+                for t in molde.imagenes_tallas
+            ]
+        }
+
     # ------------------ SUBIDA DE ARCHIVOS ------------------
     @staticmethod
     @rol_requerido("ROL-001")
@@ -50,7 +80,7 @@ class MoldeController:
             categorias = MoldeService.listar_categorias()
             return jsonify({
                 "status": "success",
-                "data": [c.to_dict() for c in categorias]
+                "data": [MoldeController._serializar_categoria(c) for c in categorias]
             }), 200
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
@@ -68,7 +98,10 @@ class MoldeController:
             }), 400
         try:
             cat = MoldeService.crear_categoria(nombre)
-            return jsonify({"status": "success", "data": cat.to_dict()}), 201
+            return jsonify({
+                "status": "success",
+                "data": MoldeController._serializar_categoria(cat)
+            }), 201
         except ValueError as ve:
             return jsonify({"status": "error", "message": str(ve)}), 400
         except Exception as e:
@@ -110,7 +143,7 @@ class MoldeController:
             )
             return jsonify({
                 "status": "success",
-                "data": [m.to_dict() for m in moldes]
+                "data": [MoldeController._serializar_molde(m) for m in moldes]
             }), 200
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
@@ -123,7 +156,10 @@ class MoldeController:
             molde = MoldeService.obtener_por_id(idMolde)
             if not molde:
                 return jsonify({"status": "error", "message": "Molde no encontrado"}), 404
-            return jsonify({"status": "success", "data": molde.to_dict()}), 200
+            return jsonify({
+                "status": "success",
+                "data": MoldeController._serializar_molde(molde)
+            }), 200
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -146,7 +182,10 @@ class MoldeController:
                 idCategoriaMolde=data.get("idCategoriaMolde"),
                 tallas=data.get("tallas", [])
             )
-            return jsonify({"status": "success", "data": molde.to_dict()}), 201
+            return jsonify({
+                "status": "success",
+                "data": MoldeController._serializar_molde(molde)
+            }), 201
         except ValueError as ve:
             return jsonify({"status": "error", "message": str(ve)}), 400
         except Exception as e:
@@ -161,7 +200,10 @@ class MoldeController:
             molde = MoldeService.actualizar_molde(idMolde, data)
             if not molde:
                 return jsonify({"status": "error", "message": "Molde no encontrado"}), 404
-            return jsonify({"status": "success", "data": molde.to_dict()}), 200
+            return jsonify({
+                "status": "success",
+                "data": MoldeController._serializar_molde(molde)
+            }), 200
         except ValueError as ve:
             return jsonify({"status": "error", "message": str(ve)}), 400
         except Exception as e:

@@ -11,13 +11,8 @@ class CategoriaMolde(db.Model):
     idCategoriaMolde = db.Column(db.String(10), primary_key=True)
     nombreCategoria = db.Column(db.String(100), nullable=False)
 
+    # Relación inversa con Molde
     moldes = db.relationship("Molde", back_populates="categoria", cascade="all, delete-orphan")
-
-    def to_dict(self):
-        return {
-            "idCategoriaMolde": self.idCategoriaMolde,
-            "nombreCategoria": self.nombreCategoria
-        }
 
 
 class Molde(db.Model):
@@ -30,20 +25,9 @@ class Molde(db.Model):
     genero = db.Column(db.Enum('hombre', 'mujer', 'niño', 'niña', 'unisex', name='genero_enum'), nullable=False, default='unisex')
     idCategoriaMolde = db.Column(db.String(10), db.ForeignKey("categoria_molde.idCategoriaMolde", onupdate="CASCADE"), nullable=False)
 
+    # Relaciones con CategoriaMolde y MoldeTallaImagen
     categoria = db.relationship("CategoriaMolde", back_populates="moldes")
     imagenes_tallas = db.relationship("MoldeTallaImagen", back_populates="molde", cascade="all, delete-orphan")
-
-    def to_dict(self):
-        return {
-            "idMolde": self.idMolde,
-            "nombreMolde": self.nombreMolde,
-            "descripcion": self.descripcion,
-            "indicaciones": self.indicaciones,
-            "genero": self.genero,
-            "idCategoriaMolde": self.idCategoriaMolde,
-            "categoria": self.categoria.nombreCategoria if self.categoria else None,
-            "tallas": [t.to_dict() for t in self.imagenes_tallas]
-        }
 
 
 class MoldeTallaImagen(db.Model):
@@ -54,11 +38,5 @@ class MoldeTallaImagen(db.Model):
     talla = db.Column(db.String(10), nullable=False)
     imagenUrl = db.Column(db.Text, nullable=False)
 
+    # Relación inversa con Molde
     molde = db.relationship("Molde", back_populates="imagenes_tallas")
-
-    def to_dict(self):
-        return {
-            "idMoldeTalla": self.idMoldeTalla,
-            "talla": self.talla,
-            "imagenUrl": self.imagenUrl
-        }

@@ -6,6 +6,7 @@
 #            memoria RAM (SQLite) y destruye las tablas al finalizar cada prueba.
 # =============================================================================
 
+
 import pytest
 
 from app import create_app

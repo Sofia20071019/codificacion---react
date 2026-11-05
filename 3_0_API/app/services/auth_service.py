@@ -40,6 +40,10 @@ class AuthService:
         if not bcrypt.check_password_hash(usuario.passwordHash, password):
             return None
 
+        # Rechazar usuarios desactivados (EST-001 = ACTIVO)
+        if usuario.idEstado != "EST-001":
+            return None
+
         # Si todo es correcto, retornar el objeto usuario autenticado
         return usuario
 

@@ -64,3 +64,21 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
+
+
+class IntegrationTestingConfig(Config):
+    """
+    Configuracion para las pruebas de integracion. Usa una base de datos MySQL
+    REAL pero exclusiva de pruebas (por defecto Kimuka3_test), distinta a la de
+    desarrollo. El nombre se toma de MYSQL_TEST_DATABASE en el archivo .env.
+    """
+
+    TESTING = True
+    BCRYPT_LOG_ROUNDS = 4  # hash rapido solo para pruebas
+    SQLALCHEMY_DATABASE_URI = (
+        f"mysql+pymysql://{os.getenv('MYSQL_USER')}:"
+        f"{os.getenv('MYSQL_PASSWORD')}@"
+        f"{os.getenv('MYSQL_HOST')}:"
+        f"{os.getenv('MYSQL_PORT')}/"
+        f"{os.getenv('MYSQL_TEST_DATABASE', 'Kimuka3_test')}"
+    )

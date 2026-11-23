@@ -47,6 +47,10 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     migrate.init_app(app, db)
 
+    @app.get('/health')
+    def health():
+        return {'status': 'ok'}
+
     # Ruta estatica para servir imagenes subidas
     @app.route("/uploads/moldes/<path:filename>")
     def servir_imagen_molde(filename):

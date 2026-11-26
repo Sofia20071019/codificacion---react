@@ -1,193 +1,258 @@
+/* ============================================================
+   ARCHIVO: Editarempleados.jsx
+   PROPOSITO: Componente de página que permite editar los datos
+              de un empleado/usuario existente en el sistema
+              Kimuka. Recibe el ID del empleado a través de la
+              URL (parámetro de ruta), carga sus datos actuales
+              desde el backend y muestra un formulario prellenado
+              para modificar nombre, apellidos, correo, contraseña
+              y estado. Tras guardar los cambios, redirige a la
+              lista de empleados.
+   ============================================================ */
+
+// Importación de hooks de estado y efecto de React
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom'; 
+// Importación de Link para navegación, useParams para obtener parámetros de URL
+// y useNavigate para redirección programática
+import { Link, useParams, useNavigate } from 'react-router-dom';
+// Importación del módulo de API para realizar peticiones HTTP al backend
+import { api } from '../api';
 
-function Editarempleados(){
-    const { id } = useParams(); 
-    const navigate = useNavigate();
-    const API_URL = `http://localhost:5000/personal/${id}`; 
+/* ============================================================
+   Componente principal: Editarempleados
+   Renderiza el formulario de edición de un empleado con sus
+   datos actuales prellenados y una sección de vista previa.
+   ============================================================ */
+function Editarempleados() {
 
-    const [adminName, setAdminName] = useState('ADMINISTRADOR');
-    const [formData, setFormData] = useState({
-        id: "",
-        nombre: "",
-        apellido: "",
-        email: "",
-        celular: "",
-        password: "",
-        foto: "",
-        edad: "",
-        fechaRegistro: "",
-        rol: ""
-    });
+  /* ----------------------------------------------------------
+     OBTENCIÓN DE PARÁMETROS DE RUTA
+     useParams extrae el ID del empleado de la URL
+     (ejemplo: /editarempleados/USR-001 → id = "USR-001")
+     ---------------------------------------------------------- */
+  const { id } = useParams();
 
-    useEffect(() => {
-        // Cargar nombre del administrador activo transformado a mayúsculas sostenidas
-        const usuarioLogueado = localStorage.getItem('usuarioLogueado');
-        if (usuarioLogueado) {
-            const user = JSON.parse(usuarioLogueado);
-            if (user.nombre) {
-                setAdminName(user.nombre.toUpperCase());
-            }
-        }
+  /* ----------------------------------------------------------
+     HOOK DE NAVEGACIÓN
+     useNavigate permite redirigir programáticamente a otra
+     ruta después de guardar los cambios exitosamente.
+     ---------------------------------------------------------- */
+  const navigate = useNavigate();
 
-        if (!id) return; 
-        fetch(API_URL)
-            .then((res) => {
-                if (!res.ok) throw new Error("No se encontró el usuario");
-                return res.json();
-            })
-            .then((data) => setFormData(data))
-            .catch((err) => console.error("Error al traer el empleado:", err));
-    }, [id, API_URL]);
+  /* ----------------------------------------------------------
+     ESTADOS (useState)
+     ---------------------------------------------------------- */
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  // Nombre del administrador logueado, se muestra en el encabezado.
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
+    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
+    if (usuarioLogueado) {
+      const user = JSON.parse(usuarioLogueado);
+      return user.nombre ? user.nombre.toUpperCase() : 'ADMINISTRADOR';
+    }
+    return 'ADMINISTRADOR';
+  });
 
-    const handleFotoChange = (e) => {
-        const archivo = e.target.files[0];
-        if (archivo) {
-            const nombreArchivo = archivo.name;
-            setFormData({ ...formData, foto: `../img/${nombreArchivo}` });
-        }
-    };
+  // Objeto que contiene todos los campos del formulario de edición
+  const [formData, setFormData] = useState({
+    pNombre: "",      // Primer nombre del empleado
+    sNombre: "",      // Segundo nombre del empleado
+    pApellido: "",    // Primer apellido del empleado
+    sApellido: "",    // Segundo apellido del empleado
+    correo: "",       // Correo electrónico del empleado
+    password: "",     // Nueva contraseña (vacío para mantener la actual)
+    idRol: "",        // ID del rol asignado al empleado
+    idEstado: "EST-001" // ID del estado del empleado (por defecto: ACTIVO)
+  });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        fetch(API_URL, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData)
-        })
-        .then((res) => {
-            if(res.ok) {
-                alert("¡Cambios guardados exitosamente en Kimuka!");
-                navigate("/empleados");
-            } else {
-                alert("Hubo un problema al guardar los cambios.");
-            }
-        })
-        .catch((err) => console.error("Error al actualizar:", err));
-    };
+  /* ----------------------------------------------------------
+     EFECTO SECUNDARIO (useEffect)
+     Se ejecuta al montar el componente y cada vez que cambia
+     el parámetro 'id' de la URL.
+     1. Carga los datos del empleado desde la API usando el ID
+     2. Rellena el formulario con los datos obtenidos
+     ---------------------------------------------------------- */
+  useEffect(() => {
+    // Si no hay ID en la URL, salir sin cargar datos
+    if (!id) return;
 
-    return (
-        <div className="dark-theme">
-            <nav className="top-nav">
-                <Link to="/empleados" className="no-text-decor">VOLVER</Link>
-            </nav>
+    // Realizar petición GET para obtener los datos del empleado por su ID
+    api.usuarios.obtener(id)
+      .then((res) => {
+        const u = res.data; // Extraer los datos del empleado de la respuesta
+        // Rellenar el formulario con los datos obtenidos del empleado
+        setFormData({
+          pNombre: u.pNombre || "",      // Primer nombre (vacío si no existe)
+          sNombre: u.sNombre || "",      // Segundo nombre (vacío si no existe)
+          pApellido: u.pApellido || "",  // Primer apellido (vacío si no existe)
+          sApellido: u.sApellido || "",  // Segundo apellido (vacío si no existe)
+          correo: u.correo || "",        // Correo electrónico (vacío si no existe)
+          password: "",                  // Contraseña siempre vacía por seguridad
+          idRol: u.idRol || "",         // Rol del empleado
+          idEstado: u.idEstado || "EST-001" // Estado (ACTIVO por defecto)
+        });
+      })
+      .catch((err) => console.error("Error al traer el empleado:", err)); // Log de errores
+  }, [id]); // Se re-ejecuta cuando cambia el ID de la URL
 
-            <header className="main-header">
-                <div className="header-container">
-                    <div className="logo-principal-cell">
-                        <div className="logo-principal">
-                            <div className="logo-circle">
-                                <img src="../img/logo kimuka.png" alt="logo Kimuka"/>
-                            </div>
-                            <h1>Editar Personal</h1>
-                        </div>
-                    </div>
-                    <div className="header-actions-cell">
-                        {/* Muestra el nombre real del administrador logueado */}
-                        <button className="btn-login">{adminName}</button>
-                    </div>
-                </div>
-            </header>
+  /* ----------------------------------------------------------
+     FUNCIÓN: handleChange
+     Propósito: Actualizar dinámicamente los campos del formulario
+                cuando el usuario escribe o selecciona un valor.
+     Parámetros: e - evento del input/select
+     Comportamiento: Usa el atributo 'name' del elemento para
+     determinar qué campo del objeto formData actualizar.
+     ---------------------------------------------------------- */
+  const handleChange = (e) => {
+    // Actualizar solo el campo cuyo name coincida con el del input modificado
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-            <main className="content-wrapper">
-                <div className="panel-registro">
-                    <section className="form-section-cell">
-                        <h2 className="form-title">Editar Perfil (Campos restringidos)</h2>
-                        <form className="grid-form" onSubmit={handleSubmit}>
-                            
-                            {/* Nombres y Apellidos (Bloqueados) */}
-                            <div className="input-group">
-                                <label>Nombres De La Persona (No Editable)</label>
-                                <input type="text" name="nombre" value={formData.nombre || ""} disabled/>
-                            </div>
-                            <div className="input-group">
-                                <label>Apellidos De La Persona (No Editable)</label>
-                                <input type="text" name="apellido" value={formData.apellido || ""} disabled/>
-                            </div>
+  /* ----------------------------------------------------------
+     FUNCIÓN: handleSubmit
+     Propósito: Enviar los datos actualizados del empleado al
+                backend y redirigir a la lista de empleados.
+     Parámetros: e - evento del formulario (submit)
+     Comportamiento: Previene la recarga de página, envía los
+     datos del formulario a la API para actualizar el empleado,
+     muestra una alerta de éxito y redirige a /empleados.
+     ---------------------------------------------------------- */
+  const handleSubmit = async (e) => {
+    // Prevenir comportamiento por defecto del formulario
+    e.preventDefault();
+    try {
+      // Enviar petición PUT para actualizar los datos del empleado
+      await api.usuarios.actualizar(id, formData);
+      // Mostrar confirmación de éxito al usuario
+      alert("¡Cambios guardados exitosamente en Kimuka!");
+      // Redirigir a la página de gestión de empleados
+      navigate("/empleados");
+    } catch {
+      // Mostrar mensaje de error si la actualización falla
+      alert("Hubo un problema al guardar los cambios.");
+    }
+  };
 
-                            {/* Edad y Rol (Bloqueados) */}
-                            <div className="input-group">
-                                <label>Edad (No Editable)</label>
-                                <input type="number" name="edad" value={formData.edad || ""} disabled />
-                            </div>
-                            <div className="input-group">
-                                <label>Rol / Perfil (No Editable)</label>
-                                <input type="text" name="rol" value={formData.rol || ""} disabled />
-                            </div>
+  /* ----------------------------------------------------------
+     RENDERIZADO (JSX)
+     Estructura visual completa de la página de edición de empleados
+     ---------------------------------------------------------- */
+  return (
+    <div className="dark-theme">
+      {/* Barra de navegación superior con enlace para volver a la lista de empleados */}
+      <nav className="top-nav">
+        <Link to="/empleados" className="no-text-decor">VOLVER</Link>
+      </nav>
 
-                            {/* Fecha de Registro (Bloqueado) */}
-                            <div className="input-group">
-                                <label>Fecha de Registro (No Editable)</label>
-                                <input type="date" name="fechaRegistro" value={formData.fechaRegistro || ""} disabled />
-                            </div>
-
-                            {/* Correo Electrónico (EDITABLE con validación) */}
-                            <div className="input-group">
-                                <label>Correo Electrónico *</label>
-                                <input 
-                                    type="email" 
-                                    name="email" 
-                                    value={formData.email || ""} 
-                                    onChange={handleChange} 
-                                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                                    title="Por favor, introduzca un correo electrónico válido."
-                                    required
-                                />
-                            </div>
-
-                            {/* Número de Celular (EDITABLE con validación de Colombia) */}
-                            <div className="input-group">
-                                <label>Número De Celular *</label>
-                                <input 
-                                    type="text" 
-                                    name="celular" 
-                                    value={formData.celular || ""} 
-                                    onChange={handleChange} 
-                                    pattern="3[0-9]{9}"
-                                    maxLength="10"
-                                    title="El número de celular en Colombia debe iniciar con 3 y tener exactamente 10 dígitos numéricos."
-                                    required
-                                />
-                            </div>
-
-                            {/* Contraseña asignada (EDITABLE con restricción numérica) */}
-                            <div className="input-group">
-                                <label>Contraseña asignada (Identificación) *</label>
-                                <input 
-                                    type="password" 
-                                    name="password" 
-                                    value={formData.password || ""} 
-                                    onChange={handleChange} 
-                                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
-                                    maxLength="16"
-                                    title="La contraseña debe contener únicamente números."
-                                    required
-                                />
-                            </div>
-
-                            <button type="submit" className="btn-submit">Guardar cambios</button>
-                        </form>
-                    </section>
-
-                    <section className="image-section-cell">
-                        <h2 className="avatar-preview-text">Foto-Trabajador</h2>
-                        <div className="portrait-wrapper">
-                            <img src={formData.foto || "../img/registroDePersonal kk .png"} alt="Vista previa"/>
-                        </div>
-                        <div className="margin-t-15">
-                            <label className="display-block margin-b-5">Actualizar Fotografía Corporativa</label>
-                            <input type="file" className="font-size-sm" accept="image/*" onChange={handleFotoChange}/>
-                        </div>
-                    </section>
-                </div>
-            </main>
+      {/* Encabezado principal con logo, título y nombre del admin */}
+      <header className="main-header">
+        {/* Contenedor flex del encabezado */}
+        <div className="header-container">
+          {/* Celda del logo principal */}
+          <div className="logo-principal-cell">
+            {/* Contenedor del logo y título */}
+            <div className="logo-principal">
+              {/* Círculo contenedor de la imagen del logo */}
+              <div className="logo-circle">
+                {/* Imagen del logo de Kimuka */}
+                <img src="../img/logo kimuka.png" alt="logo Kimuka" />
+              </div>
+              {/* Título de la página de edición de personal */}
+              <h1>Editar Personal</h1>
+            </div>
+          </div>
+          {/* Celda de acciones: nombre del administrador */}
+          <div className="header-actions-cell">
+            {/* Botón que muestra el nombre del administrador logueado */}
+            <button className="btn-login">{adminName}</button>
+          </div>
         </div>
-    );
+      </header>
+
+      {/* Contenido principal de la página */}
+      <main className="content-wrapper">
+        {/* Panel de registro/edición con diseño de dos columnas */}
+        <div className="panel-registro">
+          {/* Sección izquierda: formulario de edición */}
+          <section className="form-section-cell">
+            {/* Título del formulario */}
+            <h2 className="form-title">Editar Perfil</h2>
+            {/* Formulario de edición con grid layout */}
+            <form className="grid-form" onSubmit={handleSubmit}>
+              {/* Fila: Primer Nombre y Segundo Nombre */}
+              <div className="input-row">
+                {/* Campo de Primer Nombre */}
+                <div className="input-cell">
+                  <label>Primer Nombre</label>
+                  <input type="text" name="pNombre" value={formData.pNombre} onChange={handleChange} required />
+                </div>
+                {/* Campo de Segundo Nombre (opcional) */}
+                <div className="input-cell">
+                  <label>Segundo Nombre</label>
+                  <input type="text" name="sNombre" value={formData.sNombre} onChange={handleChange} />
+                </div>
+              </div>
+
+              {/* Fila: Primer Apellido y Segundo Apellido */}
+              <div className="input-row">
+                {/* Campo de Primer Apellido */}
+                <div className="input-cell">
+                  <label>Primer Apellido</label>
+                  <input type="text" name="pApellido" value={formData.pApellido} onChange={handleChange} required />
+                </div>
+                {/* Campo de Segundo Apellido (opcional) */}
+                <div className="input-cell">
+                  <label>Segundo Apellido</label>
+                  <input type="text" name="sApellido" value={formData.sApellido} onChange={handleChange} />
+                </div>
+              </div>
+
+              {/* Campo: Correo Electrónico */}
+              <div className="input-group">
+                <label>Correo Electrónico</label>
+                <input type="email" name="correo" value={formData.correo} onChange={handleChange} required />
+              </div>
+
+              {/* Campo: Nueva Contraseña (dejar vacío para mantener la actual) */}
+              <div className="input-group">
+                <label>Nueva Contraseña (dejar vacío para mantener)</label>
+                <input type="password" name="password" value={formData.password} onChange={handleChange} />
+              </div>
+
+              {/* Campo: Estado del empleado (ACTIVO/INACTIVO) */}
+              <div className="input-group">
+                <label>Estado</label>
+                {/* Selector de estado del empleado */}
+                <select name="idEstado" value={formData.idEstado} onChange={handleChange}>
+                  {/* Opción: ACTIVO */}
+                  <option value="EST-001">ACTIVO</option>
+                  {/* Opción: INACTIVO */}
+                  <option value="EST-002">INACTIVO</option>
+                </select>
+              </div>
+
+              {/* Botón para enviar el formulario y guardar los cambios */}
+              <button type="submit" className="btn-submit">Guardar cambios</button>
+            </form>
+          </section>
+
+          {/* Sección derecha: imagen de vista previa/avatar */}
+          <section className="image-section-cell">
+            {/* Título de la sección de imagen */}
+            <h2 className="avatar-preview-text">Foto-Trabajador</h2>
+            {/* Contenedor de la imagen de vista previa */}
+            <div className="portrait-wrapper">
+              {/* Imagen decorativa de vista previa del empleado */}
+              <img src="../img/registroDePersonal kk .png" alt="Vista previa" />
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
 }
 
+// Exportar el componente como exportación por defecto
 export default Editarempleados;

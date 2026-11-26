@@ -1,105 +1,168 @@
-import React, { useState, useEffect } from 'react';
+/* ============================================================
+   ARCHIVO: RegistroDePersonal.jsx
+   PROPOSITO: Componente de página que permite registrar nuevos
+              empleados/usuarios en el sistema Kimuka. Muestra
+              un formulario completo con campos de nombre,
+              apellidos, correo electrónico, contraseña con
+              confirmación y selección de rol. Incluye validación
+              de coincidencia de contraseñas y filtrado de números
+              en campos de nombre/apellido. Se conecta con la API
+              para crear el usuario y obtener la lista de roles
+              disponibles. Tras el registro exitoso, redirige a
+              la página de gestión de empleados.
+   ============================================================ */
+
+// Importación de hooks de estado y efecto
+import { useState, useEffect } from 'react';
+// Importación de Link para navegación y useNavigate para redirección programática
 import { Link, useNavigate } from 'react-router-dom';
-import { fetchData } from '../api';
+// Importación del módulo de API para realizar peticiones HTTP al backend
+import { api } from '../api';
 
+/* ============================================================
+   Componente principal: RegistroDePersonal
+   Renderiza el formulario completo de registro de un nuevo
+   empleado con validaciones y diseño de dos columnas.
+   ============================================================ */
 function RegistroDePersonal() {
+
+  /* ----------------------------------------------------------
+     HOOK DE NAVEGACIÓN
+     useNavigate permite redirigir programáticamente a la
+     página de gestión de empleados después del registro.
+     ---------------------------------------------------------- */
   const navigate = useNavigate();
-  const [adminName, setAdminName] = useState('ADMINISTRADOR');
 
-  const [nombre, setNombre] = useState('');
-  const [apellido, setApellido] = useState('');
-  const [edad, setEdad] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [celular, setCelular] = useState('');
-  const [fecha, setFecha] = useState('');
-  const [cargo, setCargo] = useState('');
-  const [identificacion, setIdentificacion] = useState('');
-  const [confirmarIdentificacion, setConfirmarIdentificacion] = useState('');
-  
-  const [fotoPreview, setFotoPreview] = useState('../img/registroDePersonal kk .png');
-  const [fotoNombre, setFotoNombre] = useState('');
+  /* ----------------------------------------------------------
+     ESTADOS (useState)
+     ---------------------------------------------------------- */
 
-  useEffect(() => {
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dia = String(hoy.getDate()).padStart(2, '0');
-    setFecha(`${año}-${mes}-${dia}`);
-
-    // Sincronización y conversión del nombre del administrador a MAYÚSCULAS
+  // Nombre del administrador logueado, se muestra en el encabezado.
+  // Se inicializa de forma perezosa desde localStorage para no depender de un
+  // setState dentro del useEffect (evita lint set-state-in-effect)
+  const [adminName] = useState(() => {
     const usuarioLogueado = localStorage.getItem('usuarioLogueado');
     if (usuarioLogueado) {
-        const user = JSON.parse(usuarioLogueado);
-        if (user.nombre) {
-            setAdminName(user.nombre.toUpperCase());
-        }
-    } else {
-        // Validación alternativa con la otra clave por si acaso
-        const nombreSesion = localStorage.getItem('kimuka_sesion_activa');
-        if (nombreSesion) {
-            setAdminName(nombreSesion.toUpperCase());
-        }
+      const user = JSON.parse(usuarioLogueado);
+      return user.nombre ? user.nombre.toUpperCase() : 'ADMINISTRADOR';
     }
-  }, []);
+    return 'ADMINISTRADOR';
+  });
 
-  const handleFotoChange = (e) => {
-    const archivo = e.target.files[0];
-    if (archivo) {
-      setFotoNombre(archivo.name);
-      setFotoPreview(URL.createObjectURL(archivo));
-    }
-  };
+  // Lista de roles disponibles obtenidos desde el backend
+  const [roles, setRoles] = useState([]);
 
+  // Campo: Primer nombre del nuevo empleado (obligatorio)
+  const [pNombre, setPNombre] = useState('');
+
+  // Campo: Segundo nombre del nuevo empleado (opcional)
+  const [sNombre, setSNombre] = useState('');
+
+  // Campo: Primer apellido del nuevo empleado (obligatorio)
+  const [pApellido, setPApellido] = useState('');
+
+  // Campo: Segundo apellido del nuevo empleado (opcional)
+  const [sApellido, setSApellido] = useState('');
+
+  // Campo: Correo electrónico del nuevo empleado (obligatorio)
+  const [correo, setCorreo] = useState('');
+
+  // Campo: Contraseña del nuevo empleado (obligatorio)
+  const [password, setPassword] = useState('');
+
+  // Campo: Confirmación de contraseña (debe coincidir con password)
+  const [confirmarPassword, setConfirmarPassword] = useState('');
+
+  // Campo: ID del rol seleccionado para el nuevo empleado
+  const [idRol, setIdRol] = useState('');
+
+  /* ----------------------------------------------------------
+     EFECTO SECUNDARIO (useEffect)
+     Se ejecuta una sola vez al montar el componente.
+     Carga la lista de roles disponibles desde la API
+     ---------------------------------------------------------- */
+  useEffect(() => {
+    // Realizar petición GET para obtener la lista de roles del sistema
+    api.roles.listar()
+      .then((res) => setRoles(res.data || [])) // Guardar los roles en el estado
+      .catch(() => {}); // Silenciar errores de red o backend
+  }, []); // Array vacío: se ejecuta solo al montar el componente
+
+  /* ----------------------------------------------------------
+     FUNCIÓN: handleSubmit
+     Propósito: Validar y enviar los datos del nuevo empleado
+                al backend para crearlo en el sistema.
+     Parámetros: e - evento del formulario (submit)
+     Comportamiento: Previene la recarga de página, valida que
+     las contraseñas coincidan, envía los datos a la API para
+     crear el usuario, muestra alertas de éxito/error y redirige
+     a la gestión de empleados en caso de éxito.
+     ---------------------------------------------------------- */
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
-    if (identificacion !== confirmarIdentificacion) {
-      alert("Error: El número de identificación y su confirmación no coinciden.");
-      return;
-    }
+    // Prevenir comportamiento por defecto del formulario (recarga de página)
+    e.preventDefault();
 
-    // Estructuramos el JSON mapeando los datos de forma limpia para la API
-    const nuevoOperario = {
-      nombre: nombre.trim(),
-      apellido: apellido.trim(), 
-      email: correo.toLowerCase().trim(),
-      rol: cargo.toLowerCase(),
-      celular: celular.trim()   
-    };
+    // Validar que las contraseñas coincidan antes de enviar
+    if (password !== confirmarPassword) {
+      alert('Error: Las contraseñas no coinciden.'); // Alerta de error
+      return; // Detener la ejecución si no coinciden
+    }
 
     try {
-      await fetchData('/api/personal', {
-        method: 'POST',
-        body: JSON.stringify(nuevoOperario)
+      // Enviar petición POST para crear el nuevo usuario en el backend
+      await api.usuarios.crear({
+        pNombre: pNombre.trim(),             // Primer nombre sin espacios extra
+        sNombre: sNombre.trim() || null,     // Segundo nombre (null si está vacío)
+        pApellido: pApellido.trim(),         // Primer apellido sin espacios extra
+        sApellido: sApellido.trim() || null, // Segundo apellido (null si está vacío)
+        correo: correo.toLowerCase().trim(), // Correo en minúsculas sin espacios extra
+        password: password.trim(),           // Contraseña sin espacios extra
+        idRol,                              // ID del rol seleccionado
       });
 
-      alert("¡Operario registrado con éxito en Kimuka!");
-      navigate('/login', { replace: true }); 
-
+      // Mostrar confirmación de éxito al usuario
+      alert('¡Usuario registrado con éxito en Kimuka!');
+      // Redirigir a la página de gestión de empleados (replace: reemplaza el historial)
+      navigate('/empleados', { replace: true });
     } catch (error) {
-      console.error("Error:", error);
-      alert(error.message || "Hubo un error al registrar el operario.");
+      // Mostrar mensaje de error si el registro falla
+      alert(error.message || 'Error al registrar el usuario.');
     }
   };
 
+  /* ----------------------------------------------------------
+     RENDERIZADO (JSX)
+     Estructura visual completa de la página de registro de personal
+     ---------------------------------------------------------- */
   return (
     <>
+      {/* Barra de navegación superior con enlace para volver a la gestión de empleados */}
       <nav className="top-nav">
-        <Link to="/empleados">VOLVER </Link>
+        <Link to="/empleados">VOLVER</Link>
       </nav>
 
+      {/* Encabezado principal con logo, título y botones de sesión */}
       <header className="main-header">
+        {/* Contenedor flex del encabezado */}
         <div className="header-container">
+          {/* Celda del logo principal */}
           <div className="logo-principal-cell">
+            {/* Contenedor del logo y título */}
             <div className="logo-principal">
+              {/* Círculo contenedor de la imagen del logo */}
               <div className="logo-circle">
+                {/* Imagen del logo de Kimuka */}
                 <img src="../img/logo kimuka.png" alt="Logo" />
               </div>
+              {/* Título de la página de registro de personal */}
               <h1>Kimuka - Personal</h1>
             </div>
           </div>
+          {/* Celda de acciones: nombre del admin y botón de cerrar sesión */}
           <div className="header-actions-cell">
-            {/* Renderiza el nombre en mayúsculas de manera consistente */}
+            {/* Botón que muestra el nombre del administrador logueado */}
             <button className="btn-login">{adminName}</button>
+            {/* Botón con enlace para cerrar la sesión */}
             <button className="btn-login">
               <Link to="/cierre-admin">Cerrar Sesión</Link>
             </button>
@@ -107,90 +170,95 @@ function RegistroDePersonal() {
         </div>
       </header>
 
+      {/* Contenido principal de la página */}
       <main className="content-wrapper">
+        {/* Panel de registro con diseño de dos columnas */}
         <div className="panel-registro">
+          {/* Sección izquierda: formulario de registro */}
           <div className="form-section-cell">
+            {/* Título del formulario */}
             <h2 className="form-title">Registrar Nuevo Empleado</h2>
-            
-            <form className="grid-form" id="form-personal" onSubmit={handleSubmit}>
+
+            {/* Formulario de registro con grid layout */}
+            <form className="grid-form" onSubmit={handleSubmit}>
+              {/* Fila: Primer Nombre y Segundo Nombre */}
               <div className="input-row">
+                {/* Campo de Primer Nombre (obligatorio, sin números) */}
                 <div className="input-cell">
-                  <label htmlFor="emp-nombre">Nombres de la Persona</label>
-                  <input type="text" id="emp-nombre" placeholder="Laura Jimena" value={nombre} onChange={(e) => setNombre(e.target.value)} pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo letras y espacios." required />
+                  <label>Primer Nombre</label>
+                  {/* Input que filtra números con expresión regular en el onChange */}
+                  <input type="text" placeholder="Laura" value={pNombre} onChange={(e) => setPNombre(e.target.value.replace(/[0-9]/g, ''))} required />
                 </div>
+                {/* Campo de Segundo Nombre (opcional, sin números) */}
                 <div className="input-cell">
-                  <label htmlFor="emp-apellido">Apellidos de la Persona</label>
-                  <input type="text" id="emp-apellido" placeholder="Valderrama Vaquero" value={apellido} onChange={(e) => setApellido(e.target.value)} pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo letras y espacios." required />
+                  <label>Segundo Nombre</label>
+                  <input type="text" placeholder="Jimena" value={sNombre} onChange={(e) => setSNombre(e.target.value.replace(/[0-9]/g, ''))} />
                 </div>
               </div>
 
+              {/* Fila: Primer Apellido y Segundo Apellido */}
               <div className="input-row">
+                {/* Campo de Primer Apellido (obligatorio, sin números) */}
                 <div className="input-cell">
-                  <label htmlFor="emp-edad">Edad (18 - 80 años)</label>
-                  <input type="number" id="emp-edad" placeholder="19" min="18" max="80" value={edad} onChange={(e) => setEdad(e.target.value)} required />
+                  <label>Primer Apellido</label>
+                  <input type="text" placeholder="Valderrama" value={pApellido} onChange={(e) => setPApellido(e.target.value.replace(/[0-9]/g, ''))} required />
                 </div>
+                {/* Campo de Segundo Apellido (opcional, sin números) */}
                 <div className="input-cell">
-                  <label htmlFor="emp-correo">Correo Electrónico</label>
-                  <input 
-                    type="email" 
-                    id="emp-correo" 
-                    placeholder="ejemplo@gmail.com" 
-                    value={correo} 
-                    onChange={(e) => setCorreo(e.target.value)} 
-                    pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" 
-                    title="Formato de correo no válido." 
-                    required 
-                  />
+                  <label>Segundo Apellido</label>
+                  <input type="text" placeholder="Vaquero" value={sApellido} onChange={(e) => setSApellido(e.target.value.replace(/[0-9]/g, ''))} />
                 </div>
               </div>
 
+              {/* Fila: Correo Electrónico y Rol/Perfil */}
               <div className="input-row">
+                {/* Campo de Correo Electrónico (obligatorio) */}
                 <div className="input-cell">
-                  <label htmlFor="emp-celular">Número de Celular (Colombia)</label>
-                  <input type="text" id="emp-celular" placeholder="3001234567" value={celular} onChange={(e) => setCelular(e.target.value)} pattern="3[0-9]{9}" maxLength="10" title="Debe iniciar con 3 y tener 10 dígitos." required />
+                  <label>Correo Electrónico</label>
+                  <input type="email" placeholder="ejemplo@gmail.com" value={correo} onChange={(e) => setCorreo(e.target.value)} required />
                 </div>
+                {/* Campo de selección de Rol (obligatorio, opciones desde la API) */}
                 <div className="input-cell">
-                  <label htmlFor="emp-fecha">Fecha de Registro</label>
-                  <input type="date" id="emp-fecha" value={fecha} disabled required />
-                </div>
-              </div>
-
-              <div className="input-row">
-                <div className="input-cell">
-                  <label htmlFor="emp-identificacion">Número de Identificación</label>
-                  <input type="password" id="emp-identificacion" placeholder="Ej: 1014XXXXXX" value={identificacion} onChange={(e) => setIdentificacion(e.target.value)} onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} maxLength="16" required />
-                </div>
-                <div className="input-cell">
-                  <label htmlFor="emp-confirmar-identificacion">Confirmar Identificación</label>
-                  <input type="password" id="emp-confirmar-identificacion" placeholder="Repita la identificación" value={confirmarIdentificacion} onChange={(e) => setConfirmarIdentificacion(e.target.value)} onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} maxLength="16" required />
-                </div>
-              </div>
-
-              <div className="input-row">
-                <div className="input-cell">
-                  <label htmlFor="emp-cargo">Rol / Perfil</label>
-                  <select id="emp-cargo" value={cargo} onChange={(e) => setCargo(e.target.value)} required>
+                  <label>Rol / Perfil</label>
+                  {/* Selector de roles cargados desde el backend */}
+                  <select value={idRol} onChange={(e) => setIdRol(e.target.value)} required>
+                    {/* Opción predeterminada placeholder */}
                     <option value="">-- Seleccionar --</option>
-                    <option value="empleado">Empleado</option>
-                    <option value="administrador">Administrador</option>
+                    {/* Renderizar cada rol como opción del selector */}
+                    {roles.map((r) => (
+                      <option key={r.idRol} value={r.idRol}>{r.nombreRol}</option>
+                    ))}
                   </select>
                 </div>
-                <div className="input-cell"></div>
               </div>
 
-              <div className="input-group">
-                <label htmlFor="foto-input">Fotografía Corporativa (Avatar) *</label>
-                <input type="file" id="foto-input" accept="image/*" onChange={handleFotoChange} required />
+              {/* Fila: Contraseña y Confirmación de Contraseña */}
+              <div className="input-row">
+                {/* Campo de Contraseña (obligatorio) */}
+                <div className="input-cell">
+                  <label>Contraseña</label>
+                  <input type="password" placeholder="Identificación" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </div>
+                {/* Campo de Confirmación de Contraseña (obligatorio) */}
+                <div className="input-cell">
+                  <label>Confirmar Contraseña</label>
+                  <input type="password" placeholder="Repita la identificación" value={confirmarPassword} onChange={(e) => setConfirmarPassword(e.target.value)} required />
+                </div>
               </div>
 
-              <button type="submit" className="btn-submit margin-t-15">Registrar Operario</button>
+              {/* Botón para enviar el formulario y registrar el usuario */}
+              <button type="submit" className="btn-submit margin-t-15">Registrar Usuario</button>
             </form>
           </div>
 
+          {/* Sección derecha: imagen de vista previa/avatar */}
           <div className="image-section-cell">
+            {/* Título de la sección de imagen */}
             <h3 className="avatar-preview-text">Foto-Trabajador</h3>
+            {/* Contenedor de la imagen de vista previa */}
             <div className="portrait-wrapper">
-              <img id="vista-previa" src={fotoPreview} alt="Avatar Empleado" />
+              {/* Imagen decorativa de vista previa del empleado */}
+              <img src="../img/registroDePersonal kk .png" alt="Avatar Empleado" />
             </div>
           </div>
         </div>
@@ -199,4 +267,5 @@ function RegistroDePersonal() {
   );
 }
 
+// Exportar el componente como exportación por defecto
 export default RegistroDePersonal;

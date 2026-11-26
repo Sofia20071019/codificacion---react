@@ -437,12 +437,67 @@ input[type="file"] {
 .display-inline-block { display: inline-block; }
 .flex-row-gap-10 { display: flex; gap: 10px; justify-content: flex-end; }
 .btn-alert-color { background-color: var(--color-error); color: white; }
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.text-primary { color: var(--text-primary); }
 .vertical-align-mid { vertical-align: middle; }
 .avatar-preview-text { font-size: 1.4rem; margin-bottom: 20px; text-align: center; }
 .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
 .module-card { text-align: center; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; }
 .logo-img-auth { width: 70px; height: 70px; object-fit: contain; }
 .materia-prima-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+.card-materia-prima { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; text-align: center; transition: border-color 0.3s ease; }
+.card-materia-prima:hover { border-color: var(--text-secondary); }
+.card-materia-prima h2 { font-size: 1.1rem; margin-bottom: 8px; }
+.card-materia-prima p { margin-bottom: 4px; }
+
+/* ==========================================================================
+   BOTÓN DE EXPORTACIÓN A EXCEL (Módulo de Reportes)
+   ========================================================================== */
+
+/* Celda de filtro que alberga el botón: alineada a la derecha */
+.filter-cell-btn {
+    text-align: right;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.filter-cell-btn button {
+    width: auto;
+}
+
+/* Botón verde de exportación a Excel */
+.btn-export {
+    background: var(--color-success);
+    color: #000000;
+    border: none;
+    padding: 12px 24px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    display: inline-block;
+}
+
+.btn-export:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background-color: #27ae60;
+}
+
+.btn-export:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-export span {
+    margin-right: 8px;
+}
+
+/* Mensaje de error de la exportación */
+.text-error {
+    color: var(--color-error);
+    font-size: 0.85rem;
+}
 
 /* ==========================================================================
    MAIN FOOTER

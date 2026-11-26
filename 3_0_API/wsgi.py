@@ -11,7 +11,11 @@
 #   gunicorn --bind 0.0.0.0:5000 wsgi:app
 # =============================================================================
 
+from werkzeug.middleware.proxy_fix import ProxyFix
 from app import create_app
 
 # Crear la instancia de la aplicacion usando la fabrica
 app = create_app()
+
+# Confiar en las cabeceras X-Forwarded-* enviadas por Nginx (Paso 8.3 de la guia)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)

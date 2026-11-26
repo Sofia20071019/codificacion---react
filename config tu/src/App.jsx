@@ -307,10 +307,6 @@ function App() {
         {/* Mis tareas: lista de tareas asignadas al empleado actual */}
         <Route path='/mis-tareas' element={<RutaProtegida rolRequerido="ROL-002"><EmpleadoTareas /></RutaProtegida>} />
 
-        {/* Rutas duplicadas (probablemente sobrantes del desarrollo) */}
-        <Route path='/inventario-empleado' element={<RutaProtegida rolRequerido="ROL-002"><InventarioEmpleado /></RutaProtegida>} />
-        <Route path='/mis-horas' element={<RutaProtegida rolRequerido="ROL-002"><MisHoras /></RutaProtegida>} />
-
         {/* ================================================================= */}
         {/* RUTAS DE CIERRE DE SESIÓN (protegidas por rol) */}
         {/* ================================================================= */}
@@ -320,6 +316,18 @@ function App() {
 
         {/* Cierre de sesión del empleado (incluye formulario de cierre de jornada) */}
         <Route path="/cierre-empleado" element={<RutaProtegida rolRequerido="ROL-002"><CierreDeSesionEmpleado /></RutaProtegida>} />
+
+        {/* ================================================================= */}
+        {/* MÓDULO DE MOLDES (Acceso para usuarios autenticados) */}
+        {/* ================================================================= */}
+        <Route 
+          path="/moldes" 
+          element={
+            <RutaProtegida>
+              <MoldesPage />
+            </RutaProtegida>
+          } 
+        />
 
         {/* ================================================================= */}
         {/* RUTA CATCH-ALL: PÁGINA 404 */}
@@ -333,18 +341,6 @@ function App() {
             <a href="/" className="btn-login">Volver al inicio</a>
           </main>
         } />
-
-        {/* ================================================================= */}
-        {/* MÓDULO DE MOLDES (Acceso para usuarios autenticados) */}
-        {/* ================================================================= */}
-        <Route 
-          path="/moldes" 
-          element={
-            <RutaProtegida>
-              <MoldesPage />
-            </RutaProtegida>
-          } 
-        />
       </Routes>
 
       {/* Footer: pie de página visible en todas las páginas */}

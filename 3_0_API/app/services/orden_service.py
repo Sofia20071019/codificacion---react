@@ -14,6 +14,7 @@ from app.models import OrdenProduccion, DetalleOrden
 
 # Importacion de la funcion utilitaria para generar identificadores unicos
 from app.utils.generar_id import generar_id
+from app.utils.fechas import parsear_fecha
 
 
 class OrdenService:
@@ -67,7 +68,7 @@ class OrdenService:
             idOrden=nuevo_id,           # ID unico generado automaticamente
             idCliente=idCliente,        # Cliente que realizo el pedido
             idUsuario_Admin=idUsuario_Admin,  # Administrador que registra la orden
-            fechaPedido=fechaPedido,    # Fecha del pedido
+            fechaPedido=parsear_fecha(fechaPedido),  # Fecha del pedido
             estadoProd=estadoProd       # Estado de produccion
         )
 

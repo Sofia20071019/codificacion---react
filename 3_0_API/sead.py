@@ -89,7 +89,7 @@ with app.app_context():
         # - Primer y segundo apellido (segundo apellido es opcional, puede ser None)
         # - Correo electronico unico para autenticacion
         # - Contrasena hasheada con bcrypt para seguridad
-        # - Rol asignado (ADMIN)
+        # - Rol asignado (EMPLEADO)
         # - Estado inicial (ACTIVO)
         empleado = Usuario(
             idUsuario="USR-002",

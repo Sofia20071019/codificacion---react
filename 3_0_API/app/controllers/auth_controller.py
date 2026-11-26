@@ -30,7 +30,7 @@ class AuthController:
         autenticado.
         """
         # Obtener el cuerpo de la petición HTTP en formato JSON
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         # Extraer el correo electrónico, convertirlo a minúsculas y eliminar espacios
         correo = data.get("correo", "").lower().strip()
         # Extraer la contraseña del cuerpo de la petición
@@ -80,7 +80,7 @@ class AuthController:
         administrador para que gestione el restablecimiento de la contraseña.
         """
         # Obtener el cuerpo de la petición HTTP en formato JSON
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         # Extraer el correo, convertirlo a minúsculas y limpiar espacios
         correo = data.get("correo", "").lower().strip()
 

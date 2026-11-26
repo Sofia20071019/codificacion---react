@@ -6,6 +6,8 @@ PROPOSITO: Servicio de gestion de usuarios del sistema. Proporciona operaciones 
            y la generacion automatica de identificadores unicos.
 """
 
+import re
+
 # Importacion de la instancia de base de datos y el generador de hashes de contrasenas
 from app.database.database import db, bcrypt
 
@@ -14,6 +16,8 @@ from app.models import Usuario
 
 # Importacion de la funcion utilitaria para generar identificadores unicos
 from app.utils.generar_id import generar_id
+
+_EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class UsuarioService:
@@ -54,7 +58,35 @@ class UsuarioService:
             Usuario: Objeto usuario si se encuentra, None si no existe.
         """
         # Buscar el usuario por su clave primaria
-        return Usuario.query.get(idUsuario)
+        return db.session.get(Usuario, idUsuario)
+
+    @staticmethod
+    def _validar_datos_usuario(pNombre, sNombre, pApellido, sApellido, correo, password, idRol):
+        """Valida tipos y reglas de negocio antes de persistir un usuario."""
+        obligatorios = {
+            "pNombre": pNombre,
+            "correo": correo,
+            "password": password,
+            "idRol": idRol,
+        }
+        for campo, valor in obligatorios.items():
+            if valor is None:
+                raise ValueError(f"El campo {campo} es obligatorio.")
+            if not isinstance(valor, str):
+                raise TypeError(f"El campo {campo} debe ser una cadena de texto.")
+            if not valor.strip():
+                raise ValueError(f"El campo {campo} no puede estar vacio.")
+
+        for campo, valor in (("sNombre", sNombre), ("pApellido", pApellido), ("sApellido", sApellido)):
+            if valor is not None and not isinstance(valor, str):
+                raise TypeError(f"El campo {campo} debe ser una cadena de texto.")
+
+        correo_limpio = correo.lower().strip()
+        if not _EMAIL_REGEX.match(correo_limpio):
+            raise ValueError("El correo electronico no tiene un formato valido.")
+
+        if len(password.strip()) < 4:
+            raise ValueError("La contrasena debe tener al menos 4 caracteres.")
 
     @staticmethod
     def crear_usuario(pNombre, sNombre, pApellido, sApellido, correo, password, idRol):
@@ -75,6 +107,10 @@ class UsuarioService:
         Returns:
             Usuario: Objeto del usuario recien creado con todos sus atributos.
         """
+        UsuarioService._validar_datos_usuario(
+            pNombre, sNombre, pApellido, sApellido, correo, password, idRol
+        )
+
         # Generar un nuevo ID unico con prefijo "USR" para el modelo Usuario
         nuevo_id = generar_id("USR", Usuario, "idUsuario")
 
@@ -84,13 +120,13 @@ class UsuarioService:
         # Crear la instancia del nuevo usuario con todos sus atributos
         usuario = Usuario(
             idUsuario=nuevo_id,          # ID unico generado automaticamente
-            pNombre=pNombre,             # Primer nombre proporcionado
-            sNombre=sNombre,             # Segundo nombre proporcionado
-            pApellido=pApellido,         # Primer apellido proporcionado
-            sApellido=sApellido,         # Segundo apellido proporcionado
+            pNombre=pNombre.strip(),     # Primer nombre proporcionado
+            sNombre=sNombre.strip() if sNombre else None,
+            pApellido=pApellido.strip() if pApellido else None,
+            sApellido=sApellido.strip() if sApellido else None,
             correo=correo.lower().strip(),  # Correo normalizado a minusculas y sin espacios
             passwordHash=hash_pw,        # Hash de la contrasena generada con bcrypt
-            idRol=idRol,                # Rol asignado al usuario
+            idRol=idRol.strip(),         # Rol asignado al usuario
             idEstado="EST-001"           # Estado activo por defecto
         )
 
@@ -119,7 +155,7 @@ class UsuarioService:
             Usuario: Objeto usuario actualizado si se encontro, None si no existe.
         """
         # Buscar el usuario por su ID en la base de datos
-        usuario = Usuario.query.get(idUsuario)
+        usuario = db.session.get(Usuario, idUsuario)
 
         # Si no se encuentra el usuario, retornar None
         if not usuario:
@@ -153,7 +189,7 @@ class UsuarioService:
             Usuario: Objeto usuario eliminado si existia, None si no se encontro.
         """
         # Buscar el usuario por su ID en la base de datos
-        usuario = Usuario.query.get(idUsuario)
+        usuario = db.session.get(Usuario, idUsuario)
 
         # Si no se encuentra el usuario, retornar None
         if not usuario:
@@ -182,7 +218,7 @@ class UsuarioService:
             Usuario: Objeto usuario desactivado si existia, None si no se encontro.
         """
         # Buscar el usuario por su ID en la base de datos
-        usuario = Usuario.query.get(idUsuario)
+        usuario = db.session.get(Usuario, idUsuario)
 
         # Si no se encuentra el usuario, retornar None
         if not usuario:
@@ -202,7 +238,7 @@ class UsuarioService:
         """
         Método estático que reactiva un usuario cambiando su estado a activo (EST-001).
         """
-        usuario = Usuario.query.get(idUsuario)
+        usuario = db.session.get(Usuario, idUsuario)
         if not usuario:
             return None
 

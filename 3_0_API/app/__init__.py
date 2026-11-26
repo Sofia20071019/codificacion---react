@@ -39,8 +39,14 @@ def create_app(config_class=Config):
     os.makedirs(upload_folder, exist_ok=True)
     app.config["UPLOAD_FOLDER"] = upload_folder
 
-    # Habilitar CORS en toda la aplicacion
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # Habilitar CORS para rutas de la API y archivos subidos (moldes)
+    CORS(
+        app,
+        resources={
+            r"/api/*": {"origins": "*"},
+            r"/uploads/*": {"origins": "*"},
+        },
+    )
 
     # Inicializar extensiones
     db.init_app(app)

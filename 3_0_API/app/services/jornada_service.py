@@ -17,6 +17,7 @@ from app.models import JornadaLaboral, Usuario
 
 # Importacion de la funcion utilitaria para generar identificadores unicos
 from app.utils.generar_id import generar_id
+from app.utils.fechas import parsear_fecha, parsear_hora
 
 # Tarifa por hora de trabajo utilizada para calcular el pago a empleados
 TARIFA_POR_HORA = 15000
@@ -82,11 +83,14 @@ class JornadaService:
         nuevo_id = generar_id("JOR", JornadaLaboral, "idJornada")
 
         # Crear la instancia de la nueva jornada con los datos proporcionados o valores por defecto
+        fecha_obj = parsear_fecha(fecha) or date.today()
+        hora_inicio_obj = parsear_hora(hInicio) or datetime.now().time().replace(microsecond=0)
+
         jornada = JornadaLaboral(
             idJornada=nuevo_id,                # ID unico generado automaticamente
             idUsuario_Empleado=idUsuario_Empleado,  # Empleado que inicia la jornada
-            fecha=fecha or date.today(),       # Fecha proporcionada o fecha actual
-            hInicio=hInicio or datetime.now().time().replace(microsecond=0)  # Hora proporcionada o hora actual sin microsegundos
+            fecha=fecha_obj,                   # Fecha proporcionada o fecha actual
+            hInicio=hora_inicio_obj            # Hora proporcionada o hora actual sin microsegundos
         )
 
         # Agregar la nueva jornada a la sesion de la base de datos
@@ -119,7 +123,7 @@ class JornadaService:
             return None
 
         # Establecer la hora de fin con el valor proporcionado o la hora actual
-        jornada.hFin = hFin or datetime.now().time().replace(microsecond=0)
+        jornada.hFin = parsear_hora(hFin) or datetime.now().time().replace(microsecond=0)
 
         # Confirmar los cambios en la base de datos
         db.session.commit()
@@ -162,9 +166,9 @@ class JornadaService:
         jornada = JornadaLaboral(
             idJornada=nuevo_id,                # ID unico generado automaticamente
             idUsuario_Empleado=idUsuario_Empleado,  # Empleado asociado a la jornada
-            fecha=fecha,                       # Fecha de la jornada
-            hInicio=hInicio,                   # Hora de inicio
-            hFin=hFin                          # Hora de fin (puede ser None si la jornada esta abierta)
+            fecha=parsear_fecha(fecha),        # Fecha de la jornada
+            hInicio=parsear_hora(hInicio),     # Hora de inicio
+            hFin=parsear_hora(hFin)            # Hora de fin (puede ser None si la jornada esta abierta)
         )
 
         # Agregar la nueva jornada a la sesion de la base de datos

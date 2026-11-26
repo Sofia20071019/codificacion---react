@@ -76,7 +76,7 @@ class UsuarioController:
         y retorna los datos básicos del usuario creado con código 201.
         """
         # Obtener el cuerpo de la petición HTTP en formato JSON
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         try:
             # Importación diferida del servicio de usuarios
             from app.services.usuario_service import UsuarioService
@@ -150,7 +150,7 @@ class UsuarioController:
         al usuario identificado por idUsuario.
         """
         # Obtener el cuerpo de la petición HTTP en formato JSON
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         try:
             # Importación diferida del servicio de usuarios
             from app.services.usuario_service import UsuarioService

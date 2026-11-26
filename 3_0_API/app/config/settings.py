@@ -10,13 +10,8 @@
 # Importar el modulo os para acceder a variables de entorno del sistema
 # operativo y configuraciones del entorno de ejecucion
 import os
-
-# Importar la clase Path de pathlib para manejar rutas de archivos
-# de forma robusta y multiplataforma
 from pathlib import Path
-
-# Importar la funcion load_dotenv para cargar las variables de entorno
-# desde un archivo .env situado en el directorio raiz del proyecto
+from urllib.parse import quote_plus
 from dotenv import load_dotenv
 
 # Construir la ruta absoluta al archivo .env ubicado en la raiz del
@@ -26,6 +21,15 @@ env_path = Path(__file__).resolve().parent.parent.parent / ".env"
 # Cargar todas las variables definidas en el archivo .env al entorno
 # del proceso actual, haciendolas disponibles via os.getenv()
 load_dotenv(env_path)
+
+
+def _construir_mysql_uri(nombre_bd):
+    """Construye la URI de MySQL codificando caracteres especiales de la clave."""
+    usuario = quote_plus(os.getenv("MYSQL_USER") or "root")
+    password = quote_plus(os.getenv("MYSQL_PASSWORD") or "")
+    host = os.getenv("MYSQL_HOST") or "127.0.0.1"
+    port = os.getenv("MYSQL_PORT") or "3306"
+    return f"mysql+pymysql://{usuario}:{password}@{host}:{port}/{nombre_bd}?charset=utf8mb4"
 
 
 class Config:
@@ -41,28 +45,27 @@ class Config:
     # SECRET_KEY, con un valor por defecto para entorno de desarrollo
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-key-cambiar-en-produccion")
 
-    # URI de conexion a la base de datos MySQL construida dinamicamente
-    # a partir de las variables de entorno. Utiliza el driver PyMySQL
-    # como adaptador Python-MySQL. Formato:
-    # mysql+pymysql://USUARIO:CONTRASENA@HOST:PUERTO/NOMBRE_BASE_DATOS
-    SQLALCHEMY_DATABASE_URI = (
-        f"mysql+pymysql://{os.getenv('MYSQL_USER')}:"
-        f"{os.getenv('MYSQL_PASSWORD')}@"
-        f"{os.getenv('MYSQL_HOST')}:"
-        f"{os.getenv('MYSQL_PORT')}/"
-        f"{os.getenv('MYSQL_DATABASE')}"
+    # URI de conexion a la base de datos MySQL: acepta DATABASE_URL directa
+    # o la construye desde las variables MYSQL_* con driver PyMySQL.
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or _construir_mysql_uri(
+        os.getenv("MYSQL_DATABASE") or "Kimuka3_db"
     )
 
+    # MySQL cierra conexiones inactivas: evita "MySQL server has gone away" en produccion
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+    }
+
     # Desactivar el seguimiento de modificaciones de SQLAlchemy para
-    # reducir el uso de memoria y mejorar el rendimiento. Cuando esta
-    # en True, SQLAlchemy rastrea todos los objetos instanciados, lo
-    # cual no es necesario en produccion y genera overhead
+    # reducir el uso de memoria y mejorar el rendimiento.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_ENGINE_OPTIONS = {}
     WTF_CSRF_ENABLED = False
 
 
@@ -75,10 +78,6 @@ class IntegrationTestingConfig(Config):
 
     TESTING = True
     BCRYPT_LOG_ROUNDS = 4  # hash rapido solo para pruebas
-    SQLALCHEMY_DATABASE_URI = (
-        f"mysql+pymysql://{os.getenv('MYSQL_USER')}:"
-        f"{os.getenv('MYSQL_PASSWORD')}@"
-        f"{os.getenv('MYSQL_HOST')}:"
-        f"{os.getenv('MYSQL_PORT')}/"
-        f"{os.getenv('MYSQL_TEST_DATABASE', 'Kimuka3_test')}"
+    SQLALCHEMY_DATABASE_URI = _construir_mysql_uri(
+        os.getenv("MYSQL_TEST_DATABASE", "Kimuka3_test")
     )

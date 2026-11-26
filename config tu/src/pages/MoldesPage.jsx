@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api';
 
 const TALLAS_DISPONIBLES = [
@@ -12,7 +12,18 @@ const sanitizarTexto = (valor) => {
 };
 
 export default function MoldesPage() {
-  const [esAdmin, setEsAdmin] = useState(false);
+  const [esAdmin] = useState(() => {
+    try {
+      const sesion = localStorage.getItem('usuarioLogueado');
+      if (sesion) {
+        const usuario = JSON.parse(sesion);
+        return usuario.idRol === 'ROL-001';
+      }
+    } catch {
+      return false;
+    }
+    return false;
+  });
   const [moldes, setMoldes] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -42,35 +53,16 @@ export default function MoldesPage() {
     tallas: []
   });
 
-  useEffect(() => {
-    try {
-      const sesion = localStorage.getItem('usuarioLogueado');
-      if (sesion) {
-        const usuario = JSON.parse(sesion);
-        if (usuario.idRol === 'ROL-001') {
-          setEsAdmin(true);
-        }
-      }
-    } catch {
-      setEsAdmin(false);
-    }
-    cargarCategorias();
-  }, []);
-
-  useEffect(() => {
-    cargarMoldes();
-  }, [busqueda, categoriaFiltro, generoFiltro]);
-
-  const cargarCategorias = async () => {
+  const cargarCategorias = useCallback(async () => {
     try {
       const res = await api.moldes.listarCategorias();
       setCategorias(res.data || []);
     } catch (err) {
       console.error('Error al cargar categorías', err);
     }
-  };
+  }, []);
 
-  const cargarMoldes = async () => {
+  const cargarMoldes = useCallback(async () => {
     setCargando(true);
     try {
       const res = await api.moldes.listar({
@@ -85,7 +77,39 @@ export default function MoldesPage() {
     } finally {
       setCargando(false);
     }
-  };
+  }, [busqueda, categoriaFiltro, generoFiltro]);
+
+  useEffect(() => {
+    let cancelado = false;
+    api.moldes.listarCategorias()
+      .then((res) => {
+        if (!cancelado) setCategorias(res.data || []);
+      })
+      .catch((err) => console.error('Error al cargar categorías', err));
+    return () => { cancelado = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelado = false;
+    api.moldes.listar({
+      nombre: busqueda,
+      categoria: categoriaFiltro,
+      genero: generoFiltro
+    })
+      .then((res) => {
+        if (!cancelado) {
+          setMoldes(res.data || []);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelado) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelado) setCargando(false);
+      });
+    return () => { cancelado = true; };
+  }, [busqueda, categoriaFiltro, generoFiltro]);
 
   // --- GESTIÓN DE CATEGORÍAS ---
   const handleCrearCategoria = async (e) => {

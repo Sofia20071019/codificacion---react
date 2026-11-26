@@ -14,6 +14,7 @@ from app.models import Pago
 
 # Importacion de la funcion utilitaria para generar identificadores unicos
 from app.utils.generar_id import generar_id
+from app.utils.fechas import parsear_fecha
 
 from datetime import date
 
@@ -79,7 +80,7 @@ class PagoService:
             idUsuario_Admin=idUsuario_Admin,
             montoPagado=montoPagado,
             idMetodo=idMetodo,
-            fechaPago=fechaPago or date.today()
+            fechaPago=parsear_fecha(fechaPago) or date.today()
         )
 
         db.session.add(pago)

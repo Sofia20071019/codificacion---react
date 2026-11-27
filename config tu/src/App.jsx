@@ -27,8 +27,6 @@ import Footer from './components/Footer';   // Pie de página
 // IMPORTACIÓN DE TODAS LAS PÁGINAS (componentes de ruta)
 // ============================================================================
 
-// Página de inicio / landing page (público)
-import VistaInicio from './pages/index';
 // Registro de personal nuevo (solo administradores)
 import RegistroDePersonal from './pages/RegistroDePersonal';
 // Página de inicio de sesión (público)
@@ -202,6 +200,24 @@ const RutaProtegida = ({ children, rolRequerido }) => {
 };
 
 
+// Redirección del portal corporativo privado (/):
+// Si el usuario ya inició sesión, va directo a su panel según rol.
+// Si no ha iniciado sesión, va directamente al formulario de ingreso privado.
+function RutaRaiz() {
+  const userStr = localStorage.getItem('usuarioLogueado');
+  if (!userStr) {
+    return <Navigate to="/login" replace />;
+  }
+  let destino;
+  try {
+    const user = JSON.parse(userStr);
+    destino = user?.idRol === 'ROL-001' ? '/dashboardadmin' : '/registro-horas';
+  } catch {
+    destino = '/login';
+  }
+  return <Navigate to={destino} replace />;
+}
+
 // ============================================================================
 // COMPONENTE: App (Raíz de la aplicación)
 // ============================================================================
@@ -220,16 +236,16 @@ function App() {
       {/* Contenedor de todas las definiciones de rutas de la aplicación */}
       <Routes>
         {/* ================================================================= */}
-        {/* RUTAS PÚBLICAS (no requieren autenticación) */}
+        {/* RUTAS DE ACCESO AL SISTEMA (Portal Privado) */}
         {/* ================================================================= */}
 
-        {/* Ruta raíz: página de inicio / landing page */}
-        <Route path="/" element={<VistaInicio />} />
+        {/* Ruta raíz: portal privado, redirige a login o dashboard según sesión */}
+        <Route path="/" element={<RutaRaiz />} />
 
-        {/* Página de inicio de sesión: formulario de email y contraseña */}
+        {/* Página de inicio de sesión: formulario de email y contraseña corporativa */}
         <Route path="/login" element={<InicioDeSesion />} />
 
-        {/* Página de recuperación de contraseña: formulario para solicitar restablecimiento */}
+        {/* Página de recuperación de contraseña: solo personal registrado */}
         <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
 
         {/* ================================================================= */}

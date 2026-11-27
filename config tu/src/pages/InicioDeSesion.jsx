@@ -11,8 +11,8 @@
 //            Incluye enlace a la página de recuperación de contraseña.
 // ============================================================================
 
-// Importa los hooks useState (estado local)
-import { useState } from 'react';
+// Importa los hooks useState y useEffect (estado local y ciclo de vida)
+import { useState, useEffect } from 'react';
 // Importa Link para navegación y useNavigate para redireccionamiento programático
 import { Link, useNavigate } from 'react-router-dom';
 // Importa el cliente API para realizar la petición de login al backend
@@ -26,6 +26,23 @@ function InicioDeSesion() {
   const [password, setPassword] = useState('');
   // Hook de navegación programática: permite redirigir al usuario después del login
   const navigate = useNavigate();
+
+  // Si el usuario ya cuenta con una sesión corporativa activa, redirigir de inmediato
+  useEffect(() => {
+    const userStr = localStorage.getItem('usuarioLogueado');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.idRol === 'ROL-001') {
+          navigate('/dashboardadmin', { replace: true });
+        } else {
+          navigate('/registro-horas', { replace: true });
+        }
+      } catch {
+        localStorage.clear();
+      }
+    }
+  }, [navigate]);
 
   // ---------------------------------------------------------------------------
   // Función: handleLogin
@@ -75,9 +92,11 @@ function InicioDeSesion() {
 
   return (
     <>
-      {/* Barra de navegación superior con enlace para volver a la landing page */}
+      {/* Barra de navegación superior corporativa */}
       <nav className="top-nav">
-        <Link to="/">VOLVER</Link>
+        <span style={{ color: '#fff', fontSize: '13px', letterSpacing: '1px', fontWeight: 'bold' }}>
+          TITAN SPORTS & KIMUKA • SISTEMA INTERNO
+        </span>
       </nav>
 
       {/* Contenido principal: formulario de login centrado en la página */}
@@ -91,7 +110,10 @@ function InicioDeSesion() {
             </div>
 
             {/* Título de la sección de autenticación */}
-            <h2 className="form-title text-center margin-t-10 font-size-xl">Acceso al Sistema</h2>
+            <h2 className="form-title text-center margin-t-10 font-size-xl">Acceso al Sistema Interno</h2>
+            <p className="text-secondary text-center font-size-sm" style={{ marginBottom: '20px' }}>
+              Portal privado para colaboradores y administradores de la empresa.
+            </p>
 
             {/* Formulario de login */}
             {/* onSubmit llama a handleLogin que maneja la autenticación */}
